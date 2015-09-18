@@ -37,8 +37,8 @@ EX_A = p1Aexe
 # following asks for both executables to be built
 default:  $(EX_L) $(EX_A)
 
-llt: linked_list_test.o
-	$(LD) $(LFLAGS) linked_list_test.o -o llt
+llt: linked_list_test.o Ordered_container_list.o
+	$(LD) $(LFLAGS) linked_list_test.o Ordered_container_list.o -o llt
 	
 # to build this executable, check to see if any of the listed object files
 # need to be rebuilt and do so, then link to create the executable

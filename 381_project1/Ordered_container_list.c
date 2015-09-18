@@ -1,6 +1,7 @@
 #include "Ordered_container.h"
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <assert.h>
 
 
 /* struct LL_Node structure declaration. This declaration is local to this file.
@@ -26,20 +27,25 @@ struct Ordered_container {
 	int size;
 };
 
-typedef struct Compare_result_pair {
+struct Compare_result_pair {
     struct LL_Node* node_ptr;
     int             comp_result;
-} Comp_pair_t;
+};
 
+typedef struct Compare_result_pair Comp_pair_t;
 
 int g_Container_count = 0;
 int g_Container_items_in_use = 0;
 int g_Container_items_allocated = 0;
 
-inline static void Init_container_helper(struct Ordered_container *const c_ptr){
+static void Init_container_helper(struct Ordered_container *const c_ptr){
     c_ptr->first = NULL;
     c_ptr->last = NULL;
     c_ptr->size = 0;
+}
+
+static void Increment_node(struct LL_Node** node_ptr_ptr){
+    *node_ptr_ptr = (*node_ptr_ptr)->next;
 }
 
 // Deletes the nodes in a container but does not reset container size
@@ -48,7 +54,7 @@ static void Clear_container_helper(struct Ordered_container *const c_ptr){
     struct LL_Node* node_to_delete_ptr = NULL;
 
     while ( (node_to_delete_ptr = node_ptr) ){
-        node_ptr = node_ptr->next;
+        Increment_node(&node_ptr);
         free(node_to_delete_ptr);
     }
 
@@ -135,7 +141,7 @@ void Print_container(const struct Ordered_container *const c_ptr, const int data
     struct LL_Node* node_ptr = c_ptr->first;
     while(node_ptr){
         Print_node(node_ptr, data_size);
-        node_ptr = node_ptr->next;
+        Increment_node(&node_ptr);
     }
 }
 
@@ -208,6 +214,8 @@ void OC_insert(struct Ordered_container* c_ptr, void* data_ptr){
     if (OC_empty(c_ptr)){
         c_ptr->first = node_ptr;
         c_ptr->last = node_ptr;
+        node_ptr->prev = NULL;
+        node_ptr->next = NULL;
     } else {
         Comp_pair_t comp_pair = Find_first_node_greater_equal(data_ptr, c_ptr, c_ptr->comp_func);
         struct LL_Node* insert_before_node_ptr = comp_pair.node_ptr;
@@ -239,7 +247,7 @@ void OC_apply(const struct Ordered_container* c_ptr, OC_apply_fp_t afp){
 
     while (node_ptr){
         afp(node_ptr->data_ptr);
-        node_ptr = node_ptr->next;
+        Increment_node(&node_ptr);
     }
 }
 
@@ -252,7 +260,7 @@ int OC_apply_if(const struct Ordered_container* c_ptr, OC_apply_if_fp_t afp)
         if (ret_val != 0){
             return ret_val;
         }
-        node_ptr = node_ptr->next;
+        Increment_node(&node_ptr);
     }
 
     return 0;
@@ -263,7 +271,7 @@ void OC_apply_arg(const struct Ordered_container* c_ptr, OC_apply_arg_fp_t afp, 
 
     while (node_ptr){
         afp(node_ptr->data_ptr, arg_ptr);
-        node_ptr = node_ptr->next; // Could make this inline function for one point of maint
+        Increment_node(&node_ptr);
     }
 }
 
@@ -276,7 +284,7 @@ int OC_apply_if_arg(const struct Ordered_container* c_ptr, OC_apply_if_arg_fp_t 
         if (ret_val != 0){
             return ret_val;
         }
-        node_ptr = node_ptr->next;
+        Increment_node(&node_ptr);
     }
 
     return 0;

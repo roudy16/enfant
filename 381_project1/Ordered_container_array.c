@@ -3,6 +3,8 @@ The struct declaration below must be used for the Ordered_container object.
 Remove this comment and complete this file with all necessary code.
 */
 
+#include "Ordered_container.h"
+
 /* A complete type declaration for Ordered_container implemented as an array */
 struct Ordered_container {
 	OC_comp_fp_t comp_fun;	/* pointer to comparison function  */
@@ -11,5 +13,3 @@ struct Ordered_container {
 	int size;				/* number of items currently in the array */
 };
 
-struct Ordered_container cont;
-cont.a

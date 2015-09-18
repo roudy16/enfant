@@ -1,13 +1,11 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-/* Complete this header file with include guards and the full declaration for
-the int global variable named below. 
-Then delete this comment - it is not part of the finished code */
-
+#define MAX_INPUT 64
 
 /* global variable declarations for this module */
-g_string_memory;				/* number of bytes used in C-strings */
+extern int g_string_memory;     /* number of bytes used in C-strings */
 
-/* Your own decleration and definitions */
+void free_string(char* string_ptr);
+
 #endif // UTILITY_H
