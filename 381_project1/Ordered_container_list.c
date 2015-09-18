@@ -209,6 +209,11 @@ void OC_delete_item(struct Ordered_container* c_ptr, void* item_ptr){
 
 void OC_insert(struct Ordered_container* c_ptr, void* data_ptr){
     struct LL_Node *const node_ptr = malloc(sizeof(struct LL_Node));
+    if (!node_ptr){
+        fprintf(stderr, "OC_insert malloc error in container at %p\n", c_ptr);
+        return;
+    }
+
     node_ptr->data_ptr = data_ptr;
 
     if (OC_empty(c_ptr)){

@@ -24,21 +24,21 @@ struct Person* create_Person(const char* firstname,
                              const char* lastname,
                              const char* phoneno)
 {
-    // Calculate bytes need to hold each string plus null char
-    const int firstname_size = (int)strlen(firstname) + 1;
-    const int lastname_size = (int)strlen(lastname) + 1;
-    const int string_bytes = firstname_size + lastname_size + (int)strlen(phoneno) + 1;
+    struct Person* person_ptr = malloc(sizeof(struct Person));
 
-    struct Person* person_ptr = malloc(sizeof(struct Person) + string_bytes);
-    g_string_memory += string_bytes;
+    if (person_ptr){
+        person_ptr->firstname = (char*)create_string(firstname);
+        person_ptr->lastname = (char*)create_string(lastname);
+        person_ptr->phoneno = (char*)create_string(phoneno);
 
-    person_ptr->firstname = ((char*)person_ptr) + sizeof(struct Person);
-    person_ptr->lastname = person_ptr->lastname + firstname_size;
-    person_ptr->phoneno = person_ptr->lastname + lastname_size;
-
-    strcpy(person_ptr->firstname, firstname);
-    strcpy(person_ptr->lastname, lastname);
-    strcpy(person_ptr->phoneno, phoneno);
+        if (!person_ptr->firstname ||
+            !person_ptr->lastname ||
+            !person_ptr->phoneno)
+        {
+            destroy_Person(person_ptr);
+            person_ptr = NULL;
+        }
+    }
 
     return person_ptr;
 }
