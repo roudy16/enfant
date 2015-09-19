@@ -39,7 +39,10 @@ default:  $(EX_L) $(EX_A)
 
 llt: linked_list_test.o Ordered_container_list.o
 	$(LD) $(LFLAGS) linked_list_test.o Ordered_container_list.o -o llt
-	
+
+pt: person_test.o Ordered_container_list.o Utility.o
+	$(LD) $(LFLAGS) person_test.o Ordered_container_list.o Utility.o -o llt
+
 # to build this executable, check to see if any of the listed object files
 # need to be rebuilt and do so, then link to create the executable
 $(EX_L): $(OBJS) $(OBJS_L)
@@ -71,11 +74,13 @@ Room.o: Room.c Room.h Ordered_container.h Meeting.h p1_globals.h Utility.h
 p1_globals.o: p1_globals.c p1_globals.h
 	$(CC) $(CFLAGS) p1_globals.c
 
-#include Person.h here only if your Utilities.c must include it.
-Utility.o: Utility.c Utility.h p1_globals.h Person.h
+Utility.o: Utility.c Utility.h p1_globals.h
 	$(CC) $(CFLAGS) Utility.c
 
 linked_list_test.o: linked_list_test.c Ordered_container.h
+	$(CC) $(CFLAGS) linked_list_test.c
+
+person_test.o: Person.c Ordered_container.h Utility.h
 	$(CC) $(CFLAGS) linked_list_test.c
 
 # other shell commands can appear as "things to do" - not just compilations, etc.

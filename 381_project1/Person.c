@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <assert.h>
 
 /* a Person consist of pointers to C-strings for names and phone number */
 struct Person {
@@ -44,10 +45,12 @@ struct Person* create_Person(const char* firstname,
 }
 
 void destroy_Person(struct Person* person_ptr){
-    free_string(person_ptr->firstname);
-    free_string(person_ptr->lastname);
-    free_string(person_ptr->phoneno);
-    free(person_ptr);
+    if (person_ptr){
+        free_string(person_ptr->firstname);
+        free_string(person_ptr->lastname);
+        free_string(person_ptr->phoneno);
+        free(person_ptr);
+    }
 }
 
 const char* get_Person_lastname(const struct Person* person_ptr){
@@ -60,6 +63,25 @@ void print_Person(const struct Person* person_ptr){
 
 void save_Person(const struct Person* person_ptr, FILE* outfile){
     output_Person(person_ptr, outfile);
+    fflush(outfile); // Ensures data is actually written
 }
 
-struct Person* load_Person(FILE* infile);
+struct Person* load_Person(FILE* infile){
+    static char firstname[MAX_INPUT + 1];
+    static char lastname[MAX_INPUT + 1];
+    static char phoneno[MAX_INPUT + 1];
+
+    const int return_val = fscanf(infile, "%" STRINGIFY_MACRO(MAX_INPUT) "s"
+                                  "%" STRINGIFY_MACRO(MAX_INPUT) "s"
+                                  "%" STRINGIFY_MACRO(MAX_INPUT) "s",
+                                  firstname, lastname, phoneno);
+
+    struct Person* person = NULL;
+    if (return_val <= 0){
+        discard_rest_of_input_line(infile);
+    }
+    else {
+        person = create_Person(firstname, lastname, phoneno);
+    }
+    return person;
+}

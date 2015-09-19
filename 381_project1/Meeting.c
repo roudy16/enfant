@@ -1,8 +1,6 @@
-/* skeleton file for Meeting.c
-The struct declaration below must be used for Meeting objects.
-Remove this comment and complete this file with all necessary code.
-*/
-
+#include "Meeting.h"
+#include "Ordered_container.h"
+#include "Utility.h"
 
 /* a Meeting contains a time, a topic, and a container of participants */
 struct Meeting {
@@ -11,3 +9,8 @@ struct Meeting {
 	struct Ordered_container* participants;	/* a container of pointers to struct Person objects */
 };
 
+int g_Meeting_memory = 0;
+
+struct Meeting* create_Meeting(int time, const char* topic){
+
+}

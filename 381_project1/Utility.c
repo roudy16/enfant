@@ -1,6 +1,9 @@
 #include "Utility.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdarg.h>
+#include <assert.h>
+
 
 int g_string_memory = 0;
 
@@ -27,4 +30,8 @@ const char* create_string(const char* const string_ptr){
     strncpy(new_string_ptr, string_ptr, string_bytes);
 
     return new_string_ptr;
+}
+
+int discard_rest_of_input_line(FILE* infile){
+    return fscanf(infile, "%*[^\n]");
 }
