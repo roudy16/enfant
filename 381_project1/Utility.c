@@ -1,7 +1,6 @@
 #include "Utility.h"
 #include <stdlib.h>
 #include <string.h>
-#include <stdarg.h>
 #include <assert.h>
 
 
@@ -33,5 +32,5 @@ const char* create_string(const char* const string_ptr){
 }
 
 int discard_rest_of_input_line(FILE* infile){
-    return fscanf(infile, "%*[^\n]");
+    return fscanf(infile, "%*[^\n]%c");
 }
