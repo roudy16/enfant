@@ -1,4 +1,5 @@
 #include "Utility.h"
+#include "Person.h"
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -33,4 +34,9 @@ const char* create_string(const char* const string_ptr){
 
 int discard_rest_of_input_line(FILE* infile){
     return fscanf(infile, "%*[^\n]%c");
+}
+
+int person_comp(const void* person_ptr1, const void* person_ptr2){
+    return strcmp(get_Person_lastname((struct Person *const)person_ptr1),
+                  get_Person_lastname((struct Person *const)person_ptr2));
 }

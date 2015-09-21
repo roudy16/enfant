@@ -12,11 +12,6 @@ struct Person {
 	char* phoneno;
 };
 
-// TODO Add simple string creation utility and remove this, KISS i suppose
-static const int Get_person_string_bytes(const struct Person *const person_ptr){
-    return *(int*)(person_ptr + 1);
-}
-
 static void output_Person(const struct Person* const person_ptr, FILE* outfile){
     fprintf(outfile, "%s %s %s\n", person_ptr->firstname, person_ptr->lastname, person_ptr->phoneno);
 }
