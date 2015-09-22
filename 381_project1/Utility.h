@@ -3,10 +3,9 @@
 
 #include <stdio.h>
 
-#define INPUT_BUFFER_SIZE 1024
 #define MAX_INPUT 63
 
-// Pair of macros for making a macro a string
+// Pair of macros for making a macro a string literal
 #define STRINGIFYHELPER(val) #val
 #define STRINGIFY_MACRO(val) STRINGIFYHELPER(val)
 

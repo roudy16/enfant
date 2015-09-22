@@ -102,6 +102,7 @@ int remove_Room_Meeting(struct Room* room_ptr, const struct Meeting* meeting_ptr
 void clear_Room(struct Room* room_ptr){
     assert(room_ptr);
     OC_apply(room_ptr->meetings, &destroy_Meeting);
+    OC_clear(room_ptr->meetings);
     assert(OC_empty(room_ptr->meetings));
 }
 
@@ -127,6 +128,53 @@ void save_Room(const struct Room* room_ptr, FILE* outfile){
     assert(outfile);
     
     const int number_of_meetings = OC_get_size(room_ptr->meetings);
-    fprintf(outfile, "%d %d", room_ptr->number, number_of_meetings);
+    fprintf(outfile, "%d %d\n", room_ptr->number, number_of_meetings);
     OC_apply_arg(room_ptr->meetings, &save_Meeting, outfile);
+}
+
+// Takes in a true/false expression that is true if an error has occured in the
+// file reading. Handles errors, returns result of the true/false expression
+static int handle_load_room_error(const int bool_expr, FILE* input_file,
+                                  struct Room** room_ptr)
+{
+    if (bool_expr){
+        discard_rest_of_input_line(input_file);
+        destroy_Room(*room_ptr);
+        *room_ptr = NULL;
+    }
+    return bool_expr;
+}
+
+struct Room* load_Room(FILE* infile, const struct Ordered_container* people){
+    assert(infile);
+    assert(people);
+
+    static char string_buffer[MAX_INPUT + 1];
+    int room_number = 0;
+    int number_of_meetings = 0;
+
+    struct Room* room_ptr = NULL;
+    int return_val = fscanf(infile, "%d%d", &room_number, &number_of_meetings);
+
+    if (!handle_load_room_error(return_val <= 0, infile, &room_ptr)){
+        room_ptr = create_Room(room_number);
+
+        if (!room_ptr){
+            return room_ptr;
+        }
+
+        assert(number_of_meetings >= 0);
+        for (int i = 0; i < number_of_meetings; ++i){
+            const struct Meeting* const meeting_ptr = load_Meeting(infile, people);
+
+            if (handle_load_room_error(meeting_ptr == NULL, infile, &room_ptr)){
+                break;
+            }
+            else {
+                OC_insert(room_ptr->meetings, (void*)meeting_ptr);
+            }
+        }
+    }
+
+    return room_ptr;
 }

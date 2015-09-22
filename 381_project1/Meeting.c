@@ -125,6 +125,8 @@ static int person_to_name_comp(const char* const name_ptr,
     return strcmp(name_ptr, get_Person_lastname(person_ptr));
 }
 
+// Takes in a true/false expression that is true if an error has occured in the
+// file reading. Handles errors, returns result of the true/false expression
 static int handle_load_meeting_error(const int bool_expr, FILE* input_file,
                                      struct Meeting** meeting_ptr)
 {
@@ -145,9 +147,9 @@ struct Meeting* load_Meeting(FILE* input_file, const struct Ordered_container* p
     int number_of_participants = 0;
 
     struct Meeting* meeting_ptr = NULL;
-    int return_val = fscanf(input_file,
-                                  "%d %" STRINGIFY_MACRO(MAX_INPUT) "s %d",
-                                  &time, string_buffer, &number_of_participants);
+    int return_val = fscanf(input_file, "%d %" STRINGIFY_MACRO(MAX_INPUT) "s %d",
+                            &time, string_buffer, &number_of_participants);
+
 
     if (!handle_load_meeting_error(return_val <= 0, input_file, &meeting_ptr)){
         meeting_ptr = create_Meeting(time, string_buffer); // buffer holds topic
