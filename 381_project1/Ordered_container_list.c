@@ -174,14 +174,17 @@ void OC_clear(struct Ordered_container* c_ptr){
 }
 
 int OC_get_size(const struct Ordered_container* c_ptr){
+    assert(c_ptr);
     return c_ptr->size;
 }
 
 int OC_empty(const struct Ordered_container* c_ptr){
+    assert(c_ptr);
     return c_ptr->size == 0;
 }
 
 void* OC_get_data_ptr(const void* item_ptr){
+    assert(item_ptr);
     return ((struct LL_Node*)item_ptr)->data_ptr;
 }
 
@@ -204,6 +207,8 @@ void OC_delete_item(struct Ordered_container* c_ptr, void* item_ptr){
     }
 
     --c_ptr->size;
+    --g_Container_items_in_use;
+    --g_Container_items_allocated;
     free(node_ptr);
 }
 
@@ -235,6 +240,8 @@ void OC_insert(struct Ordered_container* c_ptr, void* data_ptr){
         }
     }
     ++c_ptr->size;
+    ++g_Container_items_in_use;
+    ++g_Container_items_allocated;
 }
 
 void* OC_find_item(const struct Ordered_container* c_ptr, const void* data_ptr){

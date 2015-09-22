@@ -110,7 +110,7 @@ void save_Meeting(const struct Meeting* meeting_ptr, FILE* outfile){
     assert(meeting_ptr);
 
     int number_of_participants = OC_get_size(meeting_ptr->participants);
-    printf("%d %s %d\n", meeting_ptr->time, meeting_ptr->topic,
+    fprintf(outfile, "%d %s %d\n", meeting_ptr->time, meeting_ptr->topic,
            number_of_participants);
     OC_apply_arg(meeting_ptr->participants, &print_person_lastname, outfile);
     fflush(outfile); // Ensures data is written
@@ -122,7 +122,18 @@ static int person_to_name_comp(const char* const name_ptr,
     assert(person_ptr);
     assert(name_ptr);
 
-    return strcmp(get_Person_lastname(person_ptr), name_ptr);
+    return strcmp(name_ptr, get_Person_lastname(person_ptr));
+}
+
+static int handle_load_meeting_error(const int bool_expr, FILE* input_file,
+                                     struct Meeting** meeting_ptr)
+{
+    if (bool_expr){
+        discard_rest_of_input_line(input_file);
+        destroy_Meeting(*meeting_ptr);
+        *meeting_ptr = NULL;
+    }
+    return bool_expr;
 }
 
 struct Meeting* load_Meeting(FILE* input_file, const struct Ordered_container* people){
@@ -136,12 +147,9 @@ struct Meeting* load_Meeting(FILE* input_file, const struct Ordered_container* p
     struct Meeting* meeting_ptr = NULL;
     int return_val = fscanf(input_file,
                                   "%d %" STRINGIFY_MACRO(MAX_INPUT) "s %d",
-                                  time, string_buffer, number_of_participants);
-    if (return_val <= 0){
-        discard_rest_of_input_line(input_file);
-        return NULL;
-    }
-    else {
+                                  &time, string_buffer, &number_of_participants);
+
+    if (!handle_load_meeting_error(return_val <= 0, input_file, &meeting_ptr)){
         meeting_ptr = create_Meeting(time, string_buffer); // buffer holds topic
 
         if (!meeting_ptr){
@@ -151,19 +159,14 @@ struct Meeting* load_Meeting(FILE* input_file, const struct Ordered_container* p
         for (int i = 0; i < number_of_participants; ++i){
             return_val = fscanf(input_file, "%" STRINGIFY_MACRO(MAX_INPUT) "s",
                                 string_buffer);
-            if (return_val <= 0){
-                discard_rest_of_input_line(input_file);
-                destroy_Meeting(meeting_ptr);
-                return NULL;
+            if (handle_load_meeting_error(return_val <= 0, input_file, &meeting_ptr)){
+                break;
             }
             const void* item_ptr = OC_find_item_arg(people, string_buffer,
                                                     &person_to_name_comp);
-            if (!item_ptr){
-                discard_rest_of_input_line(input_file);
-                destroy_Meeting(meeting_ptr);
-                return NULL;
+            if (handle_load_meeting_error(!item_ptr, input_file, &meeting_ptr)){
+                break;
             }
-
             OC_insert(meeting_ptr->participants, OC_get_data_ptr(item_ptr));
         }
     }

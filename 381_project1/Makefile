@@ -40,8 +40,11 @@ default:  $(EX_L) $(EX_A)
 llt: linked_list_test.o Ordered_container_list.o
 	$(LD) $(LFLAGS) linked_list_test.o Ordered_container_list.o -o llt
 
-pt: person_test.o Ordered_container_list.o Utility.o
-	$(LD) $(LFLAGS) person_test.o Ordered_container_list.o Utility.o -o llt
+pt: person_test.o Ordered_container_list.o Utility.o Person.o
+	$(LD) $(LFLAGS) person_test.o Ordered_container_list.o Utility.o Person.o -o pt
+
+mt: meeting_test.o Ordered_container_list.o Utility.o Person.o Meeting.o
+	$(LD) $(LFLAGS) meeting_test.o Ordered_container_list.o Utility.o Person.o Meeting.o -o mt
 
 # to build this executable, check to see if any of the listed object files
 # need to be rebuilt and do so, then link to create the executable
@@ -81,7 +84,10 @@ linked_list_test.o: linked_list_test.c Ordered_container.h
 	$(CC) $(CFLAGS) linked_list_test.c
 
 person_test.o: Person.c Ordered_container.h Utility.h
-	$(CC) $(CFLAGS) linked_list_test.c
+	$(CC) $(CFLAGS) Person_test.c
+
+meeting_test.o: Meeting.h Ordered_container.h Utility.h
+	$(CC) $(CFLAGS) Meeting_test.c
 
 # other shell commands can appear as "things to do" - not just compilations, etc.
 clean:
