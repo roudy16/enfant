@@ -4,6 +4,8 @@
 //#include "Ordered_container_list.c"
 
 static int g_num_things = 0;
+int g_number_Person_structs = 0;
+int g_number_Room_structs = 0;
 
 #ifdef DEBUG
 extern void Print_container(const struct Ordered_container *const c_ptr, const int data_size);

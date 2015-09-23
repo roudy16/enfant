@@ -2,6 +2,10 @@
 #include "Utility.h"
 #include <stdio.h>
 
+
+int g_number_Person_structs = 0;
+int g_number_Room_structs = 0;
+
 int main(void){
     FILE* file_1 = fopen("test_person.out", "w");
     struct Person* me = create_Person("SteveSteveSteveSteveSteveSteveSteveSteveSteveSteveSteveSteve12345678", "Roudy", "312");

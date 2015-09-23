@@ -6,6 +6,8 @@
 #include <assert.h>
 #include <string.h>
 
+int g_number_Person_structs = 0;
+int g_number_Room_structs = 0;
 const char* firstname1 = "Rhonda";  // 7 bytes
 const char* firstname2 = "Chelsea"; // 8 bytes
 const char* firstname3 = "Ryan";    // 5 bytes

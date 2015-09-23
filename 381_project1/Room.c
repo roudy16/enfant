@@ -2,6 +2,7 @@
 #include "Room.h"
 #include "Meeting.h"
 #include "Utility.h"
+#include "p1_globals.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -18,13 +19,8 @@ static int meeting_comp(const struct Meeting *const meeting1_ptr,
     int time1 = get_Meeting_time(meeting1_ptr);
     int time2 = get_Meeting_time(meeting2_ptr);
 
-    // convert times to 24 hour range for comparison
-    if (time1 < 9){
-        time1 += 12;
-    }
-    if (time2 < 9){
-        time2 += 12;
-    }
+    time1 = convert_time_to_24_hour(time1);
+    time2 = convert_time_to_24_hour(time2);
 
     return time1 - time2;
 }
@@ -42,6 +38,7 @@ struct Room* create_Room(int number){
     }
 
     new_room_ptr->number = number;
+    ++g_number_Room_structs;
     return new_room_ptr;
 }
 
@@ -51,6 +48,7 @@ void destroy_Room(struct Room* room_ptr){
     OC_apply(room_ptr->meetings, &destroy_Meeting);
     OC_destroy_container(room_ptr->meetings);
     free(room_ptr);
+    --g_number_Room_structs;
 }
 
 int get_Room_number(const struct Room* room_ptr){
@@ -70,7 +68,9 @@ int add_Room_Meeting(struct Room* room_ptr, const struct Meeting* meeting_ptr){
 }
 
 static int meeting_comp_to_time(const int* time_ptr, const struct Meeting* meeting_ptr){
-    return *time_ptr - get_Meeting_time(meeting_ptr);
+    int arg_time = convert_time_to_24_hour(*time_ptr);
+    int meeting_time = convert_time_to_24_hour(get_Meeting_time(meeting_ptr));
+    return arg_time - meeting_time;
 }
 
 struct Meeting* find_Room_Meeting(const struct Room* room_ptr, int time){

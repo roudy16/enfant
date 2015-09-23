@@ -1,5 +1,6 @@
 #include "Person.h"
 #include "Utility.h"
+#include "p1_globals.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -34,6 +35,8 @@ struct Person* create_Person(const char* firstname,
             destroy_Person(person_ptr);
             person_ptr = NULL;
         }
+
+        ++g_number_Person_structs;
     }
 
     return person_ptr;
@@ -45,6 +48,7 @@ void destroy_Person(struct Person* person_ptr){
         free_string(person_ptr->lastname);
         free_string(person_ptr->phoneno);
         free(person_ptr);
+        --g_number_Person_structs;
     }
 }
 

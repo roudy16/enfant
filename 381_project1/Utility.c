@@ -33,7 +33,7 @@ const char* create_string(const char* const string_ptr){
 }
 
 int discard_rest_of_input_line(FILE* infile){
-    return fscanf(infile, "%*[^\n]%c");
+    return fscanf(infile, "%*[^\n]\n");
 }
 
 int person_comp(const struct Person *const person_ptr1,
@@ -50,4 +50,13 @@ int person_to_name_comp(const char *const name_ptr,
     assert(name_ptr);
 
     return strcmp(name_ptr, get_Person_lastname(person_ptr));
+}
+
+int convert_time_to_24_hour(int time)
+{
+    if (time < MEETING_TIME_LOW)
+    {
+        time += 12;
+    }
+    return time;
 }
