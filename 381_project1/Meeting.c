@@ -112,18 +112,11 @@ void save_Meeting(const struct Meeting* meeting_ptr, FILE* outfile){
     int number_of_participants = OC_get_size(meeting_ptr->participants);
     fprintf(outfile, "%d %s %d\n", meeting_ptr->time, meeting_ptr->topic,
            number_of_participants);
+
     OC_apply_arg(meeting_ptr->participants, &print_person_lastname, outfile);
     fflush(outfile); // Ensures data is written
 }
 
-static int person_to_name_comp(const char* const name_ptr,
-                               const struct Person *const person_ptr)
-{
-    assert(person_ptr);
-    assert(name_ptr);
-
-    return strcmp(name_ptr, get_Person_lastname(person_ptr));
-}
 
 // Takes in a true/false expression that is true if an error has occured in the
 // file reading. Handles errors, returns result of the true/false expression

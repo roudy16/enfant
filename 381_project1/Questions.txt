@@ -3,3 +3,6 @@ I need to cast off the const to get the compiler to quiet. Is this okay?
    -Look at Room.c load_Room for example
 
 Checking for NULL pointers or assert that they are not NULL?
+
+I have void* that are not supposed to be void*, can I forward declare structs 
+so I can write the correct types?

@@ -42,3 +42,30 @@ int read_strings_from_file(FILE* infile, const int num_strings, ...){
 
     return strings_read;
 }
+
+// FROM MAIN  #################################################
+
+// Returns a pointer to a Schedule object. There should only be one.
+static struct Schedule *const create_schedule(void){
+    static struct Schedule schedule = { NULL, NULL, 0 };
+
+    if (!schedule.initialized){
+        schedule.rooms_ptr = OC_create_container(&room_comp);
+        schedule.people_ptr = OC_create_container(&person_comp);
+        schedule.initialized = 1;
+    }
+
+    return &schedule;
+}
+
+static void destroy_schedule(struct Schedule* schedule_ptr){
+    assert(schedule_ptr);
+    OC_apply(schedule_ptr->rooms_ptr, &destroy_Room);
+    OC_destroy_container(schedule_ptr->rooms_ptr);
+    OC_apply(schedule_ptr->people_ptr, &destroy_Person);
+    OC_destroy_container(schedule_ptr->people_ptr);
+    schedule_ptr->rooms_ptr = NULL;
+    schedule_ptr->people_ptr = NULL;
+    schedule_ptr->initialized = 0;
+}
+

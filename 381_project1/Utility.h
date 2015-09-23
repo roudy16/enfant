@@ -12,6 +12,11 @@
 #define FAILURE -1
 #define SUCCESS 0
 
+// Forward declaration of types for function prototypes
+struct Person;
+struct Room;
+struct Meeting;
+
 /* global variable declarations for this module */
 extern int g_string_memory;     /* number of bytes used in C-strings */
 
@@ -27,6 +32,10 @@ void free_string(char* string_ptr);
 
 int discard_rest_of_input_line(FILE* infile);
 
-int person_comp(const void* person_ptr1, const void* person_ptr2);
+int person_comp(const struct Person *const person_ptr1,
+                const struct Person *const person_ptr2);
+
+int person_to_name_comp(const char *const name_ptr,
+                        const struct Person *const person_ptr);
 
 #endif // UTILITY_H

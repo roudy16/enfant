@@ -36,7 +36,18 @@ int discard_rest_of_input_line(FILE* infile){
     return fscanf(infile, "%*[^\n]%c");
 }
 
-int person_comp(const void* person_ptr1, const void* person_ptr2){
-    return strcmp(get_Person_lastname((struct Person *const)person_ptr1),
-                  get_Person_lastname((struct Person *const)person_ptr2));
+int person_comp(const struct Person *const person_ptr1,
+                const struct Person *const person_ptr2)
+{
+    return strcmp(get_Person_lastname(person_ptr1),
+                  get_Person_lastname(person_ptr2));
+}
+
+int person_to_name_comp(const char *const name_ptr,
+                        const struct Person *const person_ptr)
+{
+    assert(person_ptr);
+    assert(name_ptr);
+
+    return strcmp(name_ptr, get_Person_lastname(person_ptr));
 }

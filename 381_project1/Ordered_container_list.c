@@ -189,9 +189,8 @@ void* OC_get_data_ptr(const void* item_ptr){
 }
 
 void OC_delete_item(struct Ordered_container* c_ptr, void* item_ptr){
-    if (!item_ptr || !c_ptr){
-        return;
-    }
+    assert(c_ptr);
+    assert(item_ptr);
 
     struct LL_Node *const node_ptr = item_ptr;
     if (node_ptr != c_ptr->first){
@@ -239,6 +238,7 @@ void OC_insert(struct Ordered_container* c_ptr, void* data_ptr){
             c_ptr->last = node_ptr;
         }
     }
+
     ++c_ptr->size;
     ++g_Container_items_in_use;
     ++g_Container_items_allocated;
