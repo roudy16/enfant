@@ -16,7 +16,8 @@ struct Meeting {
 int g_Meeting_memory = 0;
 
 
-struct Meeting* create_Meeting(int time, const char* topic){
+struct Meeting* create_Meeting(int time, const char* topic)
+{
     struct Meeting* meeting_ptr = malloc(sizeof(struct Meeting));
 
     if (meeting_ptr){
@@ -29,8 +30,10 @@ struct Meeting* create_Meeting(int time, const char* topic){
     return meeting_ptr;
 }
 
-void destroy_Meeting(struct Meeting* meeting_ptr){
-    if (meeting_ptr){
+void destroy_Meeting(struct Meeting* meeting_ptr)
+{
+    if (meeting_ptr)
+    {
         OC_destroy_container(meeting_ptr->participants);
         free_string(meeting_ptr->topic);
         free(meeting_ptr);
@@ -38,17 +41,22 @@ void destroy_Meeting(struct Meeting* meeting_ptr){
     }
 }
 
-int get_Meeting_time(const struct Meeting* meeting_ptr){
-    if (meeting_ptr){
+int get_Meeting_time(const struct Meeting* meeting_ptr)
+{
+    if (meeting_ptr)
+    {
         return meeting_ptr->time;
     }
-    else {
+    else
+    {
         return FAILURE;
     }
 }
 
-void set_Meeting_time(struct Meeting* meeting_ptr, int time){
-    if (meeting_ptr){
+void set_Meeting_time(struct Meeting* meeting_ptr, int time)
+{
+    if (meeting_ptr)
+    {
         meeting_ptr->time = time;
     }
 }
@@ -61,7 +69,8 @@ int add_Meeting_participant(struct Meeting* meeting_ptr,
 
     void* const found_item_ptr = OC_find_item(meeting_ptr->participants,
                                               person_ptr);
-    if (found_item_ptr){
+    if (found_item_ptr)
+    {
         return FAILURE;
     }
 
@@ -90,7 +99,8 @@ int remove_Meeting_participant(struct Meeting* meeting_ptr,
 
     void* const found_item_ptr = OC_find_item(meeting_ptr->participants,
                                               person_ptr);
-    if (!found_item_ptr){
+    if (!found_item_ptr)
+    {
         return FAILURE;
     }
 
@@ -98,13 +108,15 @@ int remove_Meeting_participant(struct Meeting* meeting_ptr,
     return SUCCESS;
 }
 
-void print_Meeting(const struct Meeting* meeting_ptr){
+void print_Meeting(const struct Meeting* meeting_ptr)
+{
     assert(meeting_ptr);
 
     printf("Meeting time: %d, Topic: %s\nParticipants:",
            meeting_ptr->time, meeting_ptr->topic);
 
-    if (OC_empty(meeting_ptr->participants)){
+    if (OC_empty(meeting_ptr->participants))
+    {
         printf(" None\n");
         return;
     }
@@ -113,7 +125,9 @@ void print_Meeting(const struct Meeting* meeting_ptr){
     OC_apply(meeting_ptr->participants, &print_Person);
 }
 
-static void print_person_lastname(const struct Person* person_ptr, FILE* outfile){
+static void print_person_lastname(const struct Person* person_ptr,
+                                  FILE* outfile)
+{
     assert(person_ptr);
 
     fprintf(outfile, "%s\n", get_Person_lastname(person_ptr));

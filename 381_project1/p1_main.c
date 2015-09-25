@@ -32,7 +32,7 @@ static int room_comp_to_number(const int* number_ptr,
 
 static struct Schedule* const create_schedule(void);
 
-static void destroy_schedule(struct Schedule* schedule_ptr);
+static void destroy_schedule(struct Schedule* schedule_ptr, const int quiet);
 
 static int get_command_from_input(char* command1, char* command2);
 
@@ -88,23 +88,40 @@ static void add_person_to_meeting_in_room(struct Schedule *const schedule_ptr);
 
 static void reschedule_meeting(struct Schedule *const schedule_ptr);
 
-static void delete_individual(struct Schedule *const schedule_ptr);
+static void delete_individual_command(struct Schedule *const schedule_ptr);
 
-static void deallocate_all(struct Schedule* const schedule_ptr);
+static void delete_room_command(struct Schedule *const schedule_ptr);
 
+static void delete_meeting_command(struct Schedule *const schedule_ptr);
+
+static void delete_participant_command(struct Schedule *const schedule_ptr);
+
+static void delete_all_individual_command(struct Schedule *const schedule_ptr,
+                                          const int quiet);
+
+static void delete_schedule_command(struct Schedule *const schedule_ptr,
+                                    const int quiet);
+
+static void deallocate_all(struct Schedule *const schedule_ptr, const int quiet);
+
+static void save_data_command(struct Schedule *const schedule_ptr);
+
+static void load_data_command(struct Schedule** schedule_ptr);
 
 int main(void){
-    struct Schedule *const schedule_ptr = create_schedule();
+    struct Schedule* schedule_ptr = create_schedule();
     assert(schedule_ptr);
 
     int quit_flag = 0;
     char command1 = '\0';
     char command2 = '\0';
 
-    while (!quit_flag){
+    while (!quit_flag)
+    {
         get_command_from_input(&command1, &command2);
 
-        switch (command1){
+        switch (command1)
+        {
             case 'p':
                 print_switch(command2, schedule_ptr);
                 break;
@@ -125,8 +142,24 @@ int main(void){
                 delete_switch(command2, schedule_ptr);
                 break;
             case 's':
+                if (command2 == 'd')
+                {
+                    save_data_command(schedule_ptr);
+                }
+                else
+                {
+                    unrecognized_command_error();
+                }
                 break;
             case 'l':
+                if (command2 == 'd')
+                {
+                    load_data_command(&schedule_ptr);
+                }
+                else
+                {
+                    unrecognized_command_error();
+                }
                 break;
             case 'q':
                 if (command2 == 'q')
@@ -139,7 +172,12 @@ int main(void){
         }
     }
 
-    destroy_schedule(schedule_ptr);
+    destroy_schedule(schedule_ptr, 0);
+    assert(g_Container_count == 0);
+    assert(g_Meeting_memory == 0);
+    assert(g_string_memory == 0);
+    assert(g_Container_items_allocated == 0);
+    assert(g_Container_items_in_use == 0);
     return 0;
 }
 
@@ -196,19 +234,25 @@ static void delete_switch(char command, struct Schedule *const schedule_ptr)
     switch (command)
     {
         case 'i':
-            delete_individual(schedule_ptr);
+            delete_individual_command(schedule_ptr);
             break;
         case 'r':
+            delete_room_command(schedule_ptr);
             break;
         case 'm':
+            delete_meeting_command(schedule_ptr);
             break;
         case 'p':
+            delete_participant_command(schedule_ptr);
             break;
         case 's':
+            delete_schedule_command(schedule_ptr, 0);
             break;
         case 'g':
+            delete_all_individual_command(schedule_ptr, 0);
             break;
         case 'a':
+            deallocate_all(schedule_ptr, 0);
             break;
         default:
             unrecognized_command_error();
@@ -256,18 +300,13 @@ struct Schedule* const create_schedule(void)
     return schedule_ptr;
 }
 
-static void destroy_schedule(struct Schedule* schedule_ptr)
+static void destroy_schedule(struct Schedule* schedule_ptr, const int quiet)
 {
     assert(schedule_ptr);
 
-    deallocate_all(schedule_ptr);
+    deallocate_all(schedule_ptr, quiet);
     free(schedule_ptr);
 
-    assert(g_Container_count == 0);
-    assert(g_Meeting_memory == 0);
-    assert(g_string_memory == 0);
-    assert(g_Container_items_allocated == 0);
-    assert(g_Container_items_in_use == 0);
 }
 
 static int get_command_from_input(char* command1, char* command2)
@@ -731,13 +770,14 @@ static int search_Room_for_person(const struct Room *const room_ptr,
     return return_val;
 }
 
-static void delete_individual(struct Schedule *const schedule_ptr)
+static void delete_individual_command(struct Schedule *const schedule_ptr)
 {
     char lastname[MAX_INPUT + 1];
 
     read_string_from_input(lastname);
 
-    struct Person* person_ptr = find_person_by_name(schedule_ptr->people_ptr, lastname);
+    struct Person* person_ptr = find_person_by_name(schedule_ptr->people_ptr,
+                                                    lastname);
     if (!person_ptr){
         person_not_found_error();
         return;
@@ -746,7 +786,6 @@ static void delete_individual(struct Schedule *const schedule_ptr)
     int person_in_meeting = OC_apply_if_arg(schedule_ptr->rooms_ptr,
                                             (OC_apply_if_arg_fp_t)search_Room_for_person,
                                             person_ptr);
-
     if (person_in_meeting)
     {
         printf("This person is a participant in a meeting!\n");
@@ -759,15 +798,282 @@ static void delete_individual(struct Schedule *const schedule_ptr)
                                       (OC_find_item_arg_fp_t)person_comp);
     assert(item_ptr);
 
-    destroy_Person(person_ptr);
     OC_delete_item(schedule_ptr->people_ptr, item_ptr);
+    destroy_Person(person_ptr);
     printf("Person %s deleted\n", lastname);
 }
 
-static void deallocate_all(struct Schedule* const schedule_ptr)
+static void delete_room_command(struct Schedule *const schedule_ptr)
 {
-    OC_apply(schedule_ptr->rooms_ptr, &destroy_Room);
-    OC_destroy_container(schedule_ptr->rooms_ptr);
+    int room_number = 0;
+
+    if (read_room_from_input(&room_number) != SUCCESS)
+    {
+        return;
+    }
+
+    struct Room* room_ptr = find_room_by_number(schedule_ptr->rooms_ptr,
+                                                &room_number);
+    if (!room_ptr)
+    {
+        room_not_found_error();
+        return;
+    }
+
+    void* item_ptr = OC_find_item_arg(schedule_ptr->rooms_ptr,
+                                      room_ptr,
+                                      (OC_find_item_arg_fp_t)room_comp);
+    assert(item_ptr);
+
+    OC_delete_item(schedule_ptr->rooms_ptr, item_ptr);
+    destroy_Room(room_ptr);
+    printf("Room %d deleted\n", room_number);
+}
+
+static void delete_meeting_command(struct Schedule *const schedule_ptr)
+{
+    int room_number = 0;
+    int meeting_time = 0;
+
+    if (read_room_from_input(&room_number) != SUCCESS)
+    {
+        return;
+    }
+
+    struct Room* room_ptr = find_room_by_number(schedule_ptr->rooms_ptr,
+                                                &room_number);
+    if (!room_ptr)
+    {
+        room_not_found_error();
+        return;
+    }
+
+    if (read_time_from_input(&meeting_time) != SUCCESS)
+    {
+        return;
+    }
+
+    struct Ordered_container* meetings_ptr = (struct Ordered_container*)get_Room_Meetings(room_ptr);
+
+    void* meeting_item_ptr = OC_find_item_arg(meetings_ptr,
+                                      &meeting_time,
+                                      (OC_find_item_arg_fp_t)meeting_comp_to_time);
+
+    if (!meeting_item_ptr)
+    {
+        meeting_not_found_error();
+        return;
+    }
+
+    struct Meeting* meeting_ptr = OC_get_data_ptr(meeting_item_ptr);
+    OC_delete_item(meetings_ptr, meeting_item_ptr);
+    destroy_Meeting(meeting_ptr);
+    printf("Meeting at %d deleted\n", meeting_time);
+}
+
+static void delete_participant_command(struct Schedule *const schedule_ptr)
+{
+    int room_number = 0;
+    int meeting_time = 0;
+    char lastname[MAX_INPUT + 1];
+
+    if (read_room_from_input(&room_number) != SUCCESS)
+    {
+        return;
+    }
+
+    struct Room* room_ptr = find_room_by_number(schedule_ptr->rooms_ptr,
+                                                &room_number);
+    if (!room_ptr)
+    {
+        room_not_found_error();
+        return;
+    }
+
+    if (read_time_from_input(&meeting_time) != SUCCESS)
+    {
+        return;
+    }
+
+    struct Meeting* meeting_ptr = find_Room_Meeting(room_ptr, meeting_time);
+    if (!meeting_ptr)
+    {
+        meeting_not_found_error();
+        return;
+    }
+
+    read_string_from_input(lastname);
+    struct Person* person_ptr = find_person_by_name(schedule_ptr->people_ptr,
+                                                    lastname);
+
+    if (!person_ptr)
+    {
+        person_not_found_error();
+        return;
+    }
+
+    int return_val = remove_Meeting_participant(meeting_ptr, person_ptr);
+    if (return_val != 0)
+    {
+        printf("This person is not a participant in the meeting!\n");
+        discard_rest_of_input_line(stdin);
+        return;
+    }
+
+    printf("Participant %s deleted\n", lastname);
+}
+
+static int room_not_empty(const struct Room* const room_ptr)
+{
+    return !OC_empty(get_Room_Meetings(room_ptr));
+}
+
+static void delete_all_individual_command(struct Schedule *const schedule_ptr,
+                                          const int quiet)
+{
+    int meetings_in_schedule = OC_apply_if(schedule_ptr->rooms_ptr, (OC_apply_if_fp_t)room_not_empty);
+
+    if (meetings_in_schedule)
+    {
+        printf("Cannot clear people list unless there are no meetings!\n");
+        discard_rest_of_input_line(stdin);
+        return;
+    }
+
     OC_apply(schedule_ptr->people_ptr, &destroy_Person);
     OC_destroy_container(schedule_ptr->people_ptr);
+    if (!quiet)
+    {
+        printf("All persons deleted\n");
+    }
 }
+
+static void delete_schedule_command(struct Schedule *const schedule_ptr,
+                                    const int quiet)
+{
+    OC_apply(schedule_ptr->rooms_ptr, (OC_apply_fp_t)clear_Room);
+    if (!quiet)
+    {
+        printf("All meetings deleted\n");
+    }
+}
+
+static void deallocate_all(struct Schedule* const schedule_ptr, const int quiet)
+{
+    delete_schedule_command(schedule_ptr, quiet);
+
+    OC_apply(schedule_ptr->rooms_ptr, &destroy_Room);
+    OC_destroy_container(schedule_ptr->rooms_ptr);
+
+    if (!quiet)
+    {
+        printf("All rooms deleted\n");
+    }
+
+    delete_all_individual_command(schedule_ptr, quiet);
+}
+
+static void save_data_command(struct Schedule *const schedule_ptr)
+{
+    char filename[MAX_INPUT + 1];
+
+    read_string_from_input(filename);
+
+    FILE* savefile = fopen(filename, "w");
+    if (!savefile)
+    {
+        printf("Could not open file!\n");
+        discard_rest_of_input_line(stdin);
+        return;
+    }
+
+    fprintf(savefile, "%d\n", g_number_Person_structs);
+
+    OC_apply_arg(schedule_ptr->people_ptr, (OC_apply_arg_fp_t)save_Person, savefile);
+
+    fprintf(savefile, "%d\n", g_number_Room_structs);
+
+    OC_apply_arg(schedule_ptr->rooms_ptr, (OC_apply_arg_fp_t)save_Room, savefile);
+
+    fclose(savefile);
+}
+
+static void load_data_error(struct Schedule* bad_schedule_ptr, FILE* loadfile)
+{
+    printf("Invalid data found in file!\n");
+
+    if (bad_schedule_ptr)
+    {
+        destroy_schedule(bad_schedule_ptr, 1);
+    }
+    discard_rest_of_input_line(stdin);
+    fclose(loadfile);
+}
+
+static void load_data_command(struct Schedule ** schedule_ptr)
+{
+    char filename[MAX_INPUT + 1];
+
+    read_string_from_input(filename);
+
+    FILE* loadfile = fopen(filename, "r");
+    if (!loadfile)
+    {
+        printf("Could not open file!\n");
+        discard_rest_of_input_line(stdin);
+        return;
+    }
+
+    struct Schedule* new_schedule_ptr = NULL;
+    int number_of_people = 0;
+
+    int return_val = fscanf(loadfile, "%d", &number_of_people);
+    if (return_val != 1)
+    {
+        load_data_error(new_schedule_ptr, loadfile);
+        return;
+    }
+
+    new_schedule_ptr = create_schedule();
+
+    // Load the people container
+    for (int i = 0; i < number_of_people; ++i)
+    {
+        struct Person* new_person_ptr = load_Person(loadfile);
+        if (!new_person_ptr)
+        {
+            load_data_error(new_schedule_ptr, loadfile);
+            return;
+        }
+
+        OC_insert(new_schedule_ptr->people_ptr, new_person_ptr);
+    }
+
+    int number_of_rooms = 0;
+    return_val = fscanf(loadfile, "%d", &number_of_rooms);
+    if (return_val != 1)
+    {
+        load_data_error(new_schedule_ptr, loadfile);
+        return;
+    }
+
+    // Load the rooms container
+    for (int i = 0; i < number_of_rooms; ++i)
+    {
+        struct Room* room_ptr = load_Room(loadfile, new_schedule_ptr->people_ptr);
+        if (!room_ptr)
+        {
+            load_data_error(new_schedule_ptr, loadfile);
+            return;
+        }
+
+        OC_insert(new_schedule_ptr->rooms_ptr, room_ptr);
+    }
+
+    destroy_schedule(*schedule_ptr, 1);
+    *schedule_ptr = new_schedule_ptr;
+    printf("Data loaded\n");
+    fclose(loadfile);
+}
+
+
