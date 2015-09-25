@@ -77,7 +77,7 @@ Room.o: Room.c Room.h Ordered_container.h Meeting.h p1_globals.h Utility.h
 p1_globals.o: p1_globals.c p1_globals.h
 	$(CC) $(CFLAGS) p1_globals.c
 
-Utility.o: Utility.c Utility.h p1_globals.h
+Utility.o: Utility.c Utility.h p1_globals.h Person.h
 	$(CC) $(CFLAGS) Utility.c
 
 linked_list_test.o: linked_list_test.c Ordered_container.h

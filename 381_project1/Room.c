@@ -67,11 +67,6 @@ int add_Room_Meeting(struct Room* room_ptr, const struct Meeting* meeting_ptr){
     return SUCCESS;
 }
 
-static int meeting_comp_to_time(const int* time_ptr, const struct Meeting* meeting_ptr){
-    int arg_time = convert_time_to_24_hour(*time_ptr);
-    int meeting_time = convert_time_to_24_hour(get_Meeting_time(meeting_ptr));
-    return arg_time - meeting_time;
-}
 
 struct Meeting* find_Room_Meeting(const struct Room* room_ptr, int time){
     assert(room_ptr);
@@ -156,7 +151,7 @@ struct Room* load_Room(FILE* infile, const struct Ordered_container* people){
     struct Room* room_ptr = NULL;
     int return_val = fscanf(infile, "%d%d", &room_number, &number_of_meetings);
 
-    if (!handle_load_room_error(return_val <= 0, infile, &room_ptr)){
+    if (!handle_load_room_error(return_val != 2, infile, &room_ptr)){
         room_ptr = create_Room(room_number);
 
         if (!room_ptr){

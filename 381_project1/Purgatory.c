@@ -29,7 +29,7 @@ int read_strings_from_file(FILE* infile, const int num_strings, ...){
     for (int i = 0; i < num_strings; ++i){
         return_val = fscanf(infile, "%" STRINGIFY_MACRO(MAX_INPUT) "s", buffer_write_head);
 
-        if (return_val <= 0){
+        if (return_val != 1){
             return return_val;
         }
         else {

@@ -69,6 +69,19 @@ int add_Meeting_participant(struct Meeting* meeting_ptr,
     return SUCCESS;
 }
 
+int is_Meeting_participant_present(const struct Meeting* meeting_ptr, const struct Person * person_ptr)
+{
+    void* item_ptr = OC_find_item(meeting_ptr->participants, person_ptr);
+    if (item_ptr)
+    {
+        return 1;
+    }
+    else
+    {
+        return 0;
+    }
+}
+
 int remove_Meeting_participant(struct Meeting* meeting_ptr,
                                const struct Person* person_ptr)
 {
@@ -144,7 +157,7 @@ struct Meeting* load_Meeting(FILE* input_file, const struct Ordered_container* p
                             &time, string_buffer, &number_of_participants);
 
 
-    if (!handle_load_meeting_error(return_val <= 0, input_file, &meeting_ptr)){
+    if (!handle_load_meeting_error(return_val != 3, input_file, &meeting_ptr)){
         meeting_ptr = create_Meeting(time, string_buffer); // buffer holds topic
 
         if (!meeting_ptr){
@@ -154,7 +167,7 @@ struct Meeting* load_Meeting(FILE* input_file, const struct Ordered_container* p
         for (int i = 0; i < number_of_participants; ++i){
             return_val = fscanf(input_file, "%" STRINGIFY_MACRO(MAX_INPUT) "s",
                                 string_buffer);
-            if (handle_load_meeting_error(return_val <= 0, input_file, &meeting_ptr)){
+            if (handle_load_meeting_error(return_val != 1, input_file, &meeting_ptr)){
                 break;
             }
             const void* item_ptr = OC_find_item_arg(people, string_buffer,

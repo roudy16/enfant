@@ -76,7 +76,7 @@ struct Person* load_Person(FILE* infile){
                                   firstname, lastname, phoneno);
 
     struct Person* person = NULL;
-    if (return_val <= 0){
+    if (return_val != 3){
         discard_rest_of_input_line(infile);
     }
     else {
