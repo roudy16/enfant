@@ -28,7 +28,7 @@ static int room_comp(const struct Room *const room_ptr1,
                      const struct Room *const room_ptr2);
 
 static int room_comp_to_number(const int* number_ptr,
-                       const struct Room* room_ptr);
+                               const struct Room* room_ptr);
 
 static struct Schedule* const create_schedule(void);
 
@@ -37,14 +37,14 @@ static void destroy_schedule(struct Schedule* schedule_ptr);
 static int get_command_from_input(char* command1, char* command2);
 
 static void* find_object_arg(const struct Ordered_container* c_ptr,
-                                                 const void* arg_ptr,
-                                       OC_find_item_arg_fp_t comp_func);
+                             const void* arg_ptr,
+                             OC_find_item_arg_fp_t comp_func);
 
 static struct Person* find_person_by_name(const struct Ordered_container* c_ptr,
-                                                              const char* name);
+                                          const char* name);
 
 static struct Room* find_room_by_number(const struct Ordered_container* c_ptr,
-                                                             const int* room_number_ptr);
+                                        const int* room_number_ptr);
 
 static void read_string_from_input(char* string_buffer);
 
@@ -304,7 +304,8 @@ static struct Person* find_person_by_name(const struct Ordered_container* c_ptr,
 static struct Room* find_room_by_number(const struct Ordered_container* c_ptr,
                                         const int* room_number_ptr)
 {
-    return find_object_arg(c_ptr, room_number_ptr, (OC_find_item_arg_fp_t)room_comp_to_number);
+    return find_object_arg(c_ptr, room_number_ptr,
+                           (OC_find_item_arg_fp_t)room_comp_to_number);
 }
 
 static void read_string_from_input(char* string_buffer)
@@ -424,8 +425,8 @@ static void print_room_command(struct Schedule *const schedule_ptr)
         return;
     }
 
-    const struct Room* const room_ptr = find_room_by_number(schedule_ptr->rooms_ptr, &room_number);
-
+    const struct Room* const room_ptr = find_room_by_number(schedule_ptr->rooms_ptr,
+                                                            &room_number);
     if (room_ptr)
     {
         print_Room(room_ptr);
@@ -446,8 +447,8 @@ static void print_meeting_command(struct Schedule *const schedule_ptr)
         return;
     }
 
-    const struct Room* const room_ptr = find_room_by_number(schedule_ptr->rooms_ptr, &room_number);
-
+    const struct Room* const room_ptr = find_room_by_number(schedule_ptr->rooms_ptr,
+                                                            &room_number);
     if (!room_ptr)
     {
         room_not_found_error();
