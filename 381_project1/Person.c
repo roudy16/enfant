@@ -1,6 +1,5 @@
 #include "Person.h"
 #include "Utility.h"
-#include "p1_globals.h"
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

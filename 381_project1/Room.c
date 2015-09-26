@@ -2,7 +2,6 @@
 #include "Room.h"
 #include "Meeting.h"
 #include "Utility.h"
-#include "p1_globals.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>

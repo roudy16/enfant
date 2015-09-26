@@ -28,7 +28,7 @@ LD = gcc
 CFLAGS = -c -std=c99 -pedantic-errors -Wall -g -DDEBUG
 LFLAGS = -Wall
 
-OBJS = p1_main.o Person.o Meeting.o Room.o p1_globals.o Utility.o
+OBJS = p1_main.o Person.o Meeting.o Room.o Utility.o
 OBJS_L = Ordered_container_list.o
 OBJS_A = Ordered_container_array.o
 EX_L = p1Lexe
@@ -56,28 +56,28 @@ $(EX_A): $(OBJS) $(OBJS_A)
 
 # to build this object module, check the timestamps of what it depends on, and
 # if any are more recent than an existing p1_main.o, then recompile p1_main.c
-p1_main.o: p1_main.c Ordered_container.h Person.h Meeting.h Room.h p1_globals.h Utility.h
+p1_main.o: p1_main.c Ordered_container.h Person.h Meeting.h Room.h Utility.h
 	$(CC) $(CFLAGS) p1_main.c
 
-Ordered_container_list.o: Ordered_container_list.c Ordered_container.h p1_globals.h Utility.h
+Ordered_container_list.o: Ordered_container_list.c Ordered_container.h Utility.h
 	$(CC) $(CFLAGS) Ordered_container_list.c
 
-Ordered_container_array.o: Ordered_container_array.c Ordered_container.h p1_globals.h Utility.h
+Ordered_container_array.o: Ordered_container_array.c Ordered_container.h Utility.h
 	$(CC) $(CFLAGS) Ordered_container_array.c
 
-Person.o: Person.c Person.h p1_globals.h Utility.h
+Person.o: Person.c Person.h Utility.h
 	$(CC) $(CFLAGS) Person.c
 
-Meeting.o: Meeting.c Meeting.h Ordered_container.h Person.h p1_globals.h Utility.h
+Meeting.o: Meeting.c Meeting.h Ordered_container.h Person.h Utility.h
 	$(CC) $(CFLAGS) Meeting.c
 
-Room.o: Room.c Room.h Ordered_container.h Meeting.h p1_globals.h Utility.h
+Room.o: Room.c Room.h Ordered_container.h Meeting.h Utility.h
 	$(CC) $(CFLAGS) Room.c
 
 p1_globals.o: p1_globals.c p1_globals.h
 	$(CC) $(CFLAGS) p1_globals.c
 
-Utility.o: Utility.c Utility.h p1_globals.h Person.h Meeting.h
+Utility.o: Utility.c Utility.h Person.h Meeting.h
 	$(CC) $(CFLAGS) Utility.c
 
 linked_list_test.o: linked_list_test.c Ordered_container.h

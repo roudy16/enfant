@@ -3,7 +3,6 @@
 #include "Room.h"
 #include "Person.h"
 #include "Meeting.h"
-#include "p1_globals.h"
 #include <stdio.h>
 #include <assert.h>
 #include <string.h>
