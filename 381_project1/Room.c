@@ -24,6 +24,13 @@ static int meeting_comp(const struct Meeting *const meeting1_ptr,
     return time1 - time2;
 }
 
+static int meeting_comp_to_time(const int* time_ptr, const struct Meeting* meeting_ptr)
+{
+    int arg_time = convert_time_to_24_hour(*time_ptr);
+    int meeting_time = convert_time_to_24_hour(get_Meeting_time(meeting_ptr));
+    return arg_time - meeting_time;
+}
+
 struct Room* create_Room(int number){
     struct Room* new_room_ptr = malloc(sizeof(struct Room));
     if (!new_room_ptr){

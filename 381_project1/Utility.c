@@ -61,13 +61,6 @@ int person_to_name_comp(const char *const name_ptr,
     return strcmp(name_ptr, get_Person_lastname(person_ptr));
 }
 
-int meeting_comp_to_time(const int* time_ptr, const struct Meeting* meeting_ptr)
-{
-    int arg_time = convert_time_to_24_hour(*time_ptr);
-    int meeting_time = convert_time_to_24_hour(get_Meeting_time(meeting_ptr));
-    return arg_time - meeting_time;
-}
-
 int convert_time_to_24_hour(int time)
 {
     if (time < MEETING_TIME_LOW)

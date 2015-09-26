@@ -46,8 +46,6 @@ int person_comp(const struct Person *const person_ptr1,
 int person_to_name_comp(const char *const name_ptr,
                         const struct Person *const person_ptr);
 
-int meeting_comp_to_time(const int* time_ptr, const struct Meeting* meeting_ptr);
-
 int convert_time_to_24_hour(int time);
 
 #endif // UTILITY_H

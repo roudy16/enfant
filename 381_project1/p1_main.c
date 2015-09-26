@@ -853,20 +853,14 @@ static void delete_meeting_command(struct Schedule *const schedule_ptr)
         return;
     }
 
-    struct Ordered_container* meetings_ptr = (struct Ordered_container*)get_Room_Meetings(room_ptr);
-
-    void* meeting_item_ptr = OC_find_item_arg(meetings_ptr,
-                                      &meeting_time,
-                                      (OC_find_item_arg_fp_t)meeting_comp_to_time);
-
-    if (!meeting_item_ptr)
+    struct Meeting* meeting_ptr = find_Room_Meeting(room_ptr, meeting_time);
+    if (!meeting_ptr)
     {
         meeting_not_found_error();
         return;
     }
 
-    struct Meeting* meeting_ptr = OC_get_data_ptr(meeting_item_ptr);
-    OC_delete_item(meetings_ptr, meeting_item_ptr);
+    remove_Room_Meeting(room_ptr, meeting_ptr);
     destroy_Meeting(meeting_ptr);
     printf("Meeting at %d deleted\n", meeting_time);
 }
