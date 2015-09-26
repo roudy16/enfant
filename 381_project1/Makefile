@@ -35,7 +35,7 @@ EX_L = p1Lexe
 EX_A = p1Aexe
 
 # following asks for both executables to be built
-default:  $(EX_L) $(EX_A)
+default:  $(EX_L) #$(EX_A)
 
 llt: linked_list_test.o Ordered_container_list.o
 	$(LD) $(LFLAGS) linked_list_test.o Ordered_container_list.o -o llt
@@ -77,7 +77,7 @@ Room.o: Room.c Room.h Ordered_container.h Meeting.h p1_globals.h Utility.h
 p1_globals.o: p1_globals.c p1_globals.h
 	$(CC) $(CFLAGS) p1_globals.c
 
-Utility.o: Utility.c Utility.h p1_globals.h Person.h
+Utility.o: Utility.c Utility.h p1_globals.h Person.h Meeting.h
 	$(CC) $(CFLAGS) Utility.c
 
 linked_list_test.o: linked_list_test.c Ordered_container.h

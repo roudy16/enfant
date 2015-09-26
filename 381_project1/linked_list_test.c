@@ -7,6 +7,8 @@ static int g_num_things = 0;
 int g_number_Person_structs = 0;
 int g_number_Room_structs = 0;
 
+struct LL_Node;
+
 #ifdef DEBUG
 extern void Print_container(const struct Ordered_container *const c_ptr, const int data_size);
 extern void Print_node(const struct LL_Node *const node_ptr, const int data_size);
@@ -67,7 +69,7 @@ int main(void)
     printf("Found data: %d\n", *(int*)OC_get_data_ptr(data_ptr));
     search_num = 99;
     printf("Apply_if_arg returned: %d\n", 
-           OC_apply_if_arg(container_ptr, apply_if_arg_tester, &search_num));
+           OC_apply_if_arg(container_ptr, (OC_apply_if_arg_fp_t)apply_if_arg_tester, &search_num));
     data_ptr = OC_find_item_arg(container_ptr, &search_num, alt_thing_comp_f);
     printf("Found data: %d\n", *(int*)OC_get_data_ptr(data_ptr));
 

@@ -9,9 +9,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-int g_number_Person_structs = 0;
-int g_number_Room_structs = 0;
-
 struct Schedule{
     struct Ordered_container* rooms_ptr;
     struct Ordered_container* people_ptr;
@@ -96,8 +93,7 @@ static void delete_meeting_command(struct Schedule *const schedule_ptr);
 
 static void delete_participant_command(struct Schedule *const schedule_ptr);
 
-static void delete_all_individual_command(struct Schedule *const schedule_ptr,
-                                          const int quiet);
+static void delete_all_individual_command(struct Schedule *const schedule_ptr);
 
 static void delete_schedule_command(struct Schedule *const schedule_ptr,
                                     const int quiet);
@@ -167,6 +163,7 @@ int main(void){
                     quit_flag = 1;
                     continue;
                 }
+                /* no break */
             default:
                 unrecognized_command_error();
         }
@@ -178,6 +175,8 @@ int main(void){
     assert(g_string_memory == 0);
     assert(g_Container_items_allocated == 0);
     assert(g_Container_items_in_use == 0);
+
+    printf("Done\n");
     return 0;
 }
 
@@ -249,7 +248,7 @@ static void delete_switch(char command, struct Schedule *const schedule_ptr)
             delete_schedule_command(schedule_ptr, 0);
             break;
         case 'g':
-            delete_all_individual_command(schedule_ptr, 0);
+            delete_all_individual_command(schedule_ptr);
             break;
         case 'a':
             deallocate_all(schedule_ptr, 0);
@@ -280,7 +279,7 @@ struct Schedule* const create_schedule(void)
         return NULL;
     }
 
-    schedule_ptr->rooms_ptr = OC_create_container(&room_comp);
+    schedule_ptr->rooms_ptr = OC_create_container((OC_comp_fp_t)room_comp);
     if (!schedule_ptr->rooms_ptr)
     {
         free(schedule_ptr);
@@ -288,7 +287,7 @@ struct Schedule* const create_schedule(void)
         return NULL;
     }
 
-    schedule_ptr->people_ptr = OC_create_container(&person_comp);
+    schedule_ptr->people_ptr = OC_create_container((OC_comp_fp_t)person_comp);
     if (!schedule_ptr->people_ptr)
     {
         OC_destroy_container(schedule_ptr->rooms_ptr);
@@ -305,6 +304,8 @@ static void destroy_schedule(struct Schedule* schedule_ptr, const int quiet)
     assert(schedule_ptr);
 
     deallocate_all(schedule_ptr, quiet);
+    OC_destroy_container(schedule_ptr->rooms_ptr);
+    OC_destroy_container(schedule_ptr->people_ptr);
     free(schedule_ptr);
 
 }
@@ -546,7 +547,7 @@ static void print_memory_allocations(void)
     printf("Memory allocations:\n");
     printf("C-strings: %d bytes total\n", g_string_memory);
     printf("Person structs: %d\n", g_number_Person_structs);
-    printf("Meeting structs : %d\n", g_Meeting_memory);
+    printf("Meeting structs: %d\n", g_Meeting_memory);
     printf("Room structs: %d\n", g_number_Room_structs);
     printf("Containers: %d\n", g_Container_count);
     printf("Container items in use: %d\n", g_Container_items_in_use);
@@ -928,11 +929,10 @@ static int room_not_empty(const struct Room* const room_ptr)
     return !OC_empty(get_Room_Meetings(room_ptr));
 }
 
-static void delete_all_individual_command(struct Schedule *const schedule_ptr,
-                                          const int quiet)
+static void delete_all_individual_command(struct Schedule *const schedule_ptr)
 {
-    int meetings_in_schedule = OC_apply_if(schedule_ptr->rooms_ptr, (OC_apply_if_fp_t)room_not_empty);
-
+    int meetings_in_schedule = OC_apply_if(schedule_ptr->rooms_ptr,
+                                           (OC_apply_if_fp_t)room_not_empty);
     if (meetings_in_schedule)
     {
         printf("Cannot clear people list unless there are no meetings!\n");
@@ -940,12 +940,9 @@ static void delete_all_individual_command(struct Schedule *const schedule_ptr,
         return;
     }
 
-    OC_apply(schedule_ptr->people_ptr, &destroy_Person);
-    OC_destroy_container(schedule_ptr->people_ptr);
-    if (!quiet)
-    {
-        printf("All persons deleted\n");
-    }
+    OC_apply(schedule_ptr->people_ptr, (OC_apply_fp_t)destroy_Person);
+    OC_clear(schedule_ptr->people_ptr);
+    printf("All persons deleted\n");
 }
 
 static void delete_schedule_command(struct Schedule *const schedule_ptr,
@@ -962,15 +959,19 @@ static void deallocate_all(struct Schedule* const schedule_ptr, const int quiet)
 {
     delete_schedule_command(schedule_ptr, quiet);
 
-    OC_apply(schedule_ptr->rooms_ptr, &destroy_Room);
-    OC_destroy_container(schedule_ptr->rooms_ptr);
-
+    OC_apply(schedule_ptr->rooms_ptr, (OC_apply_fp_t)destroy_Room);
+    OC_clear(schedule_ptr->rooms_ptr);
     if (!quiet)
     {
         printf("All rooms deleted\n");
     }
 
-    delete_all_individual_command(schedule_ptr, quiet);
+    OC_apply(schedule_ptr->people_ptr, (OC_apply_fp_t)destroy_Person);
+    OC_clear(schedule_ptr->people_ptr);
+    if (!quiet)
+    {
+        printf("All persons deleted\n");
+    }
 }
 
 static void save_data_command(struct Schedule *const schedule_ptr)
@@ -988,13 +989,12 @@ static void save_data_command(struct Schedule *const schedule_ptr)
     }
 
     fprintf(savefile, "%d\n", g_number_Person_structs);
-
     OC_apply_arg(schedule_ptr->people_ptr, (OC_apply_arg_fp_t)save_Person, savefile);
 
     fprintf(savefile, "%d\n", g_number_Room_structs);
-
     OC_apply_arg(schedule_ptr->rooms_ptr, (OC_apply_arg_fp_t)save_Room, savefile);
 
+    printf("Data saved\n");
     fclose(savefile);
 }
 

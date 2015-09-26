@@ -23,7 +23,7 @@ struct Meeting* create_Meeting(int time, const char* topic)
     if (meeting_ptr){
         meeting_ptr->topic = (char*)create_string(topic);
         meeting_ptr->time = time;
-        meeting_ptr->participants = OC_create_container(&person_comp);
+        meeting_ptr->participants = OC_create_container((OC_comp_fp_t)person_comp);
         ++g_Meeting_memory;
     }
 
@@ -122,7 +122,7 @@ void print_Meeting(const struct Meeting* meeting_ptr)
     }
 
     printf("\n");
-    OC_apply(meeting_ptr->participants, &print_Person);
+    OC_apply(meeting_ptr->participants, (OC_apply_fp_t)print_Person);
 }
 
 static void print_person_lastname(const struct Person* person_ptr,
@@ -140,7 +140,7 @@ void save_Meeting(const struct Meeting* meeting_ptr, FILE* outfile){
     fprintf(outfile, "%d %s %d\n", meeting_ptr->time, meeting_ptr->topic,
            number_of_participants);
 
-    OC_apply_arg(meeting_ptr->participants, &print_person_lastname, outfile);
+    OC_apply_arg(meeting_ptr->participants, (OC_apply_arg_fp_t)print_person_lastname, outfile);
     fflush(outfile); // Ensures data is written
 }
 
@@ -185,7 +185,7 @@ struct Meeting* load_Meeting(FILE* input_file, const struct Ordered_container* p
                 break;
             }
             const void* item_ptr = OC_find_item_arg(people, string_buffer,
-                                                    &person_to_name_comp);
+                                                    (OC_find_item_arg_fp_t)person_to_name_comp);
             if (handle_load_meeting_error(!item_ptr, input_file, &meeting_ptr)){
                 break;
             }

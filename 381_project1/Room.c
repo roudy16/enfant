@@ -31,7 +31,7 @@ struct Room* create_Room(int number){
         return new_room_ptr;
     }
 
-    new_room_ptr->meetings = OC_create_container(&meeting_comp);
+    new_room_ptr->meetings = OC_create_container((OC_comp_fp_t)meeting_comp);
     if (!new_room_ptr->meetings){
         free(new_room_ptr);
         return NULL;
@@ -45,7 +45,7 @@ struct Room* create_Room(int number){
 void destroy_Room(struct Room* room_ptr){
     assert(room_ptr);
 
-    OC_apply(room_ptr->meetings, &destroy_Meeting);
+    OC_apply(room_ptr->meetings, (OC_apply_fp_t)destroy_Meeting);
     OC_destroy_container(room_ptr->meetings);
     free(room_ptr);
     --g_number_Room_structs;
@@ -71,7 +71,7 @@ int add_Room_Meeting(struct Room* room_ptr, const struct Meeting* meeting_ptr){
 struct Meeting* find_Room_Meeting(const struct Room* room_ptr, int time){
     assert(room_ptr);
     void *const item_ptr = OC_find_item_arg(room_ptr->meetings, &time,
-                                            &meeting_comp_to_time);
+                                            (OC_find_item_arg_fp_t)meeting_comp_to_time);
 
     if (!item_ptr){
         return NULL;
@@ -96,7 +96,7 @@ int remove_Room_Meeting(struct Room* room_ptr, const struct Meeting* meeting_ptr
 
 void clear_Room(struct Room* room_ptr){
     assert(room_ptr);
-    OC_apply(room_ptr->meetings, &destroy_Meeting);
+    OC_apply(room_ptr->meetings, (OC_apply_fp_t)destroy_Meeting);
     OC_clear(room_ptr->meetings);
     assert(OC_empty(room_ptr->meetings));
 }
@@ -114,7 +114,7 @@ void print_Room(const struct Room* room_ptr){
         printf("No meetings are scheduled\n");
     }
     else {
-        OC_apply(room_ptr->meetings, &print_Meeting);
+        OC_apply(room_ptr->meetings, (OC_apply_fp_t)print_Meeting);
     }
 }
 
@@ -124,7 +124,7 @@ void save_Room(const struct Room* room_ptr, FILE* outfile){
     
     const int number_of_meetings = OC_get_size(room_ptr->meetings);
     fprintf(outfile, "%d %d\n", room_ptr->number, number_of_meetings);
-    OC_apply_arg(room_ptr->meetings, &save_Meeting, outfile);
+    OC_apply_arg(room_ptr->meetings, (OC_apply_arg_fp_t)save_Meeting, outfile);
 }
 
 // Takes in a true/false expression that is true if an error has occured in the
@@ -144,7 +144,6 @@ struct Room* load_Room(FILE* infile, const struct Ordered_container* people){
     assert(infile);
     assert(people);
 
-    static char string_buffer[MAX_INPUT + 1];
     int room_number = 0;
     int number_of_meetings = 0;
 
