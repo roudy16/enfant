@@ -7,7 +7,8 @@
 #include <string.h>
 
 /* a Meeting contains a time, a topic, and a container of participants */
-struct Meeting {
+struct Meeting
+{
 	char* topic;
 	int time;
 	struct Ordered_container* participants;	/* a container of pointers to struct Person objects */
@@ -15,12 +16,17 @@ struct Meeting {
 
 int g_Meeting_memory = 0;
 
+// Takes in a true/false expression that is true if an error has occured in the
+// file reading. Handles errors, returns result of the true/false expression
+static int handle_load_meeting_error(const int bool_expr, FILE* input_file,
+                                     struct Meeting** meeting_ptr);
 
 struct Meeting* create_Meeting(int time, const char* topic)
 {
     struct Meeting* meeting_ptr = malloc(sizeof(struct Meeting));
 
-    if (meeting_ptr){
+    if (meeting_ptr)
+    {
         meeting_ptr->topic = (char*)create_string(topic);
         meeting_ptr->time = time;
         meeting_ptr->participants = OC_create_container((OC_comp_fp_t)person_comp);
@@ -133,7 +139,8 @@ static void print_person_lastname(const struct Person* person_ptr,
     fprintf(outfile, "%s\n", get_Person_lastname(person_ptr));
 }
 
-void save_Meeting(const struct Meeting* meeting_ptr, FILE* outfile){
+void save_Meeting(const struct Meeting* meeting_ptr, FILE* outfile)
+{
     assert(meeting_ptr);
 
     int number_of_participants = OC_get_size(meeting_ptr->participants);
@@ -144,13 +151,11 @@ void save_Meeting(const struct Meeting* meeting_ptr, FILE* outfile){
     fflush(outfile); // Ensures data is written
 }
 
-
-// Takes in a true/false expression that is true if an error has occured in the
-// file reading. Handles errors, returns result of the true/false expression
 static int handle_load_meeting_error(const int bool_expr, FILE* input_file,
                                      struct Meeting** meeting_ptr)
 {
-    if (bool_expr){
+    if (bool_expr)
+    {
         discard_rest_of_input_line(input_file);
         destroy_Meeting(*meeting_ptr);
         *meeting_ptr = NULL;
@@ -158,7 +163,8 @@ static int handle_load_meeting_error(const int bool_expr, FILE* input_file,
     return bool_expr;
 }
 
-struct Meeting* load_Meeting(FILE* input_file, const struct Ordered_container* people){
+struct Meeting* load_Meeting(FILE* input_file, const struct Ordered_container* people)
+{
     assert(input_file);
     assert(people);
 
@@ -166,31 +172,37 @@ struct Meeting* load_Meeting(FILE* input_file, const struct Ordered_container* p
     int time = 0;
     int number_of_participants = 0;
 
-    struct Meeting* meeting_ptr = NULL;
     int return_val = fscanf(input_file, "%d %" STRINGIFY_MACRO(MAX_INPUT) "s %d",
                             &time, string_buffer, &number_of_participants);
 
 
-    if (!handle_load_meeting_error(return_val != 3, input_file, &meeting_ptr)){
-        meeting_ptr = create_Meeting(time, string_buffer); // buffer holds topic
+    if (handle_load_meeting_error(return_val != 3, input_file, NULL))
+    {
+        return NULL;
+    }
 
-        if (!meeting_ptr){
-            return meeting_ptr;
-        }
+    struct Meeting* meeting_ptr = create_Meeting(time, string_buffer); // buffer holds topic
 
-        for (int i = 0; i < number_of_participants; ++i){
-            return_val = fscanf(input_file, "%" STRINGIFY_MACRO(MAX_INPUT) "s",
-                                string_buffer);
-            if (handle_load_meeting_error(return_val != 1, input_file, &meeting_ptr)){
-                break;
-            }
-            const void* item_ptr = OC_find_item_arg(people, string_buffer,
-                                                    (OC_find_item_arg_fp_t)person_to_name_comp);
-            if (handle_load_meeting_error(!item_ptr, input_file, &meeting_ptr)){
-                break;
-            }
-            OC_insert(meeting_ptr->participants, OC_get_data_ptr(item_ptr));
+    if (!meeting_ptr)
+    {
+        return meeting_ptr;
+    }
+
+    for (int i = 0; i < number_of_participants; ++i)
+    {
+        return_val = fscanf(input_file, "%" STRINGIFY_MACRO(MAX_INPUT) "s",
+                            string_buffer);
+        if (handle_load_meeting_error(return_val != 1, input_file, &meeting_ptr))
+        {
+            break;
         }
+        const void* item_ptr = OC_find_item_arg(people, string_buffer,
+                                                (OC_find_item_arg_fp_t)person_to_name_comp);
+        if (handle_load_meeting_error(!item_ptr, input_file, &meeting_ptr))
+        {
+            break;
+        }
+        OC_insert(meeting_ptr->participants, OC_get_data_ptr(item_ptr));
     }
 
     return meeting_ptr;

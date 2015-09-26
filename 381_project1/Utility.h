@@ -16,8 +16,6 @@
 
 // Forward declaration of types for function prototypes
 struct Person;
-struct Room;
-struct Meeting;
 
 /* global variable declarations for this module */
 extern int g_string_memory;     /* number of bytes used in C-strings */

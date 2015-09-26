@@ -8,11 +8,13 @@
 #include <string.h>
 #include <stdlib.h>
 
-struct Schedule{
+struct Schedule
+{
     struct Ordered_container* rooms_ptr;
     struct Ordered_container* people_ptr;
 };
 
+static void main_loop(struct Schedule* schedule_ptr);
 
 static void print_switch(char command, struct Schedule *const schedule_ptr);
 
@@ -103,10 +105,26 @@ static void save_data_command(struct Schedule *const schedule_ptr);
 
 static void load_data_command(struct Schedule** schedule_ptr);
 
-int main(void){
+int main(void)
+{
     struct Schedule* schedule_ptr = create_schedule();
     assert(schedule_ptr);
 
+    main_loop(schedule_ptr);
+
+    destroy_schedule(schedule_ptr, 0);
+    assert(g_Container_count == 0);
+    assert(g_Meeting_memory == 0);
+    assert(g_string_memory == 0);
+    assert(g_Container_items_allocated == 0);
+    assert(g_Container_items_in_use == 0);
+
+    printf("Done\n");
+    return 0;
+}
+
+static void main_loop(struct Schedule* schedule_ptr)
+{
     int quit_flag = 0;
     char command1 = '\0';
     char command2 = '\0';
@@ -167,16 +185,6 @@ int main(void){
                 unrecognized_command_error();
         }
     }
-
-    destroy_schedule(schedule_ptr, 0);
-    assert(g_Container_count == 0);
-    assert(g_Meeting_memory == 0);
-    assert(g_string_memory == 0);
-    assert(g_Container_items_allocated == 0);
-    assert(g_Container_items_in_use == 0);
-
-    printf("Done\n");
-    return 0;
 }
 
 static void print_switch(char command, struct Schedule *const schedule_ptr)
@@ -273,7 +281,8 @@ struct Schedule* const create_schedule(void)
 {
     struct Schedule *const schedule_ptr = malloc(sizeof(struct Schedule));
 
-    if (!schedule_ptr){
+    if (!schedule_ptr)
+    {
         perror("Failed to allocate schedule object");
         return NULL;
     }
@@ -360,7 +369,8 @@ static int read_int_from_input(int* int_ptr)
 {
     int return_val = scanf("%d", int_ptr);
 
-    if (return_val != 1){
+    if (return_val != 1)
+    {
         printf("Could not read an integer value!\n");
         discard_rest_of_input_line(stdin);
         return FAILURE;
@@ -460,7 +470,8 @@ static void print_room_command(struct Schedule *const schedule_ptr)
 {
     int room_number = -1;
 
-    if (read_room_from_input(&room_number) != SUCCESS){
+    if (read_room_from_input(&room_number) != SUCCESS)
+    {
         return;
     }
 
@@ -559,7 +570,8 @@ static void add_to_people_list(struct Schedule *const schedule_ptr)
     assert(person_ptr);
 
     void* item_ptr = OC_find_item(schedule_ptr->people_ptr, person_ptr);
-    if (item_ptr){
+    if (item_ptr)
+    {
         printf("There is already a person with this last name!\n");
         discard_rest_of_input_line(stdin);
         destroy_Person(person_ptr);
@@ -745,7 +757,8 @@ static void reschedule_meeting(struct Schedule *const schedule_ptr)
 
     struct Meeting* check_meeting_ptr = find_Room_Meeting(new_room_ptr,
                                                           new_meeting_time);
-    if (check_meeting_ptr){
+    if (check_meeting_ptr)
+    {
         printf("There is already a meeting at that time!\n");
         discard_rest_of_input_line(stdin);
         return;
@@ -778,7 +791,8 @@ static void delete_individual_command(struct Schedule *const schedule_ptr)
 
     struct Person* person_ptr = find_person_by_name(schedule_ptr->people_ptr,
                                                     lastname);
-    if (!person_ptr){
+    if (!person_ptr)
+    {
         person_not_found_error();
         return;
     }
@@ -1068,5 +1082,3 @@ static void load_data_command(struct Schedule ** schedule_ptr)
     printf("Data loaded\n");
     fclose(loadfile);
 }
-
-
