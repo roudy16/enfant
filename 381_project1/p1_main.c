@@ -14,7 +14,7 @@ struct Schedule
     struct Ordered_container* people_ptr;
 };
 
-static void main_loop(struct Schedule* schedule_ptr);
+static void main_loop(struct Schedule** schedule_ptr);
 
 static void print_switch(char command, struct Schedule *const schedule_ptr);
 
@@ -110,7 +110,7 @@ int main(void)
     struct Schedule* schedule_ptr = create_schedule();
     assert(schedule_ptr);
 
-    main_loop(schedule_ptr);
+    main_loop(&schedule_ptr);
 
     destroy_schedule(schedule_ptr, 0);
     assert(g_Container_count == 0);
@@ -123,7 +123,7 @@ int main(void)
     return 0;
 }
 
-static void main_loop(struct Schedule* schedule_ptr)
+static void main_loop(struct Schedule** schedule_ptr)
 {
     int quit_flag = 0;
     char command1 = '\0';
@@ -136,15 +136,15 @@ static void main_loop(struct Schedule* schedule_ptr)
         switch (command1)
         {
             case 'p':
-                print_switch(command2, schedule_ptr);
+                print_switch(command2, *schedule_ptr);
                 break;
             case 'a':
-                add_switch(command2, schedule_ptr);
+                add_switch(command2, *schedule_ptr);
                 break;
             case 'r':
                 if (command2 == 'm')
                 {
-                    reschedule_meeting(schedule_ptr);
+                    reschedule_meeting(*schedule_ptr);
                 }
                 else
                 {
@@ -152,12 +152,12 @@ static void main_loop(struct Schedule* schedule_ptr)
                 }
                 break;
             case 'd':
-                delete_switch(command2, schedule_ptr);
+                delete_switch(command2, *schedule_ptr);
                 break;
             case 's':
                 if (command2 == 'd')
                 {
-                    save_data_command(schedule_ptr);
+                    save_data_command(*schedule_ptr);
                 }
                 else
                 {
@@ -167,7 +167,7 @@ static void main_loop(struct Schedule* schedule_ptr)
             case 'l':
                 if (command2 == 'd')
                 {
-                    load_data_command(&schedule_ptr);
+                    load_data_command(schedule_ptr);
                 }
                 else
                 {
