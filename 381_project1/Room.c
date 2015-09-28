@@ -58,7 +58,6 @@ struct Room* create_Room(int number)
     }
 
     new_room_ptr->number = number;
-    ++g_number_Room_structs;
     return new_room_ptr;
 }
 
@@ -69,7 +68,6 @@ void destroy_Room(struct Room* room_ptr)
         OC_apply(room_ptr->meetings, (OC_apply_fp_t)destroy_Meeting);
         OC_destroy_container(room_ptr->meetings);
         free(room_ptr);
-        --g_number_Room_structs;
 	}
 }
 

@@ -6,8 +6,6 @@
 
 
 int g_string_memory = 0;
-int g_number_Person_structs = 0;
-int g_number_Room_structs = 0;
 
 void free_string(char* string_ptr)
 {

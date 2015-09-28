@@ -14,17 +14,11 @@
 #define FAILURE -1
 #define SUCCESS 0
 
-// Forward declaration of types for function prototypes
+// Forward declaration for function prototypes
 struct Person;
 
 /* global variable declarations for this module */
 extern int g_string_memory;     /* number of bytes used in C-strings */
-
-// Number of Person structs allocated
-extern int g_number_Person_structs;
-
-// Number of Room structs allocated
-extern int g_number_Room_structs;
 
 // Creates a new string that holds a copy of the string passed in
 // Strings created using create_string() must be freed using free_string()
