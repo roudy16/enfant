@@ -222,15 +222,13 @@ void OC_insert(struct Ordered_container* c_ptr, void* data_ptr)
     ++g_Container_items_in_use;
 }
 
-static void* Find_helper(const void* const data_ptr,
-                         const struct Ordered_container *const c_ptr,
-                         OC_comp_fp_t comp_func)
+void* OC_find_item(const struct Ordered_container* c_ptr, const void* data_ptr)
 {
-    struct Search_result search_result = Find_element(data_ptr, c_ptr, comp_func);
+    struct Search_result search_result = Find_element(data_ptr, c_ptr, c_ptr->comp_fun);
 
     if (search_result.item_found)
     {
-        return (void*)search_result.item_ptr;
+        return search_result.item_ptr;
     }
     else
     {
@@ -238,15 +236,36 @@ static void* Find_helper(const void* const data_ptr,
     }
 }
 
-void* OC_find_item(const struct Ordered_container* c_ptr, const void* data_ptr)
-{
-    return Find_helper(data_ptr, c_ptr, c_ptr->comp_fun);
-}
-
 void* OC_find_item_arg(const struct Ordered_container* c_ptr, const void* arg_ptr,
                        OC_find_item_arg_fp_t fafp)
 {
-    return Find_helper(arg_ptr, c_ptr, fafp);
+    const int size = c_ptr->size;
+    void** const array_base = c_ptr->array;
+
+    for (int i = 0; i < size; ++i)
+    {
+        void* const compare_item_ptr = array_base[i];
+        const int ret_val = fafp(arg_ptr, compare_item_ptr);
+        if (ret_val == 0)
+        {
+            return array_base + i;
+        }
+    }
+
+    return NULL;
+
+    /*
+    struct Search_result search_result = Find_element(arg_ptr, c_ptr, fafp);
+
+    if (search_result.item_found)
+    {
+        return search_result.item_ptr;
+    }
+    else
+    {
+        return NULL;
+    }
+    */
 }
 
 void OC_apply(const struct Ordered_container* c_ptr, OC_apply_fp_t afp)

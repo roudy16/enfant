@@ -129,7 +129,7 @@ static void* Find_helper(const struct Ordered_container* c_ptr, const void* data
     }
     else
     {
-        return (void*)NULL;
+        return NULL;
     }
 }
 

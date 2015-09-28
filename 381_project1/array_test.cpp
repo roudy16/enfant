@@ -84,5 +84,9 @@ int main(void)
 
     OC_destroy_container(container_ptr);
 
+    void* test = malloc(8);
+
+    printf("Old way %p   New Way %p\n", *(void**)test, test);
+
     return 0;
 }
