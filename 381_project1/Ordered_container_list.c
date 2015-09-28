@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <assert.h>
 
-
 /* struct LL_Node structure declaration. This declaration is local to this file.
 This is a two-way or doubly-linked list. Each node has a pointer to the previous
 node and another pointer to the next node in the list. This means insertions or
