@@ -75,7 +75,7 @@ static struct Search_result Find_element(const void* const data_ptr,
 
     while (low <= high)
     {
-        const mid = (low + high) / 2;
+        const int mid = (low + high) / 2;
         const int comp_return = comp_func(data_ptr, array_base[mid]);
         if (comp_return < 0)
         {
