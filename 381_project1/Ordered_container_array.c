@@ -14,6 +14,7 @@ struct Ordered_container
 	int size;				/* number of items currently in the array */
 };
 
+// Used to store information about the result of a search within container
 struct Search_result
 {
     void** item_ptr;
@@ -29,15 +30,21 @@ int g_Container_items_allocated = 0;
 /* HELPER FUNCTION DECLARATIONS */
 /* ############################ */
 
-
+// Performs binary search of the container for the item that compares equal
+// to the passed in data_ptr using the passed in compare function. Returns
+// NULL if none found.
 static void* Find_helper(const struct Ordered_container* const c_ptr,
                          const void* data_ptr,
                          OC_comp_fp_t comp_func);
 
 // Shifts elements in the array starting at the space_ptr and working to the end.
+// This will overwrite the void* currently at space_ptr.
 // Requires space_ptr points inside the active area of the array.
 static void Shift_array_left(const struct Ordered_container *const c_ptr, void** space_ptr);
 
+// Moves all data one space to the right starting at the location of
+// the spot_to_be_empty pointer. When this function return the area pointed to
+// by spot_to_be_empty can be treated as empty and data can be safely written there.
 // Requires enough memory allocated to hold all active elements plus one.
 static void Shift_array_right(const struct Ordered_container *const c_ptr,
                               void** const spot_to_be_empty_ptr);
@@ -110,68 +117,6 @@ static void Clear_container_helper(struct Ordered_container *const c_ptr)
     g_Container_items_in_use -= c_ptr->size;
 }
 
-struct Ordered_container* OC_create_container(OC_comp_fp_t f_ptr)
-{
-    assert(f_ptr);
-    struct Ordered_container* new_container_ptr = malloc(sizeof(struct Ordered_container));
-
-    if (!new_container_ptr)
-    {
-        printf("Could not allocate memory for new Ordered_container\n");
-    }
-    else
-    {
-        new_container_ptr->comp_fun = f_ptr;
-        Init_container_helper(new_container_ptr);
-        ++g_Container_count;
-    }
-
-    return new_container_ptr;
-}
-
-void OC_destroy_container(struct Ordered_container* c_ptr)
-{
-    assert(c_ptr);
-    Clear_container_helper(c_ptr);
-    --g_Container_count;
-    free(c_ptr);
-}
-
-void OC_clear(struct Ordered_container* c_ptr)
-{
-    assert(c_ptr);
-    Clear_container_helper(c_ptr);
-    Init_container_helper(c_ptr);
-}
-
-int OC_get_size(const struct Ordered_container* c_ptr)
-{
-    assert(c_ptr);
-    return c_ptr->size;
-}
-
-int OC_empty(const struct Ordered_container* c_ptr)
-{
-    assert(c_ptr);
-    return c_ptr->size == 0;
-}
-
-void* OC_get_data_ptr(const void* item_ptr)
-{
-    assert(item_ptr);
-    return *(void**)item_ptr;
-}
-
-void OC_delete_item(struct Ordered_container* c_ptr, void* item_ptr)
-{
-    assert(c_ptr);
-    assert(item_ptr);
-
-    Shift_array_left(c_ptr, (void**)item_ptr);
-    --c_ptr->size;
-    --g_Container_items_in_use;
-}
-
 static void Grow_array(struct Ordered_container *const c_ptr)
 {
     assert(c_ptr->size == c_ptr->allocation);
@@ -235,6 +180,68 @@ static struct Search_result Find_element(const void* const data_ptr,
 
     result.item_ptr = array_base + high + 1;
     return result;
+}
+
+struct Ordered_container* OC_create_container(OC_comp_fp_t f_ptr)
+{
+    assert(f_ptr);
+    struct Ordered_container* new_container_ptr = malloc(sizeof(struct Ordered_container));
+
+    if (!new_container_ptr)
+    {
+        printf("Could not allocate memory for new Ordered_container\n");
+    }
+    else
+    {
+        new_container_ptr->comp_fun = f_ptr;
+        Init_container_helper(new_container_ptr);
+        ++g_Container_count;
+    }
+
+    return new_container_ptr;
+}
+
+void OC_destroy_container(struct Ordered_container* c_ptr)
+{
+    assert(c_ptr);
+    Clear_container_helper(c_ptr);
+    --g_Container_count;
+    free(c_ptr);
+}
+
+void OC_clear(struct Ordered_container* c_ptr)
+{
+    assert(c_ptr);
+    Clear_container_helper(c_ptr);
+    Init_container_helper(c_ptr);
+}
+
+int OC_get_size(const struct Ordered_container* c_ptr)
+{
+    assert(c_ptr);
+    return c_ptr->size;
+}
+
+int OC_empty(const struct Ordered_container* c_ptr)
+{
+    assert(c_ptr);
+    return c_ptr->size == 0;
+}
+
+void* OC_get_data_ptr(const void* item_ptr)
+{
+    assert(item_ptr);
+    return *(void**)item_ptr;
+}
+
+void OC_delete_item(struct Ordered_container* c_ptr, void* item_ptr)
+{
+    assert(c_ptr);
+    assert(item_ptr);
+
+    Shift_array_left(c_ptr, (void**)item_ptr);
+    --c_ptr->size;
+    --g_Container_items_in_use;
 }
 
 void OC_insert(struct Ordered_container* c_ptr, void* data_ptr)

@@ -11,6 +11,9 @@
 #define STRINGIFYHELPER(val) #val
 #define STRINGIFY_MACRO(val) STRINGIFYHELPER(val)
 
+// These values are used to check if a function's operations were
+// successful. Functions that use these values are add/remove participant
+// from meeting, add/remove meeting from room, input reading functions.
 #define FAILURE -1
 #define SUCCESS 0
 
@@ -29,15 +32,20 @@ const char* create_string(const char* const string_ptr);
 // create_string()
 void free_string(char* string_ptr);
 
-
+// When an error reading input is detected this function should be called
+// to clear the rest of the offending input line
 int discard_rest_of_input_line(FILE* infile);
 
+// Comparison function to determine proper ordering of Person structs
 int person_comp(const struct Person *const person_ptr1,
                 const struct Person *const person_ptr2);
 
+// Comparison function for comparing a Person struct to a name string
 int person_to_name_comp(const char *const name_ptr,
                         const struct Person *const person_ptr);
 
+// Returns a passed in 12-hour time from 9AM - 5PM to correct 24-hour
+// time 9 - 17
 int convert_time_to_24_hour(int time);
 
 #endif // UTILITY_H

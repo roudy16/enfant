@@ -28,6 +28,7 @@ struct Ordered_container
 	int size;
 };
 
+// Used to store information about the result of a comparison within container
 struct Compare_result_pair 
 {
     struct LL_Node* node_ptr;
@@ -39,6 +40,44 @@ typedef struct Compare_result_pair Comp_pair_t;
 int g_Container_count = 0;
 int g_Container_items_in_use = 0;
 int g_Container_items_allocated = 0;
+
+
+/* ############################ */
+/* HELPER FUNCTION DECLARATIONS */
+/* ############################ */
+
+// Sets container to initial state, does not free any memory
+static void Init_container_helper(struct Ordered_container *const c_ptr);
+
+// Sets passed node pointer to the next node in the list or NULL if
+// node pointer currently points to the last node
+static void Increment_node(struct LL_Node** node_ptr_ptr);
+
+// Deletes the nodes in a container but does not reset container size
+static void Clear_container_helper(struct Ordered_container *const c_ptr);
+
+// Finds first node with data that is evaluated as greater than or equal to the
+// node passed in.
+// Requires that c_ptr points to a container
+static const Comp_pair_t Find_first_node_greater_equal(const void* const data_ptr,
+                                                       const struct Ordered_container *const c_ptr,
+                                                       const OC_comp_fp_t comp_func);
+
+// Inserts a node before the passed in insert_before_node. Does not ensure ordering.
+static void Insert_before(struct LL_Node *const insert_node_ptr,
+                          struct LL_Node *const insert_before_node_ptr,
+                          struct Ordered_container *const c_ptr);
+
+// Find the item that compares equal to the passed in data_ptr with the passed in
+// compare function, return NULL if none found
+static void* Find_helper(const struct Ordered_container* c_ptr, const void* data_ptr,
+                              const OC_comp_fp_t comp_func_ptr);
+
+
+/* #################### */
+/* FUNCTION DEFINITIONS */
+/* #################### */
+
 
 static void Init_container_helper(struct Ordered_container *const c_ptr)
 {
@@ -52,7 +91,6 @@ static void Increment_node(struct LL_Node** node_ptr_ptr)
     *node_ptr_ptr = (*node_ptr_ptr)->next;
 }
 
-// Deletes the nodes in a container but does not reset container size
 static void Clear_container_helper(struct Ordered_container *const c_ptr)
 {
     struct LL_Node* node_ptr = c_ptr->first;
@@ -68,9 +106,6 @@ static void Clear_container_helper(struct Ordered_container *const c_ptr)
     g_Container_items_in_use -= c_ptr->size;
 }
 
-// Finds first node with data that is evaluated as greater than or equal to the
-// node passed in.
-// Requires that c_ptr points to a container
 static const Comp_pair_t Find_first_node_greater_equal(const void* const data_ptr,
                                                        const struct Ordered_container *const c_ptr,
                                                        const OC_comp_fp_t comp_func)
