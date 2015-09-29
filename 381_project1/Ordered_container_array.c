@@ -24,8 +24,47 @@ int g_Container_count = 0;
 int g_Container_items_in_use = 0;
 int g_Container_items_allocated = 0;
 
+
+/* ############################ */
+/* HELPER FUNCTION DECLARATIONS */
+/* ############################ */
+
+
+static void* Find_helper(const struct Ordered_container* const c_ptr,
+    const void* data_ptr,
+    OC_comp_fp_t comp_func);
+
 // Shifts elements in the array starting at the space_ptr and working to the end.
 // Requires space_ptr points inside the active area of the array.
+static void Shift_array_left(const struct Ordered_container *const c_ptr, void** space_ptr);
+
+// Requires enough memory allocated to hold all active elements plus one.
+static void Shift_array_right(const struct Ordered_container *const c_ptr,
+    void** const spot_to_be_empty_ptr);
+
+// Perform binary search in container to find item that matches data_ptr.
+// Returns item found and pointer to that item if it is found, otherwise
+// returns item not found and pointer to place where data_ptr would be
+// inserted into container.
+static struct Search_result Find_element(const void* const data_ptr,
+    const struct Ordered_container *const c_ptr,
+    OC_comp_fp_t comp_func);
+
+// Allocates initial array, sets appropriate values to container
+static void Init_container_helper(struct Ordered_container *const c_ptr);
+
+// Deallocate container array
+static void Clear_container_helper(struct Ordered_container *const c_ptr);
+
+// Copies old container array into a new one of size = 2 * (old_size + 1)
+static void Grow_array(struct Ordered_container *const c_ptr);
+
+
+/* #################### */
+/* FUNCTION DEFINITIONS */
+/* #################### */
+
+
 static void Shift_array_left(const struct Ordered_container *const c_ptr, void** space_ptr)
 {
     assert(space_ptr >= c_ptr->array);
@@ -40,7 +79,6 @@ static void Shift_array_left(const struct Ordered_container *const c_ptr, void**
     }
 }
 
-// Requires enough memory allocated to hold all active elements plus one.
 static void Shift_array_right(const struct Ordered_container *const c_ptr,
                               void** const spot_to_be_empty_ptr)
 {
@@ -57,46 +95,6 @@ static void Shift_array_right(const struct Ordered_container *const c_ptr,
     }
 }
 
-// Perform binary search in container to find item that matches data_ptr.
-// Returns item found and pointer to that item if it is found, otherwise
-// returns item not found and pointer to place where data_ptr would be
-// inserted into container.
-static struct Search_result Find_element(const void* const data_ptr,
-                                         const struct Ordered_container *const c_ptr)
-{
-    assert(data_ptr);
-    assert(c_ptr);
-
-    struct Search_result result = { NULL, 0 };
-
-    void** const array_base = c_ptr->array;
-    int low = 0;
-    int high = c_ptr->size - 1;
-
-    while (low <= high)
-    {
-        const int mid = (low + high) / 2;
-        const int comp_return = c_ptr->comp_fun(data_ptr, array_base[mid]);
-        if (comp_return < 0)
-        {
-            high = mid - 1;
-        }
-        else if (comp_return > 0)
-        {
-            low = mid + 1;
-        }
-        else
-        {
-            result.item_ptr = array_base + mid;
-            result.item_found = 1;
-            return result;
-        }
-    }
-
-    result.item_ptr = array_base + high + 1;
-    return result;
-}
-
 static void Init_container_helper(struct Ordered_container *const c_ptr)
 {
     c_ptr->array = malloc(sizeof(void*) * INITIAL_ARRAY_SIZE);
@@ -110,36 +108,6 @@ static void Clear_container_helper(struct Ordered_container *const c_ptr)
     free(c_ptr->array);
     g_Container_items_allocated -= c_ptr->allocation;
     g_Container_items_in_use -= c_ptr->size;
-}
-
-// Copies old container array into a new one of size = 2 * (old_size + 1)
-static void Grow_array(struct Ordered_container *const c_ptr)
-{
-    assert(c_ptr->size == c_ptr->allocation);
-
-    const int old_size = c_ptr->size;
-    void** const old_array = c_ptr->array;
-    const int number_new_elements = 2 * (old_size + 1);
-    void** const new_array = malloc(sizeof(void*) * number_new_elements);
-
-    if (!new_array)
-    {
-        printf("Could not allocate memory to grow array\n");
-    }
-    else
-    {
-        g_Container_items_allocated += number_new_elements;
-
-        for (int i = 0; i < old_size; ++i)
-        {
-            new_array[i] = old_array[i];
-        }
-
-        free(old_array);
-        g_Container_items_allocated -= old_size;
-        c_ptr->array = new_array;
-        c_ptr->allocation = number_new_elements;
-    }
 }
 
 struct Ordered_container* OC_create_container(OC_comp_fp_t f_ptr)
@@ -204,6 +172,72 @@ void OC_delete_item(struct Ordered_container* c_ptr, void* item_ptr)
     --g_Container_items_in_use;
 }
 
+static void Grow_array(struct Ordered_container *const c_ptr)
+{
+    assert(c_ptr->size == c_ptr->allocation);
+
+    const int old_size = c_ptr->size;
+    void** const old_array = c_ptr->array;
+    const int number_new_elements = 2 * (old_size + 1);
+    void** const new_array = malloc(sizeof(void*) * number_new_elements);
+
+    if (!new_array)
+    {
+        printf("Could not allocate memory to grow array\n");
+    }
+    else
+    {
+        g_Container_items_allocated += number_new_elements;
+
+        for (int i = 0; i < old_size; ++i)
+        {
+            new_array[i] = old_array[i];
+        }
+
+        free(old_array);
+        g_Container_items_allocated -= old_size;
+        c_ptr->array = new_array;
+        c_ptr->allocation = number_new_elements;
+    }
+}
+
+static struct Search_result Find_element(const void* const data_ptr,
+                                         const struct Ordered_container *const c_ptr,
+                                         OC_comp_fp_t comp_func)
+{
+    assert(data_ptr);
+    assert(c_ptr);
+
+    struct Search_result result = { NULL, 0 };
+
+    void** const array_base = c_ptr->array;
+    int low = 0;
+    int high = c_ptr->size - 1;
+
+    while (low <= high)
+    {
+        const int mid = (low + high) / 2;
+        const int comp_return = comp_func(data_ptr, array_base[mid]);
+        if (comp_return < 0)
+        {
+            high = mid - 1;
+        }
+        else if (comp_return > 0)
+        {
+            low = mid + 1;
+        }
+        else
+        {
+            result.item_ptr = array_base + mid;
+            result.item_found = 1;
+            return result;
+        }
+    }
+
+    result.item_ptr = array_base + high + 1;
+    return result;
+}
+
 void OC_insert(struct Ordered_container* c_ptr, void* data_ptr)
 {
     if (c_ptr->size == c_ptr->allocation)
@@ -211,17 +245,23 @@ void OC_insert(struct Ordered_container* c_ptr, void* data_ptr)
         Grow_array(c_ptr);
     }
 
-    struct Search_result search_result = Find_element(data_ptr, c_ptr);
+    // Find pointer to item that data_ptr should be inserted before
+    struct Search_result search_result = Find_element(data_ptr, c_ptr, c_ptr->comp_fun);
     void** const insert_spot = search_result.item_ptr;
+
+    // Move elements from insert_spot after to right one in array
     Shift_array_right(c_ptr, insert_spot);
+
     *insert_spot = data_ptr;
     ++c_ptr->size;
     ++g_Container_items_in_use;
 }
 
-void* OC_find_item(const struct Ordered_container* c_ptr, const void* data_ptr)
+static void* Find_helper(const struct Ordered_container* const c_ptr,
+                         const void* data_ptr,
+                         OC_comp_fp_t comp_func)
 {
-    struct Search_result search_result = Find_element(data_ptr, c_ptr);
+    struct Search_result search_result = Find_element(data_ptr, c_ptr, comp_func);
 
     if (search_result.item_found)
     {
@@ -233,26 +273,15 @@ void* OC_find_item(const struct Ordered_container* c_ptr, const void* data_ptr)
     }
 }
 
+void* OC_find_item(const struct Ordered_container* c_ptr, const void* data_ptr)
+{
+    return Find_helper(c_ptr, data_ptr, c_ptr->comp_fun);
+}
+
 void* OC_find_item_arg(const struct Ordered_container* c_ptr, const void* arg_ptr,
                        OC_find_item_arg_fp_t fafp)
 {
-    const int size = c_ptr->size;
-    void** const array_base = c_ptr->array;
-
-    // Do linear search through array using provided compare function
-    // Cannot do binary because ordering with respect to passed in compare
-    // function is unknown
-    for (int i = 0; i < size; ++i)
-    {
-        void* const compare_item_ptr = array_base[i];
-        const int ret_val = fafp(arg_ptr, compare_item_ptr);
-        if (ret_val == 0)
-        {
-            return array_base + i;
-        }
-    }
-
-    return NULL;
+    return Find_helper(c_ptr, arg_ptr, fafp);
 }
 
 void OC_apply(const struct Ordered_container* c_ptr, OC_apply_fp_t afp)
