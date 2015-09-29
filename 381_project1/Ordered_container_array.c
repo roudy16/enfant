@@ -31,8 +31,8 @@ int g_Container_items_allocated = 0;
 
 
 static void* Find_helper(const struct Ordered_container* const c_ptr,
-    const void* data_ptr,
-    OC_comp_fp_t comp_func);
+                         const void* data_ptr,
+                         OC_comp_fp_t comp_func);
 
 // Shifts elements in the array starting at the space_ptr and working to the end.
 // Requires space_ptr points inside the active area of the array.
@@ -40,15 +40,15 @@ static void Shift_array_left(const struct Ordered_container *const c_ptr, void**
 
 // Requires enough memory allocated to hold all active elements plus one.
 static void Shift_array_right(const struct Ordered_container *const c_ptr,
-    void** const spot_to_be_empty_ptr);
+                              void** const spot_to_be_empty_ptr);
 
 // Perform binary search in container to find item that matches data_ptr.
 // Returns item found and pointer to that item if it is found, otherwise
 // returns item not found and pointer to place where data_ptr would be
 // inserted into container.
 static struct Search_result Find_element(const void* const data_ptr,
-    const struct Ordered_container *const c_ptr,
-    OC_comp_fp_t comp_func);
+                                         const struct Ordered_container *const c_ptr,
+                                         OC_comp_fp_t comp_func);
 
 // Allocates initial array, sets appropriate values to container
 static void Init_container_helper(struct Ordered_container *const c_ptr);
