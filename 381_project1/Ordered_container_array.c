@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
-#include <stddef.h>
 
 #define INITIAL_ARRAY_SIZE 3
 
@@ -27,7 +26,6 @@ int g_Container_items_allocated = 0;
 
 // Shifts elements in the array starting at the space_ptr and working to the end.
 // Requires space_ptr points inside the active area of the array.
-// Requires c_ptr->size == number active elements + 1 (for the space)
 static void Shift_array_left(const struct Ordered_container *const c_ptr, void** space_ptr)
 {
     assert(space_ptr >= c_ptr->array);
@@ -60,12 +58,10 @@ static void Shift_array_right(const struct Ordered_container *const c_ptr,
 }
 
 static struct Search_result Find_element(const void* const data_ptr,
-                                         const struct Ordered_container *const c_ptr,
-                                         OC_comp_fp_t comp_func)
+                                         const struct Ordered_container *const c_ptr)
 {
     assert(data_ptr);
     assert(c_ptr);
-    assert(comp_func);
 
     struct Search_result result = { NULL, 0 };
 
@@ -76,7 +72,7 @@ static struct Search_result Find_element(const void* const data_ptr,
     while (low <= high)
     {
         const int mid = (low + high) / 2;
-        const int comp_return = comp_func(data_ptr, array_base[mid]);
+        const int comp_return = c_ptr->comp_fun(data_ptr, array_base[mid]);
         if (comp_return < 0)
         {
             high = mid - 1;
@@ -164,9 +160,7 @@ struct Ordered_container* OC_create_container(OC_comp_fp_t f_ptr)
 void OC_destroy_container(struct Ordered_container* c_ptr)
 {
     assert(c_ptr);
-    free(c_ptr->array);
-    g_Container_items_allocated -= c_ptr->allocation;
-    g_Container_items_in_use -= c_ptr->size;
+    Clear_container_helper(c_ptr);
     --g_Container_count;
     free(c_ptr);
 }
@@ -213,8 +207,7 @@ void OC_insert(struct Ordered_container* c_ptr, void* data_ptr)
         Grow_array(c_ptr);
     }
 
-    struct Search_result search_result = Find_element(data_ptr, c_ptr,
-                                                      (OC_comp_fp_t)c_ptr->comp_fun);
+    struct Search_result search_result = Find_element(data_ptr, c_ptr);
     void** const insert_spot = search_result.item_ptr;
     Shift_array_right(c_ptr, insert_spot);
     *insert_spot = data_ptr;
@@ -224,7 +217,7 @@ void OC_insert(struct Ordered_container* c_ptr, void* data_ptr)
 
 void* OC_find_item(const struct Ordered_container* c_ptr, const void* data_ptr)
 {
-    struct Search_result search_result = Find_element(data_ptr, c_ptr, c_ptr->comp_fun);
+    struct Search_result search_result = Find_element(data_ptr, c_ptr);
 
     if (search_result.item_found)
     {
@@ -253,19 +246,6 @@ void* OC_find_item_arg(const struct Ordered_container* c_ptr, const void* arg_pt
     }
 
     return NULL;
-
-    /*
-    struct Search_result search_result = Find_element(arg_ptr, c_ptr, fafp);
-
-    if (search_result.item_found)
-    {
-        return search_result.item_ptr;
-    }
-    else
-    {
-        return NULL;
-    }
-    */
 }
 
 void OC_apply(const struct Ordered_container* c_ptr, OC_apply_fp_t afp)
@@ -296,7 +276,9 @@ int OC_apply_if(const struct Ordered_container* c_ptr, OC_apply_if_fp_t afp)
     return 0;
 }
 
-void OC_apply_arg(const struct Ordered_container* c_ptr, OC_apply_arg_fp_t afp, void* arg_ptr)
+void OC_apply_arg(const struct Ordered_container* c_ptr,
+                  OC_apply_arg_fp_t afp,
+                  void* arg_ptr)
 {
     void** const array_base = c_ptr->array;
     const int array_size = c_ptr->size;
@@ -307,7 +289,9 @@ void OC_apply_arg(const struct Ordered_container* c_ptr, OC_apply_arg_fp_t afp, 
     }
 }
 
-int OC_apply_if_arg(const struct Ordered_container* c_ptr, OC_apply_if_arg_fp_t afp, void* arg_ptr)
+int OC_apply_if_arg(const struct Ordered_container* c_ptr,
+                    OC_apply_if_arg_fp_t afp,
+                    void* arg_ptr)
 {
     void** const array_base = c_ptr->array;
     const int array_size = c_ptr->size;

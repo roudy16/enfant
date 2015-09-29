@@ -319,7 +319,6 @@ static void destroy_schedule(struct Schedule* schedule_ptr, const int quiet)
     OC_destroy_container(schedule_ptr->rooms_ptr);
     OC_destroy_container(schedule_ptr->people_ptr);
     free(schedule_ptr);
-
 }
 
 static int get_command_from_input(char* command1, char* command2)
@@ -1047,6 +1046,8 @@ static void load_data_command(struct Schedule ** schedule_ptr)
         return;
     }
 
+    deallocate_all(*schedule_ptr, 1);
+
     struct Schedule* new_schedule_ptr = NULL;
     int number_of_people = 0;
 
@@ -1070,6 +1071,7 @@ static void load_data_command(struct Schedule ** schedule_ptr)
         }
 
         OC_insert(new_schedule_ptr->people_ptr, new_person_ptr);
+        ++g_number_Person_structs;
     }
 
     int number_of_rooms = 0;
@@ -1091,12 +1093,11 @@ static void load_data_command(struct Schedule ** schedule_ptr)
         }
 
         OC_insert(new_schedule_ptr->rooms_ptr, room_ptr);
+        ++g_number_Room_structs;
     }
 
     destroy_schedule(*schedule_ptr, 1);
     *schedule_ptr = new_schedule_ptr;
-    g_number_Person_structs += number_of_people;
-    g_number_Room_structs += number_of_rooms;
     printf("Data loaded\n");
     fclose(loadfile);
 }
