@@ -57,6 +57,10 @@ static void Shift_array_right(const struct Ordered_container *const c_ptr,
     }
 }
 
+// Perform binary search in container to find item that matches data_ptr.
+// Returns item found and pointer to that item if it is found, otherwise
+// returns item not found and pointer to place where data_ptr would be
+// inserted into container.
 static struct Search_result Find_element(const void* const data_ptr,
                                          const struct Ordered_container *const c_ptr)
 {
@@ -235,6 +239,9 @@ void* OC_find_item_arg(const struct Ordered_container* c_ptr, const void* arg_pt
     const int size = c_ptr->size;
     void** const array_base = c_ptr->array;
 
+    // Do linear search through array using provided compare function
+    // Cannot do binary because ordering with respect to passed in compare
+    // function is unknown
     for (int i = 0; i < size; ++i)
     {
         void* const compare_item_ptr = array_base[i];
@@ -253,6 +260,7 @@ void OC_apply(const struct Ordered_container* c_ptr, OC_apply_fp_t afp)
     void** const array_base = c_ptr->array;
     const int array_size = c_ptr->size;
 
+    // Call function with every item in array
     for (int i = 0; i < array_size; ++i)
     {
         afp(array_base[i]);
@@ -264,6 +272,7 @@ int OC_apply_if(const struct Ordered_container* c_ptr, OC_apply_if_fp_t afp)
     void** const array_base = c_ptr->array;
     const int array_size = c_ptr->size;
 
+    // Call function with every item in array until return non-zero
     for (int i = 0; i < array_size; ++i)
     {
         const int ret_val = afp(array_base[i]);
@@ -283,6 +292,7 @@ void OC_apply_arg(const struct Ordered_container* c_ptr,
     void** const array_base = c_ptr->array;
     const int array_size = c_ptr->size;
 
+    // Call function with every item in array
     for (int i = 0; i < array_size; ++i)
     {
         afp(array_base[i], arg_ptr);
@@ -296,6 +306,7 @@ int OC_apply_if_arg(const struct Ordered_container* c_ptr,
     void** const array_base = c_ptr->array;
     const int array_size = c_ptr->size;
 
+    // Call function with every item in array until return non-zero
     for (int i = 0; i < array_size; ++i)
     {
         const int ret_val = afp(array_base[i], arg_ptr);
