@@ -205,7 +205,6 @@ static struct Search_result Find_element(const void* const data_ptr,
                                          const struct Ordered_container *const c_ptr,
                                          OC_comp_fp_t comp_func)
 {
-    assert(data_ptr);
     assert(c_ptr);
 
     struct Search_result result = { NULL, 0 };
