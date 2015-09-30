@@ -4,8 +4,8 @@
 #include <stdio.h>
 
 #define MAX_INPUT 63
-#define MEETING_TIME_LOW 9   // 24-hour
-#define MEETING_TIME_HIGH 17 // 24-hour
+#define EARLIEST_MEETING_TIME 9   // 24-hour
+#define LATEST_MEETING_TIME 17 // 24-hour
 
 // Pair of macros for making a macro a string literal
 #define STRINGIFYHELPER(val) #val
@@ -47,5 +47,6 @@ int person_to_name_comp(const char *const name_ptr,
 // Returns a passed in 12-hour time from 9AM - 5PM to correct 24-hour
 // time 9 - 17
 int convert_time_to_24_hour(int time);
+
 
 #endif // UTILITY_H

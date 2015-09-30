@@ -25,13 +25,16 @@ struct Meeting* create_Meeting(int time, const char* topic)
 {
     struct Meeting* meeting_ptr = malloc(sizeof(struct Meeting));
 
-    if (meeting_ptr)
+    if (!meeting_ptr)
     {
-        meeting_ptr->topic = (char*)create_string(topic);
-        meeting_ptr->time = time;
-        meeting_ptr->participants = OC_create_container((OC_comp_fp_t)person_comp);
-        ++g_Meeting_memory;
+        perror("Failed to allocate memory in create_Meeting\n");
+        exit(EXIT_FAILURE);
     }
+    
+    meeting_ptr->topic = (char*)create_string(topic);
+    meeting_ptr->time = time;
+    meeting_ptr->participants = OC_create_container((OC_comp_fp_t)person_comp);
+    ++g_Meeting_memory;
 
     return meeting_ptr;
 }

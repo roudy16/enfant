@@ -12,119 +12,155 @@ struct Schedule
 {
     struct Ordered_container* rooms_ptr;
     struct Ordered_container* people_ptr;
+    int number_Room_structs;
+    int number_Person_structs;
 };
 
-// Memory allocation bookkeeping
-int g_number_Person_structs = 0;
-int g_number_Room_structs = 0;
 
+/* ############################ */
+/* HELPER FUNCTION DECLARATIONS */
+/* ############################ */
+
+
+// Loop that contains main switch for processing command arguments from stdin
 static void main_loop(struct Schedule** schedule_ptr);
 
-static void print_switch(char command, struct Schedule *const schedule_ptr);
+// Functions containing switch statements for related commands
+static void print_switch(const char command, const struct Schedule *const schedule_ptr);
+static void add_switch(const char command, struct Schedule *const schedule_ptr);
+static void delete_switch(const char command, struct Schedule *const schedule_ptr);
 
-static void add_switch(char command, struct Schedule *const schedule_ptr);
-
-static void delete_switch(char command, struct Schedule *const schedule_ptr);
-
+// Compare function for two Room structs
 static int room_comp(const struct Room *const room_ptr1,
                      const struct Room *const room_ptr2);
 
+// Compare function to compare a Room to an int representing a room number
 static int room_comp_to_number(const int* number_ptr,
                                const struct Room* room_ptr);
 
+// Returns a pointer to a dynamically allocated Schedule struct
 static struct Schedule* const create_schedule(void);
 
+// Deallocates all memory allocated in a Schedule struct created using create_schedule
 static void destroy_schedule(struct Schedule* schedule_ptr, const int quiet);
 
+// Reads in two characters from stdin and stores them in characters pointed
+// to by passed in pointers
 static int get_command_from_input(char* command1, char* command2);
 
+// Returns a data ptr to first element in the container that compares equal
+// to the passed in argument using the passed in compare function, returns
+// NULL if none is found.
 static void* find_object_arg(const struct Ordered_container* c_ptr,
                              const void* arg_ptr,
                              OC_find_item_arg_fp_t comp_func);
 
+// Returns a data ptr to the first Person in the container that has the lastname
+// that matches the passed in name, returns NULL otherwise. Requires that c_ptr 
+// points to a container of Person*
 static struct Person* find_person_by_name(const struct Ordered_container* c_ptr,
                                           const char* name);
 
+// Returns a data ptr to the first Room in the container that has the room number
+// the matches the passed in number, returns NULL otherwise. Requires that c_ptr
+// points to a container of Room*
 static struct Room* find_room_by_number(const struct Ordered_container* c_ptr,
                                         const int* room_number_ptr);
 
+// Returns non-zero if passed in person in scheduled for a meeting in the
+// passed in room, returns zero if they are not. Requires the room and person
+// pointers point to valid Room and Person structs respectively.
+static int search_Room_for_person(const struct Room *const room_ptr,
+                                  const struct Person *const person_ptr);
+
+// Returns non-zero if passed in room is not empty, zero otherwise. Requires
+// passed in room is a valid Room.
+static int room_not_empty(const struct Room* const room_ptr);
+
+// Functions used to read formatted input from stdin, read data is stored in
+// memory pointed to by passed in pointers. Requires enough memory is allocated
+// to store anything that might be read.
 static void read_string_from_input(char* string_buffer);
+static int read_int_from_input(int* int_ptr);          // Returns SUCCESS on success,
+static int read_room_from_input(int* room_number_ptr); // FAILURE otherwise. Check 
+static int read_time_from_input(int* time_ptr);        // return value of these.
 
-static int read_int_from_input(int* int_ptr);
-
+// Validate value ranges according to project specification, returns
+// non-zero if argument is valid, returns zero otherwise.
 static int check_room_range_valid(const int room_number);
-
-static void print_person_command(struct Schedule *const schedule_ptr);
-
 static int check_time_range_valid(int time);
 
 static void room_not_found_error();
-
 static void person_not_found_error();
-
 static void meeting_not_found_error();
-
 static void unrecognized_command_error();
+static void load_data_error(struct Schedule* bad_schedule_ptr, FILE* loadfile);
 
-static int read_room_from_input(int* room_number_ptr);
 
-static int read_time_from_input(int* time_ptr);
+/* ########################### */
+/* COMMAND FUNCTIONS FROM SPEC */
+/* ########################### */
 
-static void print_room_command(struct Schedule *const schedule_ptr);
 
-static void print_meeting_command(struct Schedule *const schedule_ptr);
-
-static void print_all_meetings(struct Schedule *const schedule_ptr);
-
-static void print_all_people(struct Schedule *const schedule_ptr);
-
-static void print_memory_allocations(void);
+static void print_person_command(const struct Schedule *const schedule_ptr);
+static void print_room_command(const struct Schedule *const schedule_ptr);
+static void print_meeting_command(const struct Schedule *const schedule_ptr);
+static void print_all_meetings(const struct Schedule *const schedule_ptr);
+static void print_all_people(const struct Schedule *const schedule_ptr);
+static void print_memory_allocations(const struct Schedule *const schedule_ptr);
 
 static void add_to_people_list(struct Schedule *const schedule_ptr);
-
 static void add_room(struct Schedule *const schedule_ptr);
-
 static void add_meeting(struct Schedule *const schedule_ptr);
-
 static void add_person_to_meeting_in_room(struct Schedule *const schedule_ptr);
 
-static void reschedule_meeting(struct Schedule *const schedule_ptr);
+static void reschedule_meeting(const char command, struct Schedule *const schedule_ptr);
 
 static void delete_individual_command(struct Schedule *const schedule_ptr);
-
 static void delete_room_command(struct Schedule *const schedule_ptr);
-
 static void delete_meeting_command(struct Schedule *const schedule_ptr);
-
 static void delete_participant_command(struct Schedule *const schedule_ptr);
-
 static void delete_all_individual_command(struct Schedule *const schedule_ptr);
-
 static void delete_schedule_command(struct Schedule *const schedule_ptr,
                                     const int quiet);
-
 static void deallocate_all(struct Schedule *const schedule_ptr, const int quiet);
 
-static void save_data_command(struct Schedule *const schedule_ptr);
+static void save_data_command(const char command, struct Schedule *const schedule_ptr);
+static void load_data_command(const char command, struct Schedule** schedule_ptr);
 
-static void load_data_command(struct Schedule** schedule_ptr);
+
+/* #################### */
+/* FUNCTION DEFINITIONS */
+/* #################### */
+
 
 int main(void)
 {
     struct Schedule* schedule_ptr = create_schedule();
-    assert(schedule_ptr);
 
     main_loop(&schedule_ptr);
 
     destroy_schedule(schedule_ptr, 0);
+
+    printf("Done\n");
+
     assert(g_Container_count == 0);
     assert(g_Meeting_memory == 0);
     assert(g_string_memory == 0);
     assert(g_Container_items_allocated == 0);
     assert(g_Container_items_in_use == 0);
 
-    printf("Done\n");
     return 0;
+}
+
+static int get_command_from_input(char* command1, char* command2)
+{
+    printf("\nEnter command: ");
+    int return_val = scanf(" %c %c", command1, command2);
+
+    assert(return_val == 2);
+
+    return return_val;
 }
 
 static void main_loop(struct Schedule** schedule_ptr)
@@ -146,37 +182,16 @@ static void main_loop(struct Schedule** schedule_ptr)
                 add_switch(command2, *schedule_ptr);
                 break;
             case 'r':
-                if (command2 == 'm')
-                {
-                    reschedule_meeting(*schedule_ptr);
-                }
-                else
-                {
-                    unrecognized_command_error();
-                }
+                reschedule_meeting(command2, *schedule_ptr);
                 break;
             case 'd':
                 delete_switch(command2, *schedule_ptr);
                 break;
             case 's':
-                if (command2 == 'd')
-                {
-                    save_data_command(*schedule_ptr);
-                }
-                else
-                {
-                    unrecognized_command_error();
-                }
+                save_data_command(command2, *schedule_ptr);
                 break;
             case 'l':
-                if (command2 == 'd')
-                {
-                    load_data_command(schedule_ptr);
-                }
-                else
-                {
-                    unrecognized_command_error();
-                }
+                load_data_command(command2, schedule_ptr);
                 break;
             case 'q':
                 if (command2 == 'q')
@@ -191,7 +206,7 @@ static void main_loop(struct Schedule** schedule_ptr)
     }
 }
 
-static void print_switch(char command, struct Schedule *const schedule_ptr)
+static void print_switch(const char command, const struct Schedule *const schedule_ptr)
 {
     switch (command)
     {
@@ -211,14 +226,14 @@ static void print_switch(char command, struct Schedule *const schedule_ptr)
             print_all_people(schedule_ptr);
             break;
         case 'a':
-            print_memory_allocations();
+            print_memory_allocations(schedule_ptr);
             break;
         default:
             unrecognized_command_error();
     }
 }
 
-static void add_switch(char command, struct Schedule *const schedule_ptr)
+static void add_switch(const char command, struct Schedule *const schedule_ptr)
 {
     switch (command)
     {
@@ -239,7 +254,7 @@ static void add_switch(char command, struct Schedule *const schedule_ptr)
     }
 }
 
-static void delete_switch(char command, struct Schedule *const schedule_ptr)
+static void delete_switch(const char command, struct Schedule *const schedule_ptr)
 {
     switch (command)
     {
@@ -287,26 +302,14 @@ struct Schedule* const create_schedule(void)
 
     if (!schedule_ptr)
     {
-        perror("Failed to allocate schedule object");
-        return NULL;
+        perror("Failed to allocate schedule object\n");
+        exit(EXIT_FAILURE);
     }
 
     schedule_ptr->rooms_ptr = OC_create_container((OC_comp_fp_t)room_comp);
-    if (!schedule_ptr->rooms_ptr)
-    {
-        free(schedule_ptr);
-        perror("Failed to create rooms container");
-        return NULL;
-    }
-
     schedule_ptr->people_ptr = OC_create_container((OC_comp_fp_t)person_comp);
-    if (!schedule_ptr->people_ptr)
-    {
-        OC_destroy_container(schedule_ptr->rooms_ptr);
-        free(schedule_ptr);
-        perror("Failed to create people container");
-        return NULL;
-    }
+    schedule_ptr->number_Room_structs = 0;
+    schedule_ptr->number_Person_structs = 0;
 
     return schedule_ptr;
 }
@@ -319,16 +322,6 @@ static void destroy_schedule(struct Schedule* schedule_ptr, const int quiet)
     OC_destroy_container(schedule_ptr->rooms_ptr);
     OC_destroy_container(schedule_ptr->people_ptr);
     free(schedule_ptr);
-}
-
-static int get_command_from_input(char* command1, char* command2)
-{
-    printf("\nEnter command: ");
-    int return_val = scanf(" %c %c", command1, command2);
-
-    assert(return_val == 2);
-
-    return return_val;
 }
 
 static void* find_object_arg(const struct Ordered_container* c_ptr,
@@ -362,7 +355,8 @@ static struct Room* find_room_by_number(const struct Ordered_container* c_ptr,
 static void read_string_from_input(char* string_buffer)
 {
     int return_val = scanf("%" STRINGIFY_MACRO(MAX_INPUT) "s", string_buffer);
- if (return_val != 1)
+
+    if (return_val != 1)
     {
         assert("Failed to read string from input");
     }
@@ -381,25 +375,6 @@ static int read_int_from_input(int* int_ptr)
     return SUCCESS;
 }
 
-static void print_person_command(struct Schedule *const schedule_ptr)
-{
-    static char lastname_buffer[MAX_INPUT + 1];
-
-    read_string_from_input(lastname_buffer);
-
-    struct Person* person_ptr = find_person_by_name(schedule_ptr->people_ptr,
-                                                    lastname_buffer);
-    if (!person_ptr)
-    {
-        printf("No person with that name!\n");
-        discard_rest_of_input_line(stdin);
-    }
-    else
-    {
-        print_Person(person_ptr);
-    }
-}
-
 static int check_room_range_valid(const int room_number)
 {
     return room_number > 0;
@@ -408,7 +383,7 @@ static int check_room_range_valid(const int room_number)
 static int check_time_range_valid(int time)
 {
     time = convert_time_to_24_hour(time);
-    return time >= MEETING_TIME_LOW && time <= MEETING_TIME_HIGH;
+    return time >= EARLIEST_MEETING_TIME && time <= LATEST_MEETING_TIME;
 }
 
 static int read_room_from_input(int* room_number_ptr)
@@ -469,7 +444,26 @@ static void unrecognized_command_error()
     discard_rest_of_input_line(stdin);
 }
 
-static void print_room_command(struct Schedule *const schedule_ptr)
+static void print_person_command(const struct Schedule *const schedule_ptr)
+{
+    static char lastname_buffer[MAX_INPUT + 1];
+
+    read_string_from_input(lastname_buffer);
+
+    struct Person* person_ptr = find_person_by_name(schedule_ptr->people_ptr,
+                                                    lastname_buffer);
+    if (!person_ptr)
+    {
+        printf("No person with that name!\n");
+        discard_rest_of_input_line(stdin);
+    }
+    else
+    {
+        print_Person(person_ptr);
+    }
+}
+
+static void print_room_command(const struct Schedule *const schedule_ptr)
 {
     int room_number = -1;
 
@@ -490,7 +484,7 @@ static void print_room_command(struct Schedule *const schedule_ptr)
     }
 }
 
-static void print_meeting_command(struct Schedule *const schedule_ptr)
+static void print_meeting_command(const struct Schedule *const schedule_ptr)
 {
     int room_number = -1;
     int meeting_time = -1;
@@ -525,7 +519,7 @@ static void print_meeting_command(struct Schedule *const schedule_ptr)
     }
 }
 
-static void print_all_meetings(struct Schedule *const schedule_ptr)
+static void print_all_meetings(const struct Schedule *const schedule_ptr)
 {
     int number_of_rooms = OC_get_size(schedule_ptr->rooms_ptr);
 
@@ -540,7 +534,7 @@ static void print_all_meetings(struct Schedule *const schedule_ptr)
     }
 }
 
-static void print_all_people(struct Schedule *const schedule_ptr)
+static void print_all_people(const struct Schedule *const schedule_ptr)
 {
     int number_of_people = OC_get_size(schedule_ptr->people_ptr);
 
@@ -555,13 +549,13 @@ static void print_all_people(struct Schedule *const schedule_ptr)
     }
 }
 
-static void print_memory_allocations(void)
+static void print_memory_allocations(const struct Schedule *const schedule_ptr)
 {
     printf("Memory allocations:\n");
     printf("C-strings: %d bytes total\n", g_string_memory);
-    printf("Person structs: %d\n", g_number_Person_structs);
+    printf("Person structs: %d\n", schedule_ptr->number_Person_structs);
     printf("Meeting structs: %d\n", g_Meeting_memory);
-    printf("Room structs: %d\n", g_number_Room_structs);
+    printf("Room structs: %d\n", schedule_ptr->number_Room_structs);
     printf("Containers: %d\n", g_Container_count);
     printf("Container items in use: %d\n", g_Container_items_in_use);
     printf("Container items allocated: %d\n", g_Container_items_allocated);
@@ -582,7 +576,7 @@ static void add_to_people_list(struct Schedule *const schedule_ptr)
     else
     {
         OC_insert(schedule_ptr->people_ptr, person_ptr);
-        ++g_number_Person_structs;
+        ++schedule_ptr->number_Person_structs;
         printf("Person %s added\n", get_Person_lastname(person_ptr));
     }
 }
@@ -603,7 +597,7 @@ static void add_room(struct Schedule *const schedule_ptr)
         {
             room_ptr = create_Room(room_number);
             OC_insert(schedule_ptr->rooms_ptr, room_ptr);
-            ++g_number_Room_structs;
+            ++schedule_ptr->number_Room_structs;
             printf("Room %d added\n", room_number);
         }
     }
@@ -701,8 +695,15 @@ static void add_person_to_meeting_in_room(struct Schedule *const schedule_ptr)
     printf("Participant %s added\n", lastname);
 }
 
-static void reschedule_meeting(struct Schedule *const schedule_ptr)
+static void reschedule_meeting(const char command,
+                               struct Schedule *const schedule_ptr)
 {
+    if (command != 'm')
+    {
+        unrecognized_command_error();
+        return;
+    }
+
     int old_room_number = 0;
     int old_meeting_time = 0;
     int new_room_number = 0;
@@ -819,7 +820,7 @@ static void delete_individual_command(struct Schedule *const schedule_ptr)
 
     OC_delete_item(schedule_ptr->people_ptr, item_ptr);
     destroy_Person(person_ptr);
-    --g_number_Person_structs;
+    --schedule_ptr->number_Person_structs;
     printf("Person %s deleted\n", lastname);
 }
 
@@ -847,7 +848,7 @@ static void delete_room_command(struct Schedule *const schedule_ptr)
 
     OC_delete_item(schedule_ptr->rooms_ptr, item_ptr);
     destroy_Room(room_ptr);
-    --g_number_Room_structs;
+    --schedule_ptr->number_Room_structs;
     printf("Room %d deleted\n", room_number);
 }
 
@@ -945,10 +946,9 @@ static int room_not_empty(const struct Room* const room_ptr)
 
 static void destroy_all_people_helper(struct Schedule *const schedule_ptr)
 {
-    int number_people_to_destroy = OC_get_size(schedule_ptr->people_ptr);
     OC_apply(schedule_ptr->people_ptr, (OC_apply_fp_t)destroy_Person);
     OC_clear(schedule_ptr->people_ptr);
-    g_number_Person_structs -= number_people_to_destroy;
+    schedule_ptr->number_Person_structs = 0;
 }
 
 static void delete_all_individual_command(struct Schedule *const schedule_ptr)
@@ -980,24 +980,27 @@ static void deallocate_all(struct Schedule* const schedule_ptr, const int quiet)
 {
     delete_schedule_command(schedule_ptr, quiet);
 
-    int number_rooms_to_destroy = OC_get_size(schedule_ptr->rooms_ptr);
     OC_apply(schedule_ptr->rooms_ptr, (OC_apply_fp_t)destroy_Room);
     OC_clear(schedule_ptr->rooms_ptr);
-    g_number_Room_structs -= number_rooms_to_destroy;
+    schedule_ptr->number_Room_structs = 0;
+
+    destroy_all_people_helper(schedule_ptr);
+
     if (!quiet)
     {
         printf("All rooms deleted\n");
-    }
-
-    destroy_all_people_helper(schedule_ptr);
-    if (!quiet)
-    {
         printf("All persons deleted\n");
     }
 }
 
-static void save_data_command(struct Schedule *const schedule_ptr)
+static void save_data_command(const char command, struct Schedule *const schedule_ptr)
 {
+    if (command != 'd')
+    {
+        unrecognized_command_error();
+        return;
+    }
+
     char filename[MAX_INPUT + 1];
 
     read_string_from_input(filename);
@@ -1010,10 +1013,10 @@ static void save_data_command(struct Schedule *const schedule_ptr)
         return;
     }
 
-    fprintf(savefile, "%d\n", g_number_Person_structs);
+    fprintf(savefile, "%d\n", schedule_ptr->number_Person_structs);
     OC_apply_arg(schedule_ptr->people_ptr, (OC_apply_arg_fp_t)save_Person, savefile);
 
-    fprintf(savefile, "%d\n", g_number_Room_structs);
+    fprintf(savefile, "%d\n", schedule_ptr->number_Room_structs);
     OC_apply_arg(schedule_ptr->rooms_ptr, (OC_apply_arg_fp_t)save_Room, savefile);
 
     printf("Data saved\n");
@@ -1032,8 +1035,14 @@ static void load_data_error(struct Schedule* bad_schedule_ptr, FILE* loadfile)
     fclose(loadfile);
 }
 
-static void load_data_command(struct Schedule ** schedule_ptr)
+static void load_data_command(const char command, struct Schedule ** schedule_ptr)
 {
+    if (command != 'd')
+    {
+        unrecognized_command_error();
+        return;
+    }
+
     char filename[MAX_INPUT + 1];
 
     read_string_from_input(filename);
@@ -1046,7 +1055,7 @@ static void load_data_command(struct Schedule ** schedule_ptr)
         return;
     }
 
-    deallocate_all(*schedule_ptr, 1);
+    deallocate_all(*schedule_ptr, 1); // clear schedule with no print statements
 
     struct Schedule* new_schedule_ptr = NULL;
     int number_of_people = 0;
@@ -1071,7 +1080,7 @@ static void load_data_command(struct Schedule ** schedule_ptr)
         }
 
         OC_insert(new_schedule_ptr->people_ptr, new_person_ptr);
-        ++g_number_Person_structs;
+        ++new_schedule_ptr->number_Person_structs;
     }
 
     int number_of_rooms = 0;
@@ -1093,10 +1102,10 @@ static void load_data_command(struct Schedule ** schedule_ptr)
         }
 
         OC_insert(new_schedule_ptr->rooms_ptr, room_ptr);
-        ++g_number_Room_structs;
+        ++new_schedule_ptr->number_Room_structs;
     }
 
-    destroy_schedule(*schedule_ptr, 1);
+    destroy_schedule(*schedule_ptr, 1); // destroy old schedule with no print statements
     *schedule_ptr = new_schedule_ptr;
     printf("Data loaded\n");
     fclose(loadfile);

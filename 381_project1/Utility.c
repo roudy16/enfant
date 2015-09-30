@@ -21,9 +21,10 @@ const char* create_string(const char* const string_ptr)
     int string_bytes = strlen(string_ptr) + 1;
     void* new_string_ptr = malloc(string_bytes + sizeof(int));
 
-    // Check if malloc was successful
-    if (!new_string_ptr){
-        return new_string_ptr;
+    if (!new_string_ptr)
+    {
+        perror("Could not allocate memory in create_string\n");
+        exit(EXIT_FAILURE);
     }
 
     // Store num bytes used for string and increment string mem counter
@@ -58,7 +59,7 @@ int person_to_name_comp(const char *const name_ptr,
 
 int convert_time_to_24_hour(int time)
 {
-    if (time < MEETING_TIME_LOW)
+    if (time < EARLIEST_MEETING_TIME)
     {
         time += 12;
     }

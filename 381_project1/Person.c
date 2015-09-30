@@ -25,8 +25,8 @@ struct Person* create_Person(const char* firstname,
     struct Person* person_ptr = malloc(sizeof(struct Person));
     if(!person_ptr)
     {
-        printf("Failed to allocate memory in create_Person\n");
-        return NULL;
+        perror("Failed to allocate memory in create_Person\n");
+        exit(EXIT_FAILURE);
     }
 
     person_ptr->firstname = (char*)create_string(firstname);

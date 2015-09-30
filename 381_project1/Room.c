@@ -45,19 +45,16 @@ static int meeting_comp_to_time(const int* time_ptr, const struct Meeting* meeti
 struct Room* create_Room(int number)
 {
     struct Room* new_room_ptr = malloc(sizeof(struct Room));
+
     if (!new_room_ptr)
     {
-        return new_room_ptr;
+        perror("Could not allocate memory in create_Room\n");
+        exit(EXIT_FAILURE);
     }
 
     new_room_ptr->meetings = OC_create_container((OC_comp_fp_t)meeting_comp);
-    if (!new_room_ptr->meetings)
-    {
-        free(new_room_ptr);
-        return NULL;
-    }
-
     new_room_ptr->number = number;
+
     return new_room_ptr;
 }
 

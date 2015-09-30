@@ -174,20 +174,20 @@ struct Ordered_container* OC_create_container(OC_comp_fp_t f_ptr)
 
     if (!new_container_ptr) 
     {
-        printf("Could not allocate memory for new Ordered_container\n");
+        perror("Could not allocate memory for new Ordered_container\n");
+        exit(EXIT_FAILURE);
     }
-    else 
-    {
-        ++g_Container_count;
-        new_container_ptr->comp_func = f_ptr;
-        Init_container_helper(new_container_ptr);
-    }
+
+    ++g_Container_count;
+    new_container_ptr->comp_func = f_ptr;
+    Init_container_helper(new_container_ptr);
 
     return new_container_ptr;
 }
 
 void OC_destroy_container(struct Ordered_container* c_ptr)
 {
+    assert(c_ptr);
     Clear_container_helper(c_ptr);
     --g_Container_count;
     free(c_ptr);
@@ -251,8 +251,8 @@ void OC_insert(struct Ordered_container* c_ptr, void* data_ptr)
     struct LL_Node *const node_ptr = malloc(sizeof(struct LL_Node));
     if (!node_ptr)
     {
-        fprintf(stderr, "OC_insert malloc error in container at %p\n", (void*)c_ptr);
-        return;
+        perror("OC_insert malloc error in container\n");
+        exit(EXIT_FAILURE);
     }
 
     node_ptr->data_ptr = data_ptr;

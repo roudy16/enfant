@@ -30,6 +30,7 @@ int g_Container_items_allocated = 0;
 /* HELPER FUNCTION DECLARATIONS */
 /* ############################ */
 
+
 // Performs binary search of the container for the item that compares equal
 // to the passed in data_ptr using the passed in compare function. Returns
 // NULL if none found.
@@ -105,6 +106,13 @@ static void Shift_array_right(const struct Ordered_container *const c_ptr,
 static void Init_container_helper(struct Ordered_container *const c_ptr)
 {
     c_ptr->array = malloc(sizeof(void*) * INITIAL_ARRAY_SIZE);
+
+    if (!c_ptr->array)
+    {
+        perror("Failed to allocate memory in Init_container_helper\n");
+        exit(EXIT_FAILURE);
+    }
+
     c_ptr->allocation = INITIAL_ARRAY_SIZE;
     c_ptr->size = 0;
     g_Container_items_allocated += INITIAL_ARRAY_SIZE;
@@ -128,22 +136,21 @@ static void Grow_array(struct Ordered_container *const c_ptr)
 
     if (!new_array)
     {
-        printf("Could not allocate memory to grow array\n");
+        perror("Could not allocate memory to grow array\n");
+        exit(EXIT_FAILURE);
     }
-    else
+
+    g_Container_items_allocated += number_new_elements;
+
+    for (int i = 0; i < old_size; ++i)
     {
-        g_Container_items_allocated += number_new_elements;
-
-        for (int i = 0; i < old_size; ++i)
-        {
-            new_array[i] = old_array[i];
-        }
-
-        free(old_array);
-        g_Container_items_allocated -= old_size;
-        c_ptr->array = new_array;
-        c_ptr->allocation = number_new_elements;
+        new_array[i] = old_array[i];
     }
+
+    free(old_array);
+    g_Container_items_allocated -= old_size;
+    c_ptr->array = new_array;
+    c_ptr->allocation = number_new_elements;
 }
 
 static struct Search_result Find_element(const void* const data_ptr,
@@ -189,14 +196,13 @@ struct Ordered_container* OC_create_container(OC_comp_fp_t f_ptr)
 
     if (!new_container_ptr)
     {
-        printf("Could not allocate memory for new Ordered_container\n");
+        perror("Could not allocate memory in OC_create_container\n");
+        exit(EXIT_FAILURE);
     }
-    else
-    {
-        new_container_ptr->comp_fun = f_ptr;
-        Init_container_helper(new_container_ptr);
-        ++g_Container_count;
-    }
+
+    new_container_ptr->comp_fun = f_ptr;
+    Init_container_helper(new_container_ptr);
+    ++g_Container_count;
 
     return new_container_ptr;
 }
