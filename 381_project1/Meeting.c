@@ -186,11 +186,6 @@ struct Meeting* load_Meeting(FILE* input_file, const struct Ordered_container* p
 
     struct Meeting* meeting_ptr = create_Meeting(time, string_buffer); // buffer holds topic
 
-    if (!meeting_ptr)
-    {
-        return meeting_ptr;
-    }
-
     for (int i = 0; i < number_of_participants; ++i)
     {
         return_val = fscanf(input_file, "%" STRINGIFY_MACRO(MAX_INPUT) "s",

@@ -12,16 +12,30 @@ struct Room {
 	int number;
 };
 
-static int meeting_comp(const struct Meeting *const meeting1_ptr,
-                        const struct Meeting *const meeting2_ptr);
+
+/* ############################ */
+/* HELPER FUNCTION DECLARATIONS */
+/* ############################ */
+
 
 // Takes in a true/false expression that is true if an error has occured in the
 // file reading. Handles errors, returns result of the true/false expression
 static int handle_load_room_error(const int bool_expr, FILE* input_file,
                                   struct Room** room_ptr);
 
+// Compare function used to compare two Meeting structs by their times.
+static int meeting_comp(const struct Meeting *const meeting1_ptr,
+                        const struct Meeting *const meeting2_ptr);
+
+// Compare function used to compare a Meeting struct to a time int
 static int meeting_comp_to_time(const int* time_ptr,
                                 const struct Meeting* meeting_ptr);
+
+
+/* #################### */
+/* FUNCTION DEFINITIONS */
+/* #################### */
+
 
 static int meeting_comp(const struct Meeting *const meeting1_ptr,
                         const struct Meeting *const meeting2_ptr)
@@ -157,8 +171,6 @@ void save_Room(const struct Room* room_ptr, FILE* outfile)
     OC_apply_arg(room_ptr->meetings, (OC_apply_arg_fp_t)save_Meeting, outfile);
 }
 
-// Takes in a true/false expression that is true if an error has occured in the
-// file reading. Handles errors, returns result of the true/false expression
 static int handle_load_room_error(const int bool_expr, FILE* input_file,
                                   struct Room** room_ptr)
 {
@@ -185,11 +197,6 @@ struct Room* load_Room(FILE* infile, const struct Ordered_container* people)
     if (!handle_load_room_error(return_val != 2, infile, &room_ptr))
     {
         room_ptr = create_Room(room_number);
-
-        if (!room_ptr)
-        {
-            return room_ptr;
-        }
 
         assert(number_of_meetings >= 0);
         for (int i = 0; i < number_of_meetings; ++i)

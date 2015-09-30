@@ -13,6 +13,13 @@ struct Person
 	char* phoneno;
 };
 
+
+/* #################### */
+/* FUNCTION DEFINITIONS */
+/* #################### */
+
+
+// Prints a person's info to outfile according project specification
 static void output_Person(const struct Person* const person_ptr, FILE* outfile)
 {
     fprintf(outfile, "%s %s %s\n", person_ptr->firstname, person_ptr->lastname, person_ptr->phoneno);
@@ -32,14 +39,6 @@ struct Person* create_Person(const char* firstname,
     person_ptr->firstname = (char*)create_string(firstname);
     person_ptr->lastname = (char*)create_string(lastname);
     person_ptr->phoneno = (char*)create_string(phoneno);
-
-    if (!person_ptr->firstname ||
-        !person_ptr->lastname ||
-        !person_ptr->phoneno)
-    {
-        destroy_Person(person_ptr);
-        person_ptr = NULL;
-    }
 
     return person_ptr;
 }
