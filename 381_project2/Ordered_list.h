@@ -110,6 +110,11 @@ Remove this comment too. */
 // not modify the state of the function object, meaning that it can be used in
 // a const member function of the Ordered_list class.
 
+// Hack for developing in Visual Studio versions that don't support noexcept
+#if (_MSC_VER < 1900)
+#define noexcept 
+#endif
+
 // Compare two objects (passed by const&) using T's operator<
 template<typename T>
 struct Less_than_ref {

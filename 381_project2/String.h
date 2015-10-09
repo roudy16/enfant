@@ -1,6 +1,8 @@
 #ifndef STRING_H
 #define STRING_H
 
+#include <iostream>
+
 /* 
 String class - a subset of the C++ Standard Library <string> class
 String objects contain a C-string in a dynamically allocated piece of memory and 
@@ -54,6 +56,11 @@ in the .cpp file.
 Comments starting with "***" are instructions to you - remove them from your finished code.
 Remove this comment too. */
 
+// Hack for developing in Visual Studio versions that don't support noexcept
+#if (_MSC_VER < 1900)
+#define noexcept 
+#endif
+
 // Simple exception class for reporting String errors
 struct String_exception {
 	String_exception(const char* msg_) : msg(msg_)
@@ -70,6 +77,7 @@ public:
 	// The copy constructor initializes this String with the original's data,
 	// and gets minimum allocation.
 	String(const String& original);
+
     // Move constructor - take original's data, and set the original String
     // member variables to the empty state (do not initialize "this" String and swap).
     String(String&& original) noexcept;
@@ -101,7 +109,13 @@ public:
 	// Return current allocation for this String
 	int get_allocation() const
     {
-        return m_allocation;
+        if (m_length != 0){
+            return m_length + 1;
+        }
+        else {
+
+            return 0;
+        }
     }
 		
 	// Return a reference to character i in the string.
@@ -156,7 +170,6 @@ private:
 
     char* mp_cstring;
     int m_length;
-    int m_allocation;
 
 };
 
