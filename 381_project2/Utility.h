@@ -1,3 +1,5 @@
+#ifndef UTILITY_H
+#define UTILITY_H
 
 /* Utility functions, constants, and classes used by more than one other modules */
 
@@ -11,3 +13,4 @@ struct Error {
 
 /*  *** add any other functions or declarations here and define in Utility.cpp */
 
+#endif // UTILITY_H

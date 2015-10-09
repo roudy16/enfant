@@ -1,3 +1,6 @@
+#ifndef MEETING_H
+#define MEETING_H
+
 /* Meeting class - this class represents a Meeting in terms of a time, topic, and 
 list of participants. 
 Note: Meeting's interface and I/O functions assume that the time is expressed in 12-hour format.
@@ -17,6 +20,7 @@ in the .cpp file.
 Comments starting with "***" are instructions to you - remove them from your finished code.
 Remove this comment too. */
 
+class Meeting {
 public:
 	Meeting(int time_, const String& topic_)
 		/*fill this in*/
@@ -67,3 +71,5 @@ private:
 // the no-participants message with an endl
 // or the partipcants, one per line, with an endl after each one
 std::ostream& operator<< (std::ostream& os, const Meeting& meeting);
+
+#endif // MEETING_H

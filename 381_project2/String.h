@@ -1,3 +1,6 @@
+#ifndef STRING_H
+#define STRING_H
+
 /* 
 String class - a subset of the C++ Standard Library <string> class
 String objects contain a C-string in a dynamically allocated piece of memory and 
@@ -84,14 +87,22 @@ public:
 	
 	// Accesssors
 	// Return a pointer to the internal C-string
-	const char* c_str() const	
-		{/*** fill this in */}
+    const char* c_str() const
+    {
+        return mp_cstring;
+    }
+
 	// Return size (length) of internal C-string in this String
-	int size() const
-		{/*** fill this in */}
+    int size() const
+    {
+        return m_length;
+    }
+
 	// Return current allocation for this String
 	int get_allocation() const
-		{/*** fill this in */}
+    {
+        return m_allocation;
+    }
 		
 	// Return a reference to character i in the string.
 	// Throw exception if 0 <= i < size is false.
@@ -143,6 +154,10 @@ private:
 	static int total_allocation;	// counts total amount of memory allocated
 	static bool messages_wanted;	// whether to output constructor/destructor/operator= messages, initially false
 
+    char* mp_cstring;
+    int m_length;
+    int m_allocation;
+
 };
 
 // non-member overloaded operators
@@ -175,3 +190,4 @@ If the input stream fails, str contains whatever characters were read. */
 std::istream& operator>> (std::istream& is, String& str);
 
 
+#endif // STRING_H

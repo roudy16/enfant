@@ -1,3 +1,6 @@
+#ifndef PERSON_H
+#define PERSON_H
+
 /* A Person object simply contains Strings for a person's data.
 Once created, the data cannot be modified. */
 
@@ -7,41 +10,51 @@ in the .cpp file.
 Comments starting with "***" are instructors to you - remove them from your finished code.
 Remove this comment too. */
 
-
+class Person {
 public:
-	Person(const String& firstname_, const String& lastname_, const String& phoneno_)
-		/*fill this in*/
-	// construct a Person object with only a lastname
-	Person(const String& lastname_)
-		/*fill this in*/
+    Person(const String& firstname_, const String& lastname_, const String& phoneno_)
+        /*fill this in*/
+        // construct a Person object with only a lastname
+        Person(const String& lastname_)
+        /*fill this in*/
 
-	/* *** Disallow all forms of copy/move construction or assignment */
-	// These declarations help ensure that Person objects are unique,
-	// like they are in the problem domain
+        /* *** Disallow all forms of copy/move construction or assignment */
+        // These declarations help ensure that Person objects are unique,
+        // like they are in the problem domain
 
-	// Construct a Person object from a file stream in save format.
-	// Throw Error exception if invalid data discovered in file.
-	// No check made for whether the Person already exists or not.
-	// Input for a member variable value is read directly into the member variable.
-	Person(std::ifstream& is);
-	
-	// Accessors
-	String get_lastname() const
-		{/*fill this in*/}
-	
-	// Write a Person's data to a stream in save format with final endl.
-	void save(std::ostream& os) const;
+        // Construct a Person object from a file stream in save format.
+        // Throw Error exception if invalid data discovered in file.
+        // No check made for whether the Person already exists or not.
+        // Input for a member variable value is read directly into the member variable.
+        Person(std::ifstream& is);
 
-	// This operator defines the order relation between Persons, based just on the last name
-	bool operator< (const Person& rhs) const
-		{/*fill this in*/}
+    // Accessors
+    String get_lastname() const
+    {/*fill this in*/
+    }
 
-	/* *** provide in a friend declaration for the output operator */
+    // Write a Person's data to a stream in save format with final endl.
+    void save(std::ostream& os) const;
+
+    // This operator defines the order relation between Persons, based just on the last name
+    bool operator< (const Person& rhs) const
+    {/*fill this in*/
+    }
+
+    /* *** provide in a friend declaration for the output operator */
 
 private:
-	/* *** private members are your choice */
-	
+    Person(const Person& person) = delete;
+    Person(Person&& person) = delete;
+
+    String m_firstname;
+    String m_lastname;
+    String m_phoneno;
+
+};
 
 
 // output firstname, lastname, phoneno with one separating space, NO endl
 std::ostream& operator<< (std::ostream& os, const Person& person);
+
+#endif // PERSON_H
