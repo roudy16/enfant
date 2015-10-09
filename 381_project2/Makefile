@@ -15,7 +15,7 @@ LD = g++
 # -Wall asks for certain warnings of possible errors
 # -c is required to specify compile-only (no linking)
 
-CFLAGS = -std=c++14 -pedantic-errors -Wall -c
+CFLAGS = -std=c++11 -pedantic-errors -Wall -c
 
 #no load flags defined, but -l would be used to include a special library
 LFLAGS = 
@@ -25,8 +25,8 @@ PROG = proj2exe
 
 default: $(PROG)
 
-stringtest: String.o Utility.o stringtest.o
-	$(LD) $(LFLAGS) String.o Utility.o stringtest.o -o stringtest
+stringtest: String.o Utility.o string_test.o
+	$(LD) $(LFLAGS) String.o Utility.o string_test.o -o stringtest
 
 $(PROG): $(OBJS)
 	$(LD) $(LFLAGS) $(OBJS) -o $(PROG)
@@ -52,7 +52,7 @@ p2_globals.o: p2_globals.cpp p2_globals.h
 Utility.o: Utility.cpp Utility.h
 	$(CC) $(CFLAGS) Utility.cpp
 
-stringtest.o: string_test.cpp Utility.h String.h
+string_test.o: string_test.cpp Utility.h String.h
 	$(CC) $(CFLAGS) string_test.cpp
 
 clean:
