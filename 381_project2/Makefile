@@ -56,6 +56,6 @@ string_test.o: string_test.cpp Utility.h String.h
 	$(CC) $(CFLAGS) string_test.cpp
 
 clean:
-	rm -f *.o
+	rm -f *.o stringtest
 real_clean:
 	rm -rf *.o $(PROG)
