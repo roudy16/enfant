@@ -3,6 +3,7 @@
 #include <utility> // std::swap
 #include <iostream>
 #include <cstring>
+#include <cctype>  // isspace
 #include <cassert>
 
 using std::cout;
@@ -100,6 +101,7 @@ void String::swap(String& other) noexcept {
     if (this != &other){
         std::swap(mp_cstring, other.mp_cstring);
         std::swap(m_length, other.m_length);
+        std::swap(m_allocation, other.m_allocation);
     }
 }
 
@@ -183,3 +185,43 @@ String& String::operator += (const String& rhs) {
     m_length += rhs.m_length;
     return *this;
 }
+
+bool operator== (const String& lhs, const String& rhs) {
+    return std::strcmp(lhs.c_str(), rhs.c_str()) == 0;
+}
+
+bool operator!= (const String& lhs, const String& rhs) {
+    return !(lhs == rhs);
+}
+
+bool operator< (const String& lhs, const String& rhs) {
+    return std::strcmp(lhs.c_str(), rhs.c_str()) < 0;
+}
+
+bool operator> (const String& lhs, const String& rhs) {
+    return rhs < lhs;
+}
+
+String operator+ (const String& lhs, const String& rhs) {
+    String new_string(lhs);
+    return new_string += rhs;
+}
+
+std::ostream& operator<< (std::ostream& os, const String& str) {
+    return os << str.c_str();
+}
+
+std::istream& operator>> (std::istream& is, String& str) {
+    str.clear();
+
+    // Skip initial whitespace
+    while (isspace(is.peek())) { is.get(); }
+
+    // Read characters into str until whitespace is found
+    while (!isspace(is.peek())) {
+        str += is.get();
+    }
+
+    return is;
+}
+

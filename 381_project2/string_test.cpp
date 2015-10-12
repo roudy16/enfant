@@ -26,11 +26,12 @@ int main() {
 
     cout << a.c_str() << " " << a.get_allocation() << endl;
     cout << b.c_str() << " " << b.get_allocation() << endl;
-    cout << c.c_str() << " " << c.get_allocation() << endl;
     cout << d.c_str() << " " << d.get_allocation() << endl;
     d += e;
     cout << d.c_str() << " " << d.get_allocation() << endl;
     cout << d[3] << endl;
+    cin >> c;
+    cout << c << " " << c.get_allocation() << endl;
     cout << String::get_number() << "  " << String::get_total_allocation() << endl;
 
     return 0;
