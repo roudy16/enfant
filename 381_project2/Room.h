@@ -1,6 +1,9 @@
 #ifndef ROOM_H
 #define ROOM_H
 
+#include "Meeting.h"
+#include "Ordered_list.h"
+
 /* A Room object contains a room number and a list containing Meeting objects stored with
 meeting times as the key.  When created, a Room has no Meetings. When destroyed, the Meeting
 objects in a Room are automatically destroyed.
@@ -18,24 +21,18 @@ to be able to access the Meeting container in order to search for a specific par
 We let the compiler supply the destructor and copy/move constructors and assignment operators.
 */ 
 
-/* *** NOTE: If after a function header is a comment "fill this in" remove the comment and replace
-it with the proper code here in the header file.  All other functions should be defined
-in the .cpp file. 
-Comments starting with "***" are instructors to you - remove them from your finished code.
-Remove this comment too. */
-
 class Room {
 public:
     // Construct a room with the specified room number and no meetings
-    Room(int room_number_)
-        /*fill this in*/
-        // Construct a Room from an input file stream in save format, using the people list,
-        // restoring all the Meeting information. 
-        // Person list is needed to resolve references to meeting participants.
-        // No check made for whether the Room already exists or not.
-        // Throw Error exception if invalid data discovered in file.
-        // Input for a member variable value is read directly into the member variable.
-        Room(std::ifstream& is, const Ordered_list<const Person*, Less_than_ptr<const Person*> >& people_list);
+    Room(int room_number_) : m_room_number(room_number_) {}
+
+    // Construct a Room from an input file stream in save format, using the people list,
+    // restoring all the Meeting information. 
+    // Person list is needed to resolve references to meeting participants.
+    // No check made for whether the Room already exists or not.
+    // Throw Error exception if invalid data discovered in file.
+    // Input for a member variable value is read directly into the member variable.
+    Room(std::ifstream& is, const Ordered_list<const Person*, Less_than_ptr<const Person*> >& people_list);
 
     // Accessors
     int get_room_number() const
@@ -51,13 +48,14 @@ public:
     void add_Meeting(const Meeting& m);
     // The supplied Meeting is moved into the Meeting container.
     void add_Meeting(Meeting&& m);
+
     // Return true if there is at least one meeting, false if none
-    bool has_Meetings() const
-    {/*fill this in*/
+    bool has_Meetings() const {
+        return !meetings.empty();
     }
     // Return the number of meetings in this room
-    int get_number_Meetings() const
-    {/*fill this in*/
+    int get_number_Meetings() const {
+        return meetings.size();
     }
     // Return true if there is a Meeting at the time, false if not.
     bool is_Meeting_present(int time) const;
@@ -66,8 +64,8 @@ public:
     // Remove the specified Meeting, throw exception if a Meeting at that time was not found.
     void remove_Meeting(int time);
     // Remove and destroy all meetings
-    void clear_Meetings()
-    {/*fill this in*/
+    void clear_Meetings() {
+        meetings.clear();
     }
     // Return true if the person is present in any of the meetings
     bool is_participant_present(const Person* person_ptr) const;
@@ -76,19 +74,17 @@ public:
     void save(std::ostream& os) const;
 
     // This operator defines the order relation between Rooms, based just on the number
-    bool operator< (const Room& rhs) const
-    {/*fill this in*/
+    bool operator< (const Room& rhs) const {
+        return m_room_number < rhs.m_room_number;
     }
 
-    /* *** provide a friend declaration for the output operator */
+    friend std::ostream& operator<< (std::ostream&, const Room&);
 
 private:
-    /* *** the meeting information must be kept in a container of Meeting objects */
     using Meetings_t = Ordered_list < Meeting > ;
     Meetings_t meetings;
 
     int m_room_number;
-
 };
 
 // Print the Room data as follows:

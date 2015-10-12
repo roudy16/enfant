@@ -13,35 +13,34 @@ Remove this comment too. */
 class Person {
 public:
     Person(const String& firstname_, const String& lastname_, const String& phoneno_)
-        /*fill this in*/
-        // construct a Person object with only a lastname
-        Person(const String& lastname_)
-        /*fill this in*/
+        : m_firstname(firstname_), m_lastname(lastname_), m_phoneno(phoneno_) {}
+    // construct a Person object with only a lastname
+    Person(const String& lastname_) : m_lastname(lastname_) {}
 
-        /* *** Disallow all forms of copy/move construction or assignment */
-        // These declarations help ensure that Person objects are unique,
-        // like they are in the problem domain
+    /* *** Disallow all forms of copy/move construction or assignment */
+    // These declarations help ensure that Person objects are unique,
+    // like they are in the problem domain
 
-        // Construct a Person object from a file stream in save format.
-        // Throw Error exception if invalid data discovered in file.
-        // No check made for whether the Person already exists or not.
-        // Input for a member variable value is read directly into the member variable.
-        Person(std::ifstream& is);
+    // Construct a Person object from a file stream in save format.
+    // Throw Error exception if invalid data discovered in file.
+    // No check made for whether the Person already exists or not.
+    // Input for a member variable value is read directly into the member variable.
+    Person(std::ifstream& is);
 
     // Accessors
-    String get_lastname() const
-    {/*fill this in*/
+    String get_lastname() const {
+        return m_lastname;
     }
 
     // Write a Person's data to a stream in save format with final endl.
     void save(std::ostream& os) const;
 
     // This operator defines the order relation between Persons, based just on the last name
-    bool operator< (const Person& rhs) const
-    {/*fill this in*/
+    bool operator< (const Person& rhs) const {
+        return m_lastname < rhs.m_lastname;
     }
 
-    /* *** provide in a friend declaration for the output operator */
+    friend std::ostream& operator<< (std::ostream&, const Person&);
 
 private:
     Person(const Person& person) = delete;
@@ -50,7 +49,6 @@ private:
     String m_firstname;
     String m_lastname;
     String m_phoneno;
-
 };
 
 
