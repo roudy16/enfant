@@ -215,7 +215,9 @@ std::istream& operator>> (std::istream& is, String& str) {
     str.clear();
 
     // Skip initial whitespace
-    while (isspace(is.peek())) { is.get(); }
+    while (isspace(is.peek())) {
+        is.ignore();
+    }
 
     // Read characters into str until whitespace is found
     while (!isspace(is.peek())) {

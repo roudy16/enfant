@@ -12,19 +12,19 @@ of type T by dereferencing the pointers and applying T's less-than operator.
 For example:
 
     // Thing objects in order by Thing::operator<.
- 	Ordered_list<Thing, Less_than_ref> ol_things;
- 
-	// the same as above, by default
-	Ordered_list<Thing> ol_things;	
+    Ordered_list<Thing, Less_than_ref> ol_things;
+
+    // the same as above, by default
+    Ordered_list<Thing> ol_things;
     
     // Thing pointers in order by Thing::operator< applied to dereferenced pointers.
     Ordered_list<Thing*, Less_than_ptrs> ol_things;
 
     // Thing pointers in order by a custom ordering.
- 	Ordered_list<Thing*, My_ordering_class> ol_things;
-	
-The only way to add to the list is with the insert function, which  automatically puts 
-the new item in the proper place in the list using the ordering function to determine 
+    Ordered_list<Thing*, My_ordering_class> ol_things;
+
+The only way to add to the list is with the insert function, which automatically puts
+the new item in the proper place in the list using the ordering function to determine
 the point of insertion.
 
 The iterators encapsulate a pointer to the list nodes, and are a public class nested 
@@ -90,12 +90,6 @@ All Ordered_list constructors and the destructor increment/decrement g_Ordered_l
 The list Node constructors and destructor increment/decrement g_Ordered_list_Node_count.
 */
 
-/* *** NOTE: If there is a comment "fill this in" remove the comment and replace
-it with the proper code here in the header file.  
-
-Comments starting with "***" are instructions to you - remove them from your finished code.
-Remove this comment too. */
-
 
 #ifndef ORDERED_LIST_H
 #define ORDERED_LIST_H
@@ -111,20 +105,22 @@ Remove this comment too. */
 // a const member function of the Ordered_list class.
 
 // Hack for developing in Visual Studio versions that don't support noexcept
-#if (_MSC_VER < 1900)
-#define noexcept 
+#ifdef _MSC_VER
+    #if (_MSC_VER < 1900)
+    #define noexcept 
+    #endif
 #endif
 
 // Compare two objects (passed by const&) using T's operator<
 template<typename T>
 struct Less_than_ref {
-	bool operator() (const T& t1, const T& t2) const {return t1 < t2;}
+    bool operator() (const T& t1, const T& t2) const { return t1 < t2; }
 };
 
 // Compare two pointers (T is a pointer type) using *T's operator<
 template<typename T>
 struct Less_than_ptr {
-	bool operator()(const T p1, const T p2) const {return *p1 < *p2;}
+    bool operator()(const T p1, const T p2) const { return *p1 < *p2; }
 };
 
 
@@ -145,40 +141,47 @@ class Ordered_list;
 template<typename T>
 class Node {
 private:
-	// declare the client class as a friend - note we use different template parameter names here
-	template<typename A, typename B> friend class Ordered_list;
+    // declare the client class as a friend - note we use different template parameter names here
+    template<typename A, typename B> friend class Ordered_list;
 
-	// Construct a node containing a copy of the T data; the copy operation
-	// might throw an exception, so the basic and strong guarantee should
-	// be satisfied as long as the copy is attempted before the containing list is modified.
-	Node(const T& new_datum, Node* new_prev, Node* new_next) :
-		datum(new_datum), prev(new_prev), next(new_next)
-		{g_Ordered_list_Node_count++;}
+    // Construct a node containing a copy of the T data; the copy operation
+    // might throw an exception, so the basic and strong guarantee should
+    // be satisfied as long as the copy is attempted before the containing list is modified.
+    Node(const T& new_datum, Node* new_prev, Node* new_next)
+        : datum(new_datum), prev(new_prev), next(new_next)
+    {
+        g_Ordered_list_Node_count++;
+    }
 
-	// Move version of constructs a node using an rvalue reference to the new datum
-	// and move constructs the datum member variable from it, using its move constructor.
-	Node(T&& new_datum, Node* new_prev, Node* new_next) :
-		datum(std::move(new_datum)), prev(new_prev), next(new_next)
-		{g_Ordered_list_Node_count++;}
+    // Move version of constructs a node using an rvalue reference to the new datum
+    // and move constructs the datum member variable from it, using its move constructor.
+    Node(T&& new_datum, Node* new_prev, Node* new_next)
+        : datum(std::move(new_datum)), prev(new_prev), next(new_next)
+    {
+        g_Ordered_list_Node_count++;
+    }
 
-	// Copy constructor, move constructor, and dtor defined only to support allocation counting.
-	// Node copy constructor should provide the same basic and strong guarantee as Node construction.
-	Node(const Node& original) :
-		datum(original.datum), prev(original.prev), next(original.next)
-		{g_Ordered_list_Node_count++;}
+    // Copy constructor, move constructor, and dtor defined only to support allocation counting.
+    // Node copy constructor should provide the same basic and strong guarantee as Node construction.
+    Node(const Node& original)
+        : datum(original.datum), prev(original.prev), next(original.next)
+    {
+        g_Ordered_list_Node_count++;
+    }
 
-	// The following functions should not be needed and so are deleted
-	Node(Node&& original) = delete;
-	Node& operator= (const Node& rhs) = delete;
-	Node& operator= (Node&& rhs) = delete;
+    // The following functions should not be needed and so are deleted
+    Node(Node&& original) = delete;
+    Node& operator= (const Node& rhs) = delete;
+    Node& operator= (Node&& rhs) = delete;
 
-	// only defined to support allocation counting
-	~Node()
-		{g_Ordered_list_Node_count--;}
+    // only defined to support allocation counting
+    ~Node() {
+        g_Ordered_list_Node_count--;
+    }
 
-	T datum;
-	Node* prev; // pointer to previous node
-	Node* next; // pointer to next node
+    T datum;
+    Node* prev; // pointer to previous node
+    Node* next; // pointer to next node
 };
 
 
@@ -188,208 +191,232 @@ private:
 template<typename T, typename OF = Less_than_ref<T> >
 class Ordered_list {
 public:
-	// Default constructor creates an empty container that has an ordering function object
+    // Default constructor creates an empty container that has an ordering function object
     // of the type specified in the second template type parameter (OF).
-	Ordered_list();
-	
-	// Copy construct this list from another list by copying its data.
-	// The basic exception guarantee:
+    Ordered_list();
+
+    // Copy construct this list from another list by copying its data.
+    // The basic exception guarantee:
     // If an exception is thrown when the type T contents of a node are copied,
-	// any nodes already constructed are destroyed, so that no memory is leaked.
-	Ordered_list(const Ordered_list& original);
-	
-	// Move construct this list from another list by taking its data,
+    // any nodes already constructed are destroyed, so that no memory is leaked.
+    Ordered_list(const Ordered_list& original);
+
+    // Move construct this list from another list by taking its data,
     // leaving the original in an empty state (like when default constructed).
-	// Since no type T data is copied, no exceptions are possible,
+    // Since no type T data is copied, no exceptions are possible,
     // so the no-throw guarantee is made.
-	Ordered_list(Ordered_list&& original) noexcept;
-	
-	// Copy assign this list with a copy of another list, using the copy-swap idiom.
+    Ordered_list(Ordered_list&& original) noexcept;
+
+    // Copy assign this list with a copy of another list, using the copy-swap idiom.
     // Basic and strong exception guarantee:
-	// If an exception is thrown during the copy, no memory is leaked, and lhs is unchanged.
-	Ordered_list& operator= (const Ordered_list& rhs);
-	
+    // If an exception is thrown during the copy, no memory is leaked, and lhs is unchanged.
+    Ordered_list& operator= (const Ordered_list& rhs);
+
     // Move assignment operator simply swaps the current content with the rhs.
-	// Since no type T data is copied, no exceptions are possible,
+    // Since no type T data is copied, no exceptions are possible,
     // so the no-throw guarantee is made.
-	Ordered_list& operator= (Ordered_list&& rhs) noexcept;
+    Ordered_list& operator= (Ordered_list&& rhs) noexcept;
 
-	// deallocate all the nodes in this list
-	~Ordered_list();
-	
-	// Delete the nodes in the list, if any, and initialize it.
-	// No exceptions are supposed to happen so the no-throw guarantee is made.
-	void clear() noexcept;
+    // deallocate all the nodes in this list
+    ~Ordered_list();
 
-	// Return the number of nodes in the list
-	int size() const
-		{/* fill this in */}
+    // Delete the nodes in the list, if any, and initialize it.
+    // No exceptions are supposed to happen so the no-throw guarantee is made.
+    void clear() noexcept;
 
-	// Return true if the list is empty
-	bool empty() const
-		{/* fill this in */}
-		
-	// Iterator is a public nested class within Ordered_list.
-	// An Iterator object designates a Node by encapsulating a pointer to the Node, 
-	// and provides Standard Library-style operators for using, manipulating,
+    // Return the number of nodes in the list
+    int size() const {
+        return m_size;
+    }
+
+    // Return true if the list is empty
+    bool empty() const {
+        return m_size == 0;
+    }
+
+    // Iterator is a public nested class within Ordered_list.
+    // An Iterator object designates a Node by encapsulating a pointer to the Node, 
+    // and provides Standard Library-style operators for using, manipulating,
     // and comparing Iterators. This class is nested inside Ordered_list<> as
     // a public member; refer to as e.g. Ordered_list<int, My_of>::Iterator
-	class Iterator {
-		public:
-			// default initialize to nullptr
-			Iterator() :
-				node_ptr(nullptr)
-				{}
-				
-			// Overloaded dereferencing operators
-			// * returns a reference to the datum in the pointed-to node
-			T& operator* () const
-				{/* fill this in */}
-			// operator-> simply returns the address of the data in the pointed-to node.
-			// *** For this operator, the compiler reapplies the -> operator with the returned pointer.
-			/* *** definition supplied here because it is a special-case of operator overloading. */
-			T* operator-> () const
-				{assert(node_ptr); return &(node_ptr->datum);}
+    class Iterator {
+        public:
+            // default initialize to nullptr
+            Iterator() : node_ptr(nullptr) {}
 
-			// prefix ++ operator moves the iterator forward to point to the next node
-			// and returns this iterator.
-			Iterator& operator++ ()	// prefix
-				{	
-					/* fill this in */
-				}
-			// postfix ++ operator saves the current address for the pointed-to node,
-			// moves this iterator to point to the next node, and returns
-			// an interator pointing to the node at the saved address.
-			Iterator operator++ (int)	// postfix
-				{	
-					/* fill this in */
-				}
-			// Iterators are equal if they point to the same node
-			bool operator== (Iterator rhs) const
-				{/* fill this in */}
-			bool operator!= (Iterator rhs) const
-				{/* fill this in */}
-	
-			// *** here, declare the outer Ordered_list class as a friend		
+            // Overloaded dereferencing operators
+            // * returns a reference to the datum in the pointed-to node
+            T& operator* () const {
+                assert(node_ptr);
+                return node_ptr->datum;
+            }
 
-		private:
-			/* *** define here a private constructor for Iterator that takes a Node<T>* parameter.
-			Ordered_list can use this to create Iterators conveniently initialized to point to a Node.
-			It is private because the client code can't and shouldn't be using it - it isn't even supposed to
-			know about the Node objects.  */
-			/* *** you may have other private member functions, but not member variables */
-			Node<T> * node_ptr;
-		};
-	// end of nested Iterator class declaration
+            // operator-> simply returns the address of the data in the pointed-to node.
+            T* operator-> () const {
+                assert(node_ptr);
+                return &(node_ptr->datum);
+            }
 
-	// const_Iterator is a public nested class within Ordered_list.
-	// It behaves identically to an Iterator except that it cannot be used to modify
-	// the pointed-to data, as shown by its dereferencing operators returning const.
-	class const_Iterator {
-		public:
-			// default initialize to nullptr
-			const_Iterator() :
-				node_ptr(nullptr)
-				{}
+            // prefix ++ operator moves the iterator forward to point to the next node
+            // and returns this iterator.
+            Iterator& operator++ () { // prefix
+                assert(node_ptr);
+                node_ptr = node_ptr->next;
+                return *this;
+            }
 
-			// convert an Iterator into a const_Iterator
-			const_Iterator(Iterator original) :
-				node_ptr(original.node_ptr) {}
-		
-			// Overloaded dereferencing operators
-			// * returns a const reference to the datum in the pointed-to node
-			const T& operator* () const
-				{/* fill this in */}
-			// operator-> simply returns the address of the data in the pointed-to node.
-			// the compiler reapplies the -> operator with the returned pointer
-			const T* operator-> () const
-				{assert(node_ptr); return &(node_ptr->datum);}
+            // postfix ++ operator saves the current address for the pointed-to node,
+            // moves this iterator to point to the next node, and returns
+            // an interator pointing to the node at the saved address.
+            Iterator operator++ (int) { // postfix
+                assert(node_ptr);
+                Node<T>* temp_node_ptr = node_ptr;
+                node_ptr = node_ptr->next;
+                return Iterator(temp_node_ptr);
+            }
 
-			// prefix ++ operator moves the iterator forward to point to the next node
-			// and returns this iterator.
-			const_Iterator& operator++ ()	// prefix
-				{	
-					/* fill this in */
-				}
-			// postfix ++ operator saves the current address for the pointed-to node,
-			// moves this iterator to point to the next node, and returns
-			// an interator pointing to the node at the saved address.
-			const_Iterator operator++ (int)	// postfix
-				{	
-					/* fill this in */
-				}
-			// Iterators are equal if they point to the same node
-			bool operator== (const_Iterator rhs) const
-				{/* fill this in */}
-			bool operator!= (const_Iterator rhs) const
-				{/* fill this in */}
-	
-		// *** here, declare the outer Ordered_list class as a friend		
+            // Iterators are equal if they point to the same node
+            bool operator== (Iterator rhs) const {
+                return node_ptr == rhs.node_ptr;
+            }
+            bool operator!= (Iterator rhs) const {
+                return node_ptr != rhs.node_ptr;
+            }
 
-		private:
-			/* *** define here a private constructor for const_Iterator that takes a const Node<T>* parameter.
-			Ordered_list can use this to create const_Iterators conveniently initialized to point to a Node.
-			It is private because the client code can't and shouldn't be using it - it isn't even supposed to
-			know about the Node objects.  */
-			/* *** you may have other private member functions, but not member variables */
-			const Node<T> * node_ptr;
-		};
-	// end of nested const_Iterator class declaration
-	
-	
-	// Return an Iterator pointing to the first node.
+            friend class Ordered_list<T, OF>;
+
+        private:
+            Iterator(Node<T>*const node_ptr_in) : node_ptr(node_ptr_in) {}
+
+            /* *** you may have other private member functions, but not member variables */
+            Node<T> * node_ptr;
+        };
+    // end of nested Iterator class declaration
+
+    // const_Iterator is a public nested class within Ordered_list.
+    // It behaves identically to an Iterator except that it cannot be used to modify
+    // the pointed-to data, as shown by its dereferencing operators returning const.
+    class const_Iterator {
+        public:
+            // default initialize to nullptr
+            const_Iterator() : node_ptr(nullptr) {}
+
+            // convert an Iterator into a const_Iterator
+            const_Iterator(Iterator original) : node_ptr(original.node_ptr) {}
+
+            // Overloaded dereferencing operators
+            // * returns a const reference to the datum in the pointed-to node
+            const T& operator* () const {
+                assert(node_ptr);
+                return node_ptr->datum;
+            }
+
+            // operator-> simply returns the address of the data in the pointed-to node.
+            // the compiler reapplies the -> operator with the returned pointer
+            const T* operator-> () const {
+                assert(node_ptr);
+                return &(node_ptr->datum);
+            }
+
+            // prefix ++ operator moves the iterator forward to point to the next node
+            // and returns this iterator.
+            const_Iterator& operator++ () { // prefix
+                assert(node_ptr);
+                node_ptr = node_ptr->next;
+                return *this;
+            }
+
+            // postfix ++ operator saves the current address for the pointed-to node,
+            // moves this iterator to point to the next node, and returns
+            // an interator pointing to the node at the saved address.
+            const_Iterator operator++ (int) { // postfix
+                assert(node_ptr);
+                const Node<T>* temp_node_ptr = node_ptr;
+                node_ptr = node_ptr->next;
+                return const_Iterator(temp_node_ptr);
+            }
+
+            // Iterators are equal if they point to the same node
+            bool operator== (const_Iterator rhs) const {
+                return node_ptr == rhs.node_ptr;
+            }
+
+            bool operator!= (const_Iterator rhs) const {
+                return node_ptr != rhs.node_ptr;
+            }
+
+            friend class Ordered_list<T, OF>;
+
+        private:
+            const_Iterator(const Node<T>*const node_ptr_in) : node_ptr(node_ptr_in) {}
+
+            /* *** you may have other private member functions, but not member variables */
+            const Node<T> * node_ptr;
+        };
+    // end of nested const_Iterator class declaration
+
+
+    // Return an Iterator pointing to the first node.
     // If the list is empty, the begin Iterator points to "past the end"
-	Iterator begin() 
-		{/* fill this in */}
-	// Return an iterator pointing to "past the end".
-	Iterator end()
-		{return Iterator(nullptr);}	// same as next pointer of last node
+    Iterator begin() {
+        return Iterator(mp_first);
+    }
+    // Return an iterator pointing to "past the end".
+    Iterator end() {
+        return Iterator(nullptr); // same as next pointer of last node
+    }
 
-	// Return an const_Iterator pointing to the first node;
+    // Return an const_Iterator pointing to the first node;
     // If the list is empty, the Iterator points to "past the end"
-	const_Iterator begin() const
-		{/* fill this in */}
-	// return an iterator pointing to "past the end"
-	const_Iterator end() const
-		{/* fill this in */}
+    const_Iterator begin() const {
+        return const_Iterator(mp_first);
+    }
 
-	// The insert functions add the new datum to the list using the ordering function.
-	// If an "equal" object is already in the list, then the new datum object 
-	// is placed in the list before the "equal" one that is already there.
+    // return an iterator pointing to "past the end"
+    const_Iterator end() const {
+        return const_Iterator(nullptr);
+    }
+
+    // The insert functions add the new datum to the list using the ordering function.
+    // If an "equal" object is already in the list, then the new datum object 
+    // is placed in the list before the "equal" one that is already there.
     // A copy of the data object is made in the new list node.
-	void insert(const T& new_datum);
+    void insert(const T& new_datum);
     // This version of insert provides for moving the contents of a data object
     // into the new list node instead of copying it.
-	void insert(T&& new_datum);
-	
-	// The find function returns an iterator designating the node containing
+    void insert(T&& new_datum);
+
+    // The find function returns an iterator designating the node containing
     // the datum that according to the ordering function, is equal to the
     // supplied probe_datum; end() is returned if the node is not found.
-	// If more than one item is equal to the probe, the returned iterator
+    // If more than one item is equal to the probe, the returned iterator
     // points to the first one. If a matching item is not present, the scan is
     // terminated as soon as possible by detecting when the scan goes past where
     // the matching item would be.
-	Iterator find(const T& probe_datum) noexcept;
-	// The const version of find returns a const_Iterator
-	const_Iterator find(const T& probe_datum) const noexcept;
-	
-	// Delete the specified node.
-	// Caller is responsible for any required deletion of any pointed-to data beforehand.
-	// Do not attempt to dereference the iterator after calling this function - it
-	// is invalid after this function executes. The results are undefined if the
-    // Iterator does not point to an actual node, or the list is empty.
-	void erase(Iterator it) noexcept;
+    Iterator find(const T& probe_datum) noexcept;
+    // The const version of find returns a const_Iterator
+    const_Iterator find(const T& probe_datum) const noexcept;
 
-	// Interchange the member variable values of this list with the other list;
+    // Delete the specified node.
+    // Caller is responsible for any required deletion of any pointed-to data beforehand.
+    // Do not attempt to dereference the iterator after calling this function - it
+    // is invalid after this function executes. The results are undefined if the
+    // Iterator does not point to an actual node, or the list is empty.
+    void erase(Iterator it) noexcept;
+
+    // Interchange the member variable values of this list with the other list;
     // Only the pointers, size, and ordering_functions are interchanged;
     // no allocation or deallocation of list Nodes is done.
     // Thus the no-throw guarantee can be provided.
-	void swap(Ordered_list & other) noexcept;
+    void swap(Ordered_list & other) noexcept;
 
 private:
-	// member variable declaration for the ordering function object.
-	OF ordering_fo;
-	/* *** other private member variables and functions are your choice. */
+    // member variable declaration for the ordering function object.
+    OF ordering_fo;
+    /* *** other private member variables and functions are your choice. */
+
+    Node<T>* mp_first;
+    int      m_size;
 };
 
 // These function templates are given two iterators, usually .begin() and .end(),
@@ -403,8 +430,9 @@ private:
 template<typename IT, typename F>
 void apply(IT first, IT last, F function)
 {
-	for(; first != last; ++first)
-		function(*first);
+    for (; first != last; ++first) {
+        function(*first);
+    }
 }
 
 // the fourth parameter is used as the second argument of the function
@@ -426,10 +454,12 @@ void apply_arg_ref(IT first, IT last, F function, A& arg)
 template<typename IT, typename F>
 bool apply_if(IT first, IT last, F function)
 {
-	for(; first != last; ++first)
-		if(function(*first))
-			return true;
-	return false;
+    for (; first != last; ++first) {
+        if (function(*first)) {
+            return true;
+        }
+    }
+    return false;
 }
 
 // this function works like apply_if, with a fourth parameter used as the second
@@ -438,6 +468,15 @@ template<typename IT, typename F, typename A>
 bool apply_if_arg(IT first, IT last, F function, A arg)
 {
 // *** fill this in.
+    return false;
+}
+
+template<typename T, typename OF>
+Ordered_list<T, OF>::Ordered_list() : mp_first(nullptr), m_size(0) {}
+
+template<typename T, typename OF>
+Ordered_list<T, OF>::~Ordered_list() {
+
 }
 
 /* *** Put your code for Ordered_list member functions here, defined outside the class declaration.
@@ -446,9 +485,9 @@ For example:
 template<typename T, typename OF>
 void Ordered_list<T, OF>::erase(Iterator it)
 {
-	your code here
+    your code here
 }
- 
+
 */
 
 #endif // ORDERED_LIST_H

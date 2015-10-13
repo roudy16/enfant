@@ -1,6 +1,8 @@
 #ifndef PERSON_H
 #define PERSON_H
 
+#include "String.h"
+
 /* A Person object simply contains Strings for a person's data.
 Once created, the data cannot be modified. */
 

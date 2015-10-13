@@ -25,8 +25,11 @@ PROG = proj2exe
 
 default: $(PROG)
 
-stringtest: String.o Utility.o string_test.o
-	$(LD) $(LFLAGS) String.o Utility.o string_test.o -o stringtest
+strtest: String.o Utility.o string_test.o
+	$(LD) $(LFLAGS) String.o Utility.o string_test.o -o strtest
+
+ctest: String.o Utility.o container_test.o
+	$(LD) $(LFLAGS) String.o Utility.o container_test.o -o ctest
 
 $(PROG): $(OBJS)
 	$(LD) $(LFLAGS) $(OBJS) -o $(PROG)
@@ -55,7 +58,10 @@ Utility.o: Utility.cpp Utility.h
 string_test.o: string_test.cpp Utility.h String.h
 	$(CC) $(CFLAGS) string_test.cpp
 
+container_test.o: container_test.cpp Utility.h String.h Ordered_list.h
+	$(CC) $(CFLAGS) container_test.cpp
+
 clean:
-	rm -f *.o stringtest
+	rm -f *.o strtest ctest
 real_clean:
 	rm -rf *.o $(PROG)

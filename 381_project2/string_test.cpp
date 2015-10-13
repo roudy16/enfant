@@ -2,6 +2,7 @@
 #include <utility>
 #include <string>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 
@@ -24,15 +25,22 @@ int main() {
     str[3] = '\0';
     cout << str << " " << str.length() << endl;
 
-    cout << a.c_str() << " " << a.get_allocation() << endl;
-    cout << b.c_str() << " " << b.get_allocation() << endl;
-    cout << d.c_str() << " " << d.get_allocation() << endl;
+    cout << a << " " << a.get_allocation() << endl;
+    cout << b << " " << b.get_allocation() << endl;
+    cout << d << " " << d.get_allocation() << endl;
     d += e;
-    cout << d.c_str() << " " << d.get_allocation() << endl;
+    cout << d << " " << d.get_allocation() << endl;
     cout << d[3] << endl;
     cin >> c;
+    cin >> d;
     cout << c << " " << c.get_allocation() << endl;
+    cout << d << " " << d.get_allocation() << endl;
     cout << String::get_number() << "  " << String::get_total_allocation() << endl;
+    cout << "a: " << a.get_allocation() << endl;
+    cout << "b: " << b.get_allocation() << endl;
+    cout << "c: " << c.get_allocation() << endl;
+    cout << "d: " << d.get_allocation() << endl;
+    cout << "e: " << e.get_allocation() << endl;
 
     return 0;
 }

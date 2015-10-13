@@ -51,8 +51,10 @@ or assignment operator as part of their work.
 */
 
 // Hack for developing in Visual Studio versions that don't support noexcept
-#if (_MSC_VER < 1900)
-#define noexcept 
+#ifdef _MSC_VER
+    #if (_MSC_VER < 1900)
+    #define noexcept 
+    #endif
 #endif
 
 // Simple exception class for reporting String errors
