@@ -417,7 +417,9 @@ private:
 
     // Returns Iterator to first item that compares greater than or equal to
     // the probe datum when compared with ordering function or end() if none found
-    Iterator find_first_greater_equal(const T& probe_datum); 
+    Iterator find_first_greater_equal(const T& probe_datum) noexcept; 
+
+    void insert_helper(Node<T> *const new_node_ptr, const T &new_datum);
 
     Node<T>* mp_front;
     Node<T>* mp_back;
@@ -444,14 +446,18 @@ void apply(IT first, IT last, F function)
 template<typename IT, typename F, typename A>
 void apply_arg(IT first, IT last, F function, A arg)
 {
-// *** fill this in.
+    for (; first != last; ++first) {
+        function(*first, arg);
+    }
 }
 
 // this function templates accept the second argument by reference - useful for streams.
 template<typename IT, typename F, typename A>
 void apply_arg_ref(IT first, IT last, F function, A& arg)
 {
-// *** fill this in.
+    for (; first != last; ++first) {
+        function(*first, arg);
+    }
 }
 
 // the function must return true/false; apply the function until true is returned,
@@ -472,7 +478,11 @@ bool apply_if(IT first, IT last, F function)
 template<typename IT, typename F, typename A>
 bool apply_if_arg(IT first, IT last, F function, A arg)
 {
-// *** fill this in.
+    for (; first != last; ++first) {
+        if (function(*first, arg)) {
+            return true;
+        }
+    }
     return false;
 }
 
@@ -481,15 +491,13 @@ Ordered_list<T, OF>::Ordered_list() : mp_front(nullptr), mp_back(nullptr), m_siz
 
 template<typename T, typename OF>
 Ordered_list<T, OF>::~Ordered_list() {
-    for (auto iter = begin(); iter != end(); ++iter) {
-        erase(iter);
-    }
+    clear();
 }
 
-// Copy construct this list from another list by copying its data.
-// The basic exception guarantee:
-// If an exception is thrown when the type T contents of a node are copied,
-// any nodes already constructed are destroyed, so that no memory is leaked.
+/*  #######################################
+    DEFINITIONS OF CLASS TEMPLATE FUNCTIONS
+    #######################################  */
+
 template<typename T, typename OF>
 Ordered_list<T, OF>::Ordered_list(const Ordered_list& original)
     : mp_front(nullptr), mp_back(nullptr), m_size(original.m_size)
@@ -526,59 +534,90 @@ Ordered_list<T, OF>::Ordered_list(const Ordered_list& original)
     mp_back = cur_node_ptr;
 }
 
-// Move construct this list from another list by taking its data,
-// leaving the original in an empty state (like when default constructed).
-// Since no type T data is copied, no exceptions are possible,
-// so the no-throw guarantee is made.
 template<typename T, typename OF>
-Ordered_list<T, OF>::Ordered_list(Ordered_list&& original) noexcept {
-
+Ordered_list<T, OF>::Ordered_list(Ordered_list&& original) noexcept 
+    : ordering_fo(original.ordering_fo), mp_front(original.mp_front),
+      mp_back(original.mp_back), m_size(original.m_size)
+{
+    original.mp_front = nullptr;
+    original.mp_back = nullptr;
+    original.m_size = 0;
 }
 
-// Copy assign this list with a copy of another list, using the copy-swap idiom.
-// Basic and strong exception guarantee:
-// If an exception is thrown during the copy, no memory is leaked, and lhs is unchanged.
 template<typename T, typename OF>
 Ordered_list<T, OF>& Ordered_list<T, OF>::operator= (const Ordered_list& rhs) {
+    Ordered_list new_olist(rhs);
+    swap(new_olist);
     return *this;
 }
 
-// Move assignment operator simply swaps the current content with the rhs.
-// Since no type T data is copied, no exceptions are possible,
-// so the no-throw guarantee is made.
 template<typename T, typename OF>
 Ordered_list<T, OF>& Ordered_list<T, OF>::operator= (Ordered_list&& rhs) noexcept {
+    swap(rhs);
     return *this;
 }
 
-// Delete the nodes in the list, if any, and initialize it.
-// No exceptions are supposed to happen so the no-throw guarantee is made.
 template<typename T, typename OF>
 void Ordered_list<T, OF>::clear() noexcept {
+    auto iter = begin();
+    while (iter != end()) {
+        erase(iter++);
+    }
 
+    mp_front = nullptr;
+    mp_back = nullptr;
+    m_size = 0;
 }
 
-// The insert functions add the new datum to the list using the ordering function.
-// If an "equal" object is already in the list, then the new datum object 
-// is placed in the list before the "equal" one that is already there.
-// A copy of the data object is made in the new list node.
+template<typename T, typename OF>
+void Ordered_list<T, OF>::insert_helper(Node<T> *const new_node_ptr, const T &new_datum) {
+    if (empty()) {
+        mp_front = new_node_ptr;
+        mp_back = new_node_ptr;
+        ++m_size;
+        return;
+    }
+
+    auto iter = find_first_greater_equal(new_datum);
+
+    if (iter == end()) {
+        mp_back->next = new_node_ptr;
+        new_node_ptr->prev = mp_back;
+        mp_back = new_node_ptr;
+    }
+    else if (iter == begin()) {
+        mp_front->prev = new_node_ptr;
+        new_node_ptr->next = mp_front;
+        mp_front = new_node_ptr;
+    }
+    else {
+        iter.node_ptr->prev->next = new_node_ptr;
+        new_node_ptr->prev = iter.node_ptr->prev;
+        new_node_ptr->next = iter.node_ptr;
+        iter.node_ptr->prev = new_node_ptr;
+    }
+
+    ++m_size;
+}
+
 template<typename T, typename OF>
 void Ordered_list<T, OF>::insert(const T& new_datum) {
-    auto iter = find_first_greater_equal(new_datum);
+    Node<T>* new_node_ptr = new Node<T>(new_datum, nullptr, nullptr);
+    insert_helper(new_node_ptr, new_datum);
 }
 
-// This version of insert provides for moving the contents of a data object
-// into the new list node instead of copying it.
 template<typename T, typename OF>
 void Ordered_list<T, OF>::insert(T&& new_datum) {
-
+    Node<T>* new_node_ptr = new Node<T>(new_datum, nullptr, nullptr);
+    insert_helper(new_node_ptr, new_datum);
 }
 
 template<typename T, typename OF>
-typename Ordered_list<T, OF>::Iterator Ordered_list<T, OF>::find_first_greater_equal(const T& probe_datum) {
+auto Ordered_list<T, OF>::find_first_greater_equal(const T& probe_datum) noexcept ->Iterator {
     Iterator iter = begin();
 
     while (iter != end()) {
+        // iter's datum compares as higher than probe
         if (!ordering_fo(*iter, probe_datum)) {
             break;
         }
@@ -588,20 +627,14 @@ typename Ordered_list<T, OF>::Iterator Ordered_list<T, OF>::find_first_greater_e
     return iter;
 }
 
-// The find function returns an iterator designating the node containing
-// the datum that according to the ordering function, is equal to the
-// supplied probe_datum; end() is returned if the node is not found.
-// If more than one item is equal to the probe, the returned iterator
-// points to the first one. If a matching item is not present, the scan is
-// terminated as soon as possible by detecting when the scan goes past where
-// the matching item would be.
 template<typename T, typename OF>
-typename Ordered_list<T, OF>::Iterator Ordered_list<T, OF>::find(const T& probe_datum) noexcept {
+auto Ordered_list<T, OF>::find(const T& probe_datum) noexcept ->Iterator {
     auto iter = find_first_greater_equal(probe_datum);
     if (iter == end()) {
         return end();
     }
 
+    // probe compares as higher than iter's datum
     if (!ordering_fo(probe_datum, *iter)) {
         return iter;
     }
@@ -609,30 +642,23 @@ typename Ordered_list<T, OF>::Iterator Ordered_list<T, OF>::find(const T& probe_
     return end();
 }
 
-// The const version of find returns a const_Iterator
 template<typename T, typename OF>
-typename Ordered_list<T, OF>::const_Iterator Ordered_list<T, OF>::find(const T& probe_datum) const noexcept {
+auto Ordered_list<T, OF>::find(const T& probe_datum) const noexcept ->const_Iterator {
     // cast used to call other find(), converts back to const_Iterator on return
     return static_cast<Iterator&>(find(probe_datum)); 
 }
 
-// Delete the specified node.
-// Caller is responsible for any required deletion of any pointed-to data beforehand.
-// Do not attempt to dereference the iterator after calling this function - it
-// is invalid after this function executes. The results are undefined if the
-// Iterator does not point to an actual node, or the list is empty.
 template<typename T, typename OF>
 void Ordered_list<T, OF>::erase(Iterator it) noexcept {
     delete it.node_ptr;
 }
 
-// Interchange the member variable values of this list with the other list;
-// Only the pointers, size, and ordering_functions are interchanged;
-// no allocation or deallocation of list Nodes is done.
-// Thus the no-throw guarantee can be provided.
 template<typename T, typename OF>
 void Ordered_list<T, OF>::swap(Ordered_list & other) noexcept {
-
+    std::swap(ordering_fo, other.ordering_fo);
+    std::swap(mp_front, other.mp_front);
+    std::swap(mp_back, other.mp_back);
+    std::swap(m_size, other.m_size);
 }
 
 

@@ -15,7 +15,7 @@ LD = g++
 # -Wall asks for certain warnings of possible errors
 # -c is required to specify compile-only (no linking)
 
-CFLAGS = -std=c++14 -pedantic-errors -Wall -c
+CFLAGS = -std=c++11 -pedantic-errors -Wall -c
 
 #no load flags defined, but -l would be used to include a special library
 LFLAGS = 
