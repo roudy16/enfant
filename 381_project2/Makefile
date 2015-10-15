@@ -34,6 +34,12 @@ ctest: String.o Utility.o container_test.o p2_globals.o
 ptest: String.o Utility.o Person_test.o p2_globals.o Person.o
 	$(LD) $(LFLAGS) String.o Utility.o Person.o Person_test.o p2_globals.o -o ptest
 
+mtest: String.o Utility.o Meeting_test.o p2_globals.o Meeting.o Person.o
+	$(LD) $(LFLAGS) String.o Utility.o Person.o Meeting.o Meeting_test.o p2_globals.o -o mtest
+
+rtest: String.o Utility.o Room_test.o p2_globals.o Person.o Room.o Meeting.o
+	$(LD) $(LFLAGS) String.o Utility.o Person.o Room_test.o p2_globals.o Meeting.o -o rtest
+
 $(PROG): $(OBJS)
 	$(LD) $(LFLAGS) $(OBJS) -o $(PROG)
 
@@ -61,13 +67,19 @@ Utility.o: Utility.cpp Utility.h
 string_test.o: string_test.cpp Utility.h String.h
 	$(CC) $(CFLAGS) string_test.cpp
 
-container_test.o: container_test.cpp Utility.h String.h Ordered_list.h
+container_test.o: container_test.cpp Utility.h String.h Ordered_list.h p2_globals.h
 	$(CC) $(CFLAGS) container_test.cpp
 
-Person_test.o: Person_test.cpp Utility.h String.h Ordered_list.h Person.h
+Person_test.o: Person_test.cpp Utility.h String.h Ordered_list.h Person.h p2_globals.h
 	$(CC) $(CFLAGS) Person_test.cpp
 
+Meeting_test.o: Meeting_test.cpp Utility.h String.h Ordered_list.h Meeting.h p2_globals.h
+	$(CC) $(CFLAGS) Meeting_test.cpp
+
+Room_test.o: Room_test.cpp Utility.h String.h Ordered_list.h Room.h Meeting.h p2_globals.h
+	$(CC) $(CFLAGS) Room_test.cpp
+
 clean:
-	rm -f *.o strtest ctest ptest
+	rm -f *.o strtest ctest ptest mtest rtest
 real_clean:
 	rm -rf *.o $(PROG)

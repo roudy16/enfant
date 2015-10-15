@@ -1,6 +1,8 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
+class Person;
+
 /* Utility functions, constants, and classes used by more than one other modules */
 
 
@@ -12,6 +14,6 @@ struct Error {
 	const char* msg;
 };
 
-/*  *** add any other functions or declarations here and define in Utility.cpp */
+bool person_to_String_comp(String lastname, const Person *const person_ptr);
 
 #endif // UTILITY_H

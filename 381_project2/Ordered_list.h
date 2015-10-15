@@ -499,7 +499,6 @@ Ordered_list<T, OF>::Ordered_list() : mp_front(nullptr), mp_back(nullptr), m_siz
 template<typename T, typename OF>
 Ordered_list<T, OF>::~Ordered_list() {
     clear();
-    --g_Ordered_list_count;
 }
 
 template<typename T, typename OF>
@@ -580,7 +579,7 @@ void Ordered_list<T, OF>::clear() noexcept {
 
     mp_front = nullptr;
     mp_back = nullptr;
-    m_size = 0;
+    assert(m_size == 0);
 }
 
 template<typename T, typename OF>
@@ -688,7 +687,36 @@ auto Ordered_list<T, OF>::find(const T& probe_datum) const noexcept ->const_Iter
 
 template<typename T, typename OF>
 void Ordered_list<T, OF>::erase(Iterator it) noexcept {
+    assert(it.node_ptr);
+
+    Node<T>*const prev = it.node_ptr->prev;
+    Node<T>*const next = it.node_ptr->next;
+
+    if (prev) {
+        // erase a node in the middle of list
+        if (next) {
+            next->prev = prev;
+        }
+        else { // Node must be at back of list
+            assert(mp_back == it.node_ptr);
+            mp_back = prev;
+        }
+
+        prev->next = next;
+    }
+    else {
+        assert(mp_front == it.node_ptr);
+        // Node must be front of list
+        mp_front = next;
+
+        if (next) {
+            next->prev = prev;
+        }
+    }
+
     delete it.node_ptr;
+    --m_size;
+    --g_Ordered_list_Node_count;
 }
 
 template<typename T, typename OF>

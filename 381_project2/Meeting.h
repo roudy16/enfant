@@ -57,14 +57,13 @@ public:
     // This operator defines the order relation between meetings, based just on the time
     bool operator< (const Meeting& other) const;
 
-    /* *** provide a friend declaration for the output operator */
     friend std::ostream& operator<< (std::ostream&, const Meeting&);
 private:
     using Participants_t = Ordered_list<const Person*, Less_than_ptr<const Person*>>;
     Participants_t participants;
 
-    String m_topic;
     int m_time;
+    String m_topic;
 };
 
 // Print the Meeting data as follows:
