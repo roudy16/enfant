@@ -35,6 +35,9 @@ int main() {
 
     apply_arg_ref(il1.begin(), il1.end(), print_ol<int>, cout);
 
+    auto obj = il1.find(110);
+    cout << *obj;
+
 
     return 0;
 }

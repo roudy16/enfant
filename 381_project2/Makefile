@@ -31,6 +31,9 @@ strtest: String.o Utility.o string_test.o
 ctest: String.o Utility.o container_test.o p2_globals.o
 	$(LD) $(LFLAGS) String.o Utility.o container_test.o p2_globals.o -o ctest
 
+ptest: String.o Utility.o Person_test.o p2_globals.o Person.o
+	$(LD) $(LFLAGS) String.o Utility.o Person.o Person_test.o p2_globals.o -o ptest
+
 $(PROG): $(OBJS)
 	$(LD) $(LFLAGS) $(OBJS) -o $(PROG)
 
@@ -61,7 +64,10 @@ string_test.o: string_test.cpp Utility.h String.h
 container_test.o: container_test.cpp Utility.h String.h Ordered_list.h
 	$(CC) $(CFLAGS) container_test.cpp
 
+Person_test.o: Person_test.cpp Utility.h String.h Ordered_list.h Person.h
+	$(CC) $(CFLAGS) Person_test.cpp
+
 clean:
-	rm -f *.o strtest ctest
+	rm -f *.o strtest ctest ptest
 real_clean:
 	rm -rf *.o $(PROG)

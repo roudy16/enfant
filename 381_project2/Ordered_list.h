@@ -418,6 +418,7 @@ private:
     // Returns Iterator to first item that compares greater than or equal to
     // the probe datum when compared with ordering function or end() if none found
     Iterator find_first_greater_equal(const T& probe_datum) noexcept; 
+    const_Iterator find_first_greater_equal(const T& probe_datum) const noexcept; 
 
     void insert_helper(Node<T> *const new_node_ptr, const T &new_datum);
 
@@ -486,17 +487,20 @@ bool apply_if_arg(IT first, IT last, F function, A arg)
     return false;
 }
 
+/*  #######################################
+    DEFINITIONS OF CLASS TEMPLATE FUNCTIONS
+    #######################################  */
+
 template<typename T, typename OF>
-Ordered_list<T, OF>::Ordered_list() : mp_front(nullptr), mp_back(nullptr), m_size(0) {}
+Ordered_list<T, OF>::Ordered_list() : mp_front(nullptr), mp_back(nullptr), m_size(0) {
+    ++g_Ordered_list_count;
+}
 
 template<typename T, typename OF>
 Ordered_list<T, OF>::~Ordered_list() {
     clear();
+    --g_Ordered_list_count;
 }
-
-/*  #######################################
-    DEFINITIONS OF CLASS TEMPLATE FUNCTIONS
-    #######################################  */
 
 template<typename T, typename OF>
 Ordered_list<T, OF>::Ordered_list(const Ordered_list& original)
@@ -509,15 +513,21 @@ Ordered_list<T, OF>::Ordered_list(const Ordered_list& original)
     Node<T>* cur_node_ptr = nullptr;
 
     try {
+        // Copy front Node
         auto original_iter = original.begin();
         mp_front = new Node<T>(*original_iter, nullptr, nullptr);
         cur_node_ptr = mp_front;
+
+        ++g_Ordered_list_Node_count;
         ++original_iter;
 
+        // Copy all subsequent Nodes
         for (; original_iter != original.end(); ++original_iter) {
             Node<T>* new_node_ptr = new Node<T>(*original_iter, cur_node_ptr, nullptr);
             cur_node_ptr->next = new_node_ptr;
             cur_node_ptr = new_node_ptr;
+
+            ++g_Ordered_list_Node_count;
             ++original_iter;
         }
     }
@@ -527,11 +537,14 @@ Ordered_list<T, OF>::Ordered_list(const Ordered_list& original)
             Node<T>* to_delete = cur_node;
             cur_node = cur_node->next;
             delete to_delete;
+
+            --g_Ordered_list_Node_count;
         }
         throw;
     }
 
     mp_back = cur_node_ptr;
+    ++g_Ordered_list_count;
 }
 
 template<typename T, typename OF>
@@ -542,6 +555,7 @@ Ordered_list<T, OF>::Ordered_list(Ordered_list&& original) noexcept
     original.mp_front = nullptr;
     original.mp_back = nullptr;
     original.m_size = 0;
+    ++g_Ordered_list_count;
 }
 
 template<typename T, typename OF>
@@ -613,8 +627,23 @@ void Ordered_list<T, OF>::insert(T&& new_datum) {
 }
 
 template<typename T, typename OF>
-auto Ordered_list<T, OF>::find_first_greater_equal(const T& probe_datum) noexcept ->Iterator {
+auto Ordered_list<T, OF>::find_first_greater_equal(const T& probe_datum) noexcept ->Iterator{
     Iterator iter = begin();
+
+    while (iter != end()) {
+        // iter's datum compares as higher than probe
+        if (!ordering_fo(*iter, probe_datum)) {
+            break;
+        }
+        ++iter;
+    }
+
+    return iter;
+}
+
+template<typename T, typename OF>
+auto Ordered_list<T, OF>::find_first_greater_equal(const T& probe_datum) const noexcept ->const_Iterator{
+    const_Iterator iter = begin();
 
     while (iter != end()) {
         // iter's datum compares as higher than probe
@@ -644,8 +673,17 @@ auto Ordered_list<T, OF>::find(const T& probe_datum) noexcept ->Iterator {
 
 template<typename T, typename OF>
 auto Ordered_list<T, OF>::find(const T& probe_datum) const noexcept ->const_Iterator {
-    // cast used to call other find(), converts back to const_Iterator on return
-    return static_cast<Iterator&>(find(probe_datum)); 
+    auto iter = find_first_greater_equal(probe_datum);
+    if (iter == end()) {
+        return end();
+    }
+
+    // probe compares as higher than iter's datum
+    if (!ordering_fo(probe_datum, *iter)) {
+        return iter;
+    }
+
+    return end();
 }
 
 template<typename T, typename OF>

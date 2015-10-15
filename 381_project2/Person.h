@@ -19,10 +19,6 @@ public:
     // construct a Person object with only a lastname
     Person(const String& lastname_) : m_lastname(lastname_) {}
 
-    /* *** Disallow all forms of copy/move construction or assignment */
-    // These declarations help ensure that Person objects are unique,
-    // like they are in the problem domain
-
     // Construct a Person object from a file stream in save format.
     // Throw Error exception if invalid data discovered in file.
     // No check made for whether the Person already exists or not.
@@ -47,6 +43,7 @@ public:
 private:
     Person(const Person& person) = delete;
     Person(Person&& person) = delete;
+    Person& operator=(const Person& rhs) = delete;
 
     String m_firstname;
     String m_lastname;
