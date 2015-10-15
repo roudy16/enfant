@@ -15,14 +15,13 @@ using Rooms_t = Ordered_list < Room* const, Less_than_ptr<Room* const> > ;
 using People_t = Ordered_list < const Person*, Less_than_ptr<const Person*> > ;
 using std::cout;
 using std::cin;
+using std::endl;
 
 // We will use the compiler created default/move ctors, we must define our
 // own dtor to clean up allocated rooms and people.
 struct Schedule {
     Rooms_t m_rooms;
     People_t m_people;
-    int m_number_Rooms;
-    int m_number_People;
 
     ~Schedule();
 };
@@ -32,7 +31,7 @@ struct Command_pair {
     char command1;
 };
 
-// We can throw this and handle this specific exception accordinly
+// We can throw this and handle this specific exception accordingly
 struct Unrecognized_command_exception {};
 
 
@@ -63,8 +62,6 @@ static void* find_object_arg(const Ordered_list<T, OF> container, const void* ar
 // non-zero if argument is valid, returns zero otherwise.
 static bool check_room_range_valid(const int room_number);
 static bool check_time_range_valid(int time);
-
-static void load_data_error(Schedule& bad_schedule, std::ifstream& ifs);
 
 
 /* ########################### */
@@ -299,37 +296,122 @@ static void print_person_command(const Schedule& schedule){
         throw Error("No person with that name!");
     }
     else {
-        cout << **iter;
+        cout << **iter << endl;
     }
 }
 
 static void print_room_command(const Schedule& schedule){
+    int room_number;
+    cin >> room_number;
 
+    if (!check_room_range_valid(room_number)) {
+        discard_rest_of_line(cin);
+        throw Error("Room number is not in range!");
+    }
+
+    Room probe_room(room_number);
+    auto iter = schedule.m_rooms.find(&probe_room);
+    if (iter == schedule.m_rooms.end()) {
+        discard_rest_of_line(cin);
+        throw Error("No room with that number!");
+    }
+    else {
+        cout << **iter;
+    }
 }
 
-static void print_meeting_command(const Schedule& schedule){
 
+static void print_meeting_command(const Schedule& schedule){
+    int room_number;
+    int meeting_time;
+
+    cin >> room_number;
+    if (!check_room_range_valid(room_number)) {
+        discard_rest_of_line(cin);
+        throw Error("Room number is not in range!");
+    }
+
+    Room probe_room(room_number);
+    auto room_iter = schedule.m_rooms.find(&probe_room);
+    if (room_iter == schedule.m_rooms.end()) {
+        discard_rest_of_line(cin);
+        throw Error("No room with that number!");
+    }
+
+
+    cin >> meeting_time;
+    if (!check_time_range_valid(meeting_time)) {
+        discard_rest_of_line(cin);
+        throw Error("Time is not in range!");
+    }
+
+    try {
+        Meeting& meeting = (*room_iter)->get_Meeting(meeting_time);
+        cout << meeting;
+    }
+    catch (Error& e){
+        discard_rest_of_line(cin);
+        throw;
+    }
 }
 
 static void print_all_meetings(const Schedule& schedule){
-
+    if (schedule.m_rooms.empty()) {
+        cout << "List of rooms is empty" << endl;
+    }
+    else {
+        for (auto room_p : schedule.m_rooms) {
+            cout << *room_p;
+        }
+    }
 }
 
 static void print_all_people(const Schedule& schedule){
-
+    if (schedule.m_people.empty()) {
+        cout << "List of people is empty" << endl;
+    }
+    else {
+        for (auto person_p : schedule.m_people) {
+            cout << *person_p << endl;
+        }
+    }
 }
 
 static void print_memory_allocations(const Schedule& schedule){
+    int total_meetings = 0;
+    for (auto room_p : schedule.m_rooms) {
+        total_meetings += room_p->get_number_Meetings();
+    }
 
+    cout << "Memory allocations:" << '\n';
+    cout << "Strings: " << String::get_number() << " with "
+         << String::get_total_allocation() << " bytes total" << '\n';
+    cout << "Persons: " << schedule.m_people.size() << '\n';
+    cout << "Meetings: " << total_meetings << '\n';
+    cout << "Rooms: " << schedule.m_rooms.size() << '\n';
+    cout << "Lists: " << g_Ordered_list_count << '\n';
+    cout << "List Nodes: " << g_Ordered_list_Node_count << endl;
 }
 
 
 static void add_to_people_list(Schedule& schedule){
+    String firstname, lastname, phoneno;
 
+    cin >> firstname >> lastname >> phoneno;
+
+    Person probe(lastname);
+    auto iter = schedule.m_people.find(&probe);
+    if (iter != schedule.m_people.end()) {
+        discard_rest_of_line(cin);
+        throw Error("There is already a person with this last name!\n");
+    }
+
+    schedule.m_people.insert(new Person(firstname, lastname, phoneno));
+    cout << "Person " << lastname << " added" << endl;
 }
 
 static void add_room(Schedule& schedule){
-
+    int room_number;
 }
 
 static void add_meeting(Schedule& schedule){
@@ -391,7 +473,4 @@ Schedule::~Schedule() {
     for (auto p : m_people) {
         delete p;
     }
-
-    m_number_People = 0;
-    m_number_Rooms = 0;
 }
