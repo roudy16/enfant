@@ -15,7 +15,7 @@ LD = g++
 # -Wall asks for certain warnings of possible errors
 # -c is required to specify compile-only (no linking)
 
-CFLAGS = -std=c++11 -pedantic-errors -Wall -c
+CFLAGS = -std=c++14 -g -pedantic-errors -Wall -c
 
 #no load flags defined, but -l would be used to include a special library
 LFLAGS = 
@@ -38,7 +38,7 @@ mtest: String.o Utility.o Meeting_test.o p2_globals.o Meeting.o Person.o
 	$(LD) $(LFLAGS) String.o Utility.o Person.o Meeting.o Meeting_test.o p2_globals.o -o mtest
 
 rtest: String.o Utility.o Room_test.o p2_globals.o Person.o Room.o Meeting.o
-	$(LD) $(LFLAGS) String.o Utility.o Person.o Room_test.o p2_globals.o Meeting.o -o rtest
+	$(LD) $(LFLAGS) String.o Utility.o Person.o Room.o Room_test.o p2_globals.o Meeting.o -o rtest
 
 $(PROG): $(OBJS)
 	$(LD) $(LFLAGS) $(OBJS) -o $(PROG)

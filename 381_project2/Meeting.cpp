@@ -3,7 +3,6 @@
 #include <fstream>
 #include <ostream>
 
-using std::flush;
 using std::endl;
 using std::ostream;
 using std::ifstream;
@@ -59,14 +58,21 @@ void Meeting::save(ostream& os) const {
     os << m_time << ' ' << m_topic << ' ' << participants.size() << '\n';
 
     for (auto p : participants) {
-        os << *p << '\n';
+        os << *p << endl;
     }
+}
 
-    os << flush;
+static int convert_time_to_24_hour(int time) {
+    if (time < k_EARLIEST_MEETING_TIME) {
+        time += 12;
+    }
+    return time;
 }
 
 bool Meeting::operator< (const Meeting& other) const {
-    return m_time < other.m_time;
+    const int lhs = convert_time_to_24_hour(m_time);
+    const int rhs = convert_time_to_24_hour(other.m_time);
+    return lhs < rhs;
 }
 
 ostream& operator<< (ostream& os, const Meeting& meeting) {

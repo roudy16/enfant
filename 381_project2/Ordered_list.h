@@ -527,7 +527,6 @@ Ordered_list<T, OF>::Ordered_list(const Ordered_list& original)
             cur_node_ptr = new_node_ptr;
 
             ++g_Ordered_list_Node_count;
-            ++original_iter;
         }
     }
     catch (...) {

@@ -181,8 +181,11 @@ String& String::operator += (const String& rhs) {
         grow(required_allocation);
     }
 
-    strncpy(mp_cstring + m_length, rhs.mp_cstring, rhs.m_length + 1);
+    // Handles case where String appends itself: str += str 
+    strncpy(mp_cstring + m_length, rhs.mp_cstring, rhs.m_length);
     m_length += rhs.m_length;
+    mp_cstring[m_length] = '\0';
+
     return *this;
 }
 
@@ -222,6 +225,10 @@ std::istream& operator>> (std::istream& is, String& str) {
     // Read characters into str until whitespace is found
     while (!isspace(is.peek())) {
         str += is.get();
+        if (!is) {
+            //TODO throw input error
+            throw;
+        }
     }
 
     return is;
