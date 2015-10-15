@@ -80,6 +80,6 @@ Room_test.o: Room_test.cpp Utility.h String.h Ordered_list.h Room.h Meeting.h p2
 	$(CC) $(CFLAGS) Room_test.cpp
 
 clean:
-	rm -f *.o strtest ctest ptest mtest rtest
+	rm -f *.o strtest ctest ptest mtest rtest $(PROG)
 real_clean:
 	rm -rf *.o $(PROG)

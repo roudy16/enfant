@@ -62,13 +62,6 @@ void Meeting::save(ostream& os) const {
     }
 }
 
-static int convert_time_to_24_hour(int time) {
-    if (time < k_EARLIEST_MEETING_TIME) {
-        time += 12;
-    }
-    return time;
-}
-
 bool Meeting::operator< (const Meeting& other) const {
     const int lhs = convert_time_to_24_hour(m_time);
     const int rhs = convert_time_to_24_hour(other.m_time);
