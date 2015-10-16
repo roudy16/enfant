@@ -42,6 +42,7 @@ int main() {
     cout << "d: " << d.get_allocation() << endl;
     cout << "e: " << e.get_allocation() << endl;
     cout << (e += e) << endl;
+    cout << (e += e.c_str()) << endl;
 
     return 0;
 }

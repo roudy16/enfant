@@ -72,12 +72,20 @@ String::~String() noexcept {
 
     mp_cstring = nullptr;
     --number;
+
+    if (messages_wanted) {
+        cout << "Dtor: \"" << mp_cstring << "\"" << endl;
+    }
 }
 
 String& String::operator= (const String& rhs) {
     if (this != &rhs) {
         String new_string(rhs);
         swap(new_string);
+    }
+
+    if (messages_wanted) {
+        cout << "Copy assign from String:  \"" << mp_cstring << "\"" << endl;
     }
 
     return *this;
@@ -89,11 +97,20 @@ String& String::operator= (const char* rhs) {
         swap(new_string);
     }
 
+    if (messages_wanted) {
+        cout << "Assign from C-string:  \"" << mp_cstring << "\"" << endl;
+    }
+
     return *this;
 }
 
 String& String::operator= (String&& rhs) noexcept {
     swap(rhs);
+
+    if (messages_wanted) {
+        cout << "Move assign from String:  \"" << mp_cstring << "\"" << endl;
+    }
+
     return *this;
 }
 
@@ -122,21 +139,24 @@ const char& String::operator[] (int i) const {
     return const_cast<String&>(*this)[i];
 }
 
-void String::grow(const int min_new_allocation) {
+const char* String::grow(const int min_new_allocation) {
     assert(min_new_allocation > m_length);
-
+    
+    const char* deferred_delete_ptr = nullptr;
     const int new_allocation = 2 * min_new_allocation;
     char* temp_cstr = new char[new_allocation];
     strncpy(temp_cstr, mp_cstring, m_length);
 
     if (mp_cstring != &a_null_byte) {
-        delete[] mp_cstring;
+        deferred_delete_ptr = mp_cstring;
         total_allocation -= m_allocation;
     }
 
     mp_cstring = temp_cstr;
     m_allocation = new_allocation;
     total_allocation += new_allocation;
+
+    return deferred_delete_ptr;
 }
 
 String& String::operator += (char rhs) {
@@ -155,38 +175,33 @@ String& String::operator += (char rhs) {
     return *this;
 }
 
+// TODO ugly solution to case where String appends itself
 String& String::operator += (const char* rhs) {
     const int rhs_len = static_cast<const int>(strlen(rhs));
     if (rhs_len == 0) {
         return *this;
     }
 
+    const char* deferred_delete_ptr = nullptr;
     const int required_allocation = m_length + rhs_len + 1;
     if (m_allocation < required_allocation) {
-        grow(required_allocation);
+        deferred_delete_ptr = grow(required_allocation);
     }
 
-    strncpy(mp_cstring + m_length, rhs, rhs_len + 1);
+    // Handles case where String appends itself: str += str.c_str()
+    strncpy(mp_cstring + m_length, rhs, rhs_len);
     m_length += rhs_len;
+    mp_cstring[m_length] = '\0';
+
+    if (deferred_delete_ptr) {
+        delete[] deferred_delete_ptr;
+    }
+
     return *this;
 }
 
 String& String::operator += (const String& rhs) {
-    if (rhs.m_length == 0) {
-        return *this;
-    }
-
-    const int required_allocation = m_length + rhs.m_length + 1;
-    if (m_allocation < required_allocation) {
-        grow(required_allocation);
-    }
-
-    // Handles case where String appends itself: str += str 
-    strncpy(mp_cstring + m_length, rhs.mp_cstring, rhs.m_length);
-    m_length += rhs.m_length;
-    mp_cstring[m_length] = '\0';
-
-    return *this;
+    return *this += rhs.c_str();
 }
 
 bool operator== (const String& lhs, const String& rhs) {
@@ -220,6 +235,9 @@ std::istream& operator>> (std::istream& is, String& str) {
     // Skip initial whitespace
     while (isspace(is.peek())) {
         is.ignore();
+        if (!is) {
+            throw;
+        }
     }
 
     // Read characters into str until whitespace is found

@@ -31,12 +31,30 @@ int main() {
     apply_arg(il.begin(), il.end(), add_num_arg, 100);
     apply_arg_ref(il.begin(), il.end(), print_ol<int>, cout);
 
-    const Ordered_list<int> il1(std::move(il));
+    Ordered_list<int> il1(std::move(il));
 
     apply_arg_ref(il1.begin(), il1.end(), print_ol<int>, cout);
 
-    auto obj = il1.find(110);
-    cout << *obj;
+    Ordered_list<int> il2;
+    il2 = std::move(il1);
+
+    for (auto& i : il2) {
+        i += 10;
+    }
+
+    auto obj = il2.find(110);
+
+    String me("Steve");
+    String you("You");
+    String abby("Abby");
+
+    Ordered_list<String> strings;
+
+    strings.insert(std::move(me));
+    strings.insert(std::move(you));
+    strings.insert(std::move(abby));
+
+    apply_arg_ref(strings.begin(), strings.end(), print_ol<String>, cout);
 
 
     return 0;

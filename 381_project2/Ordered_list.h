@@ -499,6 +499,7 @@ Ordered_list<T, OF>::Ordered_list() : mp_front(nullptr), mp_back(nullptr), m_siz
 template<typename T, typename OF>
 Ordered_list<T, OF>::~Ordered_list() {
     clear();
+    --g_Ordered_list_count;
 }
 
 template<typename T, typename OF>
@@ -506,6 +507,7 @@ Ordered_list<T, OF>::Ordered_list(const Ordered_list& original)
     : mp_front(nullptr), mp_back(nullptr), m_size(original.m_size)
 {
     if (original.m_size == 0) {
+        ++g_Ordered_list_count;
         return;
     }
 
@@ -517,7 +519,6 @@ Ordered_list<T, OF>::Ordered_list(const Ordered_list& original)
         mp_front = new Node<T>(*original_iter, nullptr, nullptr);
         cur_node_ptr = mp_front;
 
-        ++g_Ordered_list_Node_count;
         ++original_iter;
 
         // Copy all subsequent Nodes
@@ -525,8 +526,6 @@ Ordered_list<T, OF>::Ordered_list(const Ordered_list& original)
             Node<T>* new_node_ptr = new Node<T>(*original_iter, cur_node_ptr, nullptr);
             cur_node_ptr->next = new_node_ptr;
             cur_node_ptr = new_node_ptr;
-
-            ++g_Ordered_list_Node_count;
         }
     }
     catch (...) {
@@ -535,8 +534,6 @@ Ordered_list<T, OF>::Ordered_list(const Ordered_list& original)
             Node<T>* to_delete = cur_node;
             cur_node = cur_node->next;
             delete to_delete;
-
-            --g_Ordered_list_Node_count;
         }
         throw;
     }
@@ -620,8 +617,8 @@ void Ordered_list<T, OF>::insert(const T& new_datum) {
 
 template<typename T, typename OF>
 void Ordered_list<T, OF>::insert(T&& new_datum) {
-    Node<T>* new_node_ptr = new Node<T>(new_datum, nullptr, nullptr);
-    insert_helper(new_node_ptr, new_datum);
+    Node<T>* new_node_ptr = new Node<T>(std::move(new_datum), nullptr, nullptr);
+    insert_helper(new_node_ptr, new_node_ptr->datum);
 }
 
 template<typename T, typename OF>
@@ -711,11 +708,14 @@ void Ordered_list<T, OF>::erase(Iterator it) noexcept {
         if (next) {
             next->prev = prev;
         }
+        else { // we are leaving the list empty
+            assert(m_size == 1);
+            mp_back = nullptr;
+        }
     }
 
     delete it.node_ptr;
     --m_size;
-    --g_Ordered_list_Node_count;
 }
 
 template<typename T, typename OF>

@@ -161,7 +161,8 @@ private:
     // Used by multiple constructors to initialize a new String
     void init(const char* cstr_);
     // Grows the c-string that holds the String's data according to doubling rules
-    void grow(const int min_new_allocation);
+    // Returns pointer to old data so that we can defer the delete 
+    const char* grow(const int min_new_allocation);
 
     char* mp_cstring;
     int m_length;

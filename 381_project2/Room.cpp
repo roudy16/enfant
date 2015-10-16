@@ -23,7 +23,7 @@ Room::Room(std::ifstream& is, People_list_t& people_list) {
 
 void Room::add_Meeting(const Meeting& m) {
     if (is_Meeting_present(m.get_time())) {
-        // TODO throw error
+        throw Error("There is already a meeting at that time!");
     }
     else {
         meetings.insert(m);
@@ -32,10 +32,10 @@ void Room::add_Meeting(const Meeting& m) {
 
 void Room::add_Meeting(Meeting&& m) {
     if (is_Meeting_present(m.get_time())) {
-        // TODO throw error
+        throw Error("There is already a meeting at that time!");
     }
     else {
-        meetings.insert(m);
+        meetings.insert(std::move(m));
     }
 }
 
@@ -47,8 +47,7 @@ bool Room::is_Meeting_present(int time) const {
 Meeting& Room::get_Meeting(int time) {
     auto iter = meetings.find(Meeting(time));
     if (iter == meetings.end()) {
-        // TODO throw error
-        throw;
+        throw Error("No meeting at that time!");
     }
     else {
         return *iter;
@@ -58,8 +57,7 @@ Meeting& Room::get_Meeting(int time) {
 void Room::remove_Meeting(int time) {
     auto iter = meetings.find(Meeting(time));
     if (iter == meetings.end()) {
-        // TODO throw error
-        throw;
+        throw Error("No meeting at that time!");
     }
     else {
         meetings.erase(iter);
