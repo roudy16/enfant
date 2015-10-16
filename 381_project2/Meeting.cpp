@@ -10,17 +10,22 @@ using std::ifstream;
 Meeting::Meeting(ifstream& is, const Participants_t& people) {
     int number_of_participants;
     is >> m_time >> m_topic >> number_of_participants;
+    if (!is.good()) {
+        throw Error("Invalid data found in file!");
+    }
 
     for (int i = 0; i < number_of_participants; ++i){
-        String discard;
         String lastname;
 
-        is >> discard >> lastname >> discard;
+        is >> lastname;
+        if (!is.good()) {
+            throw Error("Invalid data found in file!");
+        }
 
         Person person(lastname);
         auto iter = people.find(&person);
         if (iter == people.end()) {
-            // TODO handle error
+            throw Error("Invalid data found in file!");
         }
         else {
             participants.insert(*iter);
@@ -30,7 +35,7 @@ Meeting::Meeting(ifstream& is, const Participants_t& people) {
 
 void Meeting::add_participant(const Person* p) {
     if (is_participant_present(p)) {
-        // TODO throw an error for this
+        throw Error("This person is already a participant!");
     }
     else {
         participants.insert(p);
@@ -47,7 +52,7 @@ bool Meeting::is_participant_present(const Person* p) const {
 
 void Meeting::remove_participant(const Person* p) {
     if (!is_participant_present(p)) {
-        // TODO throw an error for this
+        throw Error("This person is not a participant in the meeting!");
     }
     else {
         participants.erase(participants.find(p));
@@ -58,7 +63,7 @@ void Meeting::save(ostream& os) const {
     os << m_time << ' ' << m_topic << ' ' << participants.size() << '\n';
 
     for (auto p : participants) {
-        os << *p << endl;
+        os << p->get_lastname() << endl;
     }
 }
 

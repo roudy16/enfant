@@ -233,20 +233,13 @@ std::istream& operator>> (std::istream& is, String& str) {
     str.clear();
 
     // Skip initial whitespace
-    while (isspace(is.peek())) {
+    while (is && isspace(is.peek())) {
         is.ignore();
-        if (!is) {
-            throw;
-        }
     }
 
     // Read characters into str until whitespace is found
-    while (!isspace(is.peek())) {
+    while (is && !isspace(is.peek())) {
         str += is.get();
-        if (!is) {
-            //TODO throw input error
-            throw;
-        }
     }
 
     return is;
