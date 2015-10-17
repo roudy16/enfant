@@ -41,7 +41,7 @@ void String::init(const char* cstr_) {
 
 String::String(const char* cstr_) {
     if (messages_wanted) {
-        cout << "Ctor: \"" << mp_cstring << "\"" << endl;
+        cout << "Ctor: \"" << cstr_ << "\"" << endl;
     }
 
     init(cstr_);
@@ -49,7 +49,7 @@ String::String(const char* cstr_) {
 
 String::String(const String& original) {
     if (messages_wanted) {
-        cout << "Copy ctor: \"" << mp_cstring << "\"" << endl;
+        cout << "Copy ctor: \"" << original.mp_cstring << "\"" << endl;
     }
 
     init(original.mp_cstring);
@@ -60,7 +60,7 @@ String::String(String&& rhs) noexcept
       m_allocation(rhs.m_allocation)
 {
     if (messages_wanted) {
-        cout << "Move ctor: \"" << mp_cstring << "\"" << endl;
+        cout << "Move ctor: \"" << rhs.mp_cstring << "\"" << endl;
     }
 
     rhs.mp_cstring = &a_null_byte;
@@ -88,7 +88,7 @@ String::~String() noexcept {
 
 String& String::operator= (const String& rhs) {
     if (messages_wanted) {
-        cout << "Copy assign from String:  \"" << mp_cstring << "\"" << endl;
+        cout << "Copy assign from String:  \"" << rhs.mp_cstring << "\"" << endl;
     }
 
     String new_string(rhs);
@@ -99,7 +99,7 @@ String& String::operator= (const String& rhs) {
 
 String& String::operator= (const char* rhs) {
     if (messages_wanted) {
-        cout << "Assign from C-string:  \"" << mp_cstring << "\"" << endl;
+        cout << "Assign from C-string:  \"" << rhs << "\"" << endl;
     }
 
     String new_string(rhs);
@@ -110,7 +110,7 @@ String& String::operator= (const char* rhs) {
 
 String& String::operator= (String&& rhs) noexcept {
     if (messages_wanted) {
-        cout << "Move assign from String:  \"" << mp_cstring << "\"" << endl;
+        cout << "Move assign from String:  \"" << rhs.mp_cstring << "\"" << endl;
     }
 
     swap(rhs);

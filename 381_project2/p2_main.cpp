@@ -632,13 +632,13 @@ void Schedule::load_data_command(const char command){
             delete person_ptr;
         }
 
-        m_people = std::move(old_people);
-        m_rooms = std::move(old_rooms);
+        m_people.swap(old_people);
+        m_rooms.swap(old_rooms);
 
         throw;
     }
 
-    // deallocate old data before destructor runs
+    // deallocate old data before destrucor
     for (auto room_ptr : old_rooms) {
         delete room_ptr;
     }
