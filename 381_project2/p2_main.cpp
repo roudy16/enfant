@@ -11,29 +11,77 @@
 #include <new>
 #include <cassert>
 
-using Rooms_t = Ordered_list < Room* const, Less_than_ptr<Room* const> > ;
-using People_t = Ordered_list < const Person*, Less_than_ptr<const Person*> > ;
 using std::cout;
 using std::cin;
 using std::endl;
 
+// Holds the pair of characters used to determine input command
+struct Command_pair {
+    char command0;
+    char command1;
+};
+
 // We will use the compiler created default/move ctors, we must define our
 // own dtor to clean up allocated rooms and people.
-struct Schedule {
-    Rooms_t m_rooms;
-    People_t m_people;
-
+class Schedule {
+public:
     ~Schedule();
+
+/* ########################### */
+/* COMMAND FUNCTIONS FROM SPEC */
+/* ########################### */
+
+    void print_person_command() const;
+    void print_room_command() const;
+    void print_meeting_command() const;
+    void print_all_meetings() const;
+    void print_all_people() const;
+    void print_memory_allocations() const;
+
+    void add_to_people_list();
+    void add_room();
+    void add_meeting();
+    void add_person_to_meeting_in_room();
+
+    void reschedule_meeting(const char command);
+
+    void delete_individual_command();
+    void delete_room_command();
+    void delete_meeting_command();
+    void delete_participant_command();
+    void delete_all_individual_command();
+    void delete_schedule_command();
+    void deallocate_all();
+
+    void save_data_command(const char command);
+    void load_data_command(const char command);
+
+private:
+    using Rooms_t = Ordered_list < Room* const, Less_than_ptr<Room* const> > ;
+    using People_t = Ordered_list < const Person*, Less_than_ptr<const Person*> > ;
 
     // Find a room in the schedule by number if it exists, throw an Error
     // if no such Room is found
     Rooms_t::const_Iterator find_room(const int room_number) const;
     Rooms_t::Iterator find_room(const int room_number);
-};
 
-struct Command_pair {
-    char command0;
-    char command1;
+    // Find a person in the schedule by lastname if it exists, throw an Error
+    // if no such Person is found
+    People_t::const_Iterator find_person(const String& lastname) const;
+    People_t::Iterator find_person(const String& lastname);
+
+    void delete_schedule_helper();
+
+    // Reads and checks validity of time read from stream, throws error if reading
+    // fails or value is invalid
+    int read_time_from_stream(std::istream& is) const;
+
+    // Reads and checks validity of room number read from stream, throws error if
+    // reading fails or value is invalid
+    int read_room_number_from_stream(std::istream& is) const;
+
+    Rooms_t m_rooms;
+    People_t m_people;
 };
 
 
@@ -50,51 +98,21 @@ static void print_switch(const char command, const Schedule& schedule);
 static void add_switch(const char command, Schedule& schedule);
 static void delete_switch(const char command, Schedule& schedule);
 
-// Reads in two characters from cin and returns them in a Command_pair
-static Command_pair get_command_from_input();
-
-// Returns a data ptr to first element in the container that compares equal
-// to the passed in argument using the passed in compare function, returns
-// NULL if none is found.
-// TODO - this is probably not needed
-template<typename T, typename OF>
-static void* find_object_arg(const Ordered_list<T, OF> container, const void* arg_ptr);
+// ignore the rest of a line
+static void discard_rest_of_line(std::istream& is);
 
 // Validate value ranges according to project specification, returns
 // non-zero if argument is valid, returns zero otherwise.
-static bool check_room_range_valid(const int room_number);
-static bool check_time_range_valid(int time);
+static bool is_room_range_valid(const int room_number);
+static bool is_time_range_valid(int time);
+
+// Returns an int read from the stream, throws an error if reading fails
+static int read_int_from_stream(std::istream& is);
+
+// Reads in two characters from cin and returns them in a Command_pair
+static Command_pair get_command_from_input();
 
 
-/* ########################### */
-/* COMMAND FUNCTIONS FROM SPEC */
-/* ########################### */
-
-
-static void print_person_command(const Schedule& schedule);
-static void print_room_command(const Schedule& schedule);
-static void print_meeting_command(const Schedule& schedule);
-static void print_all_meetings(const Schedule& schedule);
-static void print_all_people(const Schedule& schedule);
-static void print_memory_allocations(const Schedule& schedule);
-
-static void add_to_people_list(Schedule& schedule);
-static void add_room(Schedule& schedule);
-static void add_meeting(Schedule& schedule);
-static void add_person_to_meeting_in_room(Schedule& schedule);
-
-static void reschedule_meeting(const char command, Schedule& schedule);
-
-static void delete_individual_command(Schedule& schedule);
-static void delete_room_command(Schedule& schedule);
-static void delete_meeting_command(Schedule& schedule);
-static void delete_participant_command(Schedule& schedule);
-static void delete_all_individual_command(Schedule& schedule);
-static void delete_schedule_command(Schedule& schedule, bool quiet);
-static void deallocate_all(Schedule& schedule, bool quiet);
-
-static void save_data_command(const char command, Schedule& schedule);
-static void load_data_command(const char command, Schedule& schedule);
 
 
 /* #################### */
@@ -106,11 +124,9 @@ int main() {
 
     main_loop(schedule);
 
+    schedule.deallocate_all();
+
     printf("Done\n");
-
-    // TODO assert memory stuff 
-
-    return 0;
 }
 
 static Command_pair get_command_from_input()
@@ -153,16 +169,16 @@ static void main_loop(Schedule& schedule)
                 add_switch(commands.command1, schedule);
                 break;
             case 'r':
-                reschedule_meeting(commands.command1, schedule);
+                schedule.reschedule_meeting(commands.command1);
                 break;
             case 'd':
                 delete_switch(commands.command1, schedule);
                 break;
             case 's':
-                save_data_command(commands.command1, schedule);
+                schedule.save_data_command(commands.command1);
                 break;
             case 'l':
-                load_data_command(commands.command1, schedule);
+                schedule.load_data_command(commands.command1);
                 break;
             case 'q':
                 if (commands.command1 == 'q')
@@ -196,22 +212,22 @@ static void print_switch(const char command, const Schedule& schedule)
     switch (command)
     {
     case 'i':
-        print_person_command(schedule);
+        schedule.print_person_command();
         break;
     case 'r':
-        print_room_command(schedule);
+        schedule.print_room_command();
         break;
     case 'm':
-        print_meeting_command(schedule);
+        schedule.print_meeting_command();
         break;
     case 's':
-        print_all_meetings(schedule);
+        schedule.print_all_meetings();
         break;
     case 'g':
-        print_all_people(schedule);
+        schedule.print_all_people();
         break;
     case 'a':
-        print_memory_allocations(schedule);
+        schedule.print_memory_allocations();
         break;
     default:
         throw Error("Unrecognized command!");
@@ -223,16 +239,16 @@ static void add_switch(const char command, Schedule& schedule)
     switch (command)
     {
     case 'i':
-        add_to_people_list(schedule);
+        schedule.add_to_people_list();
         break;
     case 'r':
-        add_room(schedule);
+        schedule.add_room();
         break;
     case 'm':
-        add_meeting(schedule);
+        schedule.add_meeting();
         break;
     case 'p':
-        add_person_to_meeting_in_room(schedule);
+        schedule.add_person_to_meeting_in_room();
         break;
     default:
         throw Error("Unrecognized command!");
@@ -244,180 +260,148 @@ static void delete_switch(const char command, Schedule& schedule)
     switch (command)
     {
     case 'i':
-        delete_individual_command(schedule);
+        schedule.delete_individual_command();
         break;
     case 'r':
-        delete_room_command(schedule);
+        schedule.delete_room_command();
         break;
     case 'm':
-        delete_meeting_command(schedule);
+        schedule.delete_meeting_command();
         break;
     case 'p':
-        delete_participant_command(schedule);
+        schedule.delete_participant_command();
         break;
     case 's':
-        delete_schedule_command(schedule, false);
+        schedule.delete_schedule_command();
         break;
     case 'g':
-        delete_all_individual_command(schedule);
+        schedule.delete_all_individual_command();
         break;
     case 'a':
-        deallocate_all(schedule, false);
+        schedule.deallocate_all();
         break;
     default:
         throw Error("Unrecognized command!");
     }
 }
 
-static bool check_room_range_valid(const int room_number) {
+static void discard_rest_of_line(std::istream& is) {
+    is.clear();
+    while (is && is.get() != '\n') {
+        ;
+    }
+}
+
+static bool is_room_range_valid(const int room_number) {
     return room_number > 0;
 }
 
-static bool check_time_range_valid(int time) {
+static bool is_time_range_valid(int time) {
     time = convert_time_to_24_hour(time);
     return time >= k_EARLIEST_MEETING_TIME && time <= k_LATEST_MEETING_TIME;
 }
 
-static void load_data_error(Schedule& bad_schedule, std::ifstream& ifs){
-
-}
-
-static void print_person_command(const Schedule& schedule){
+void Schedule::print_person_command() const {
     String lastname;
     cin >> lastname;
 
-    Person probe(lastname);
-    auto iter = schedule.m_people.find(&probe);
+    auto person_iter = find_person(lastname);
 
-    if (iter == schedule.m_people.end()) {
-        // TODO throw error
-        throw Error("No person with that name!");
-    }
-    else {
-        cout << **iter << endl;
-    }
+    cout << **person_iter << endl;
 }
 
-static void print_room_command(const Schedule& schedule){
+void Schedule::print_room_command() const {
     int room_number;
     cin >> room_number;
 
-    if (!check_room_range_valid(room_number)) {
-        throw Error("Room number is not in range!");
-    }
 
-    auto iter = schedule.find_room(room_number);
+    auto iter = find_room(room_number);
     cout << **iter;
 }
 
 
-static void print_meeting_command(const Schedule& schedule){
-    int room_number;
-    int meeting_time;
-
-    cin >> room_number;
-    if (!check_room_range_valid(room_number)) {
-        throw Error("Room number is not in range!");
-    }
-
-    auto room_iter = schedule.find_room(room_number);
-
-    cin >> meeting_time;
-    if (!check_time_range_valid(meeting_time)) {
-        throw Error("Time is not in range!");
-    }
-
+void Schedule::print_meeting_command() const {
+    int room_number = read_room_number_from_stream(cin);
+    auto room_iter = find_room(room_number);
+    int meeting_time = read_time_from_stream(cin);
     Meeting& meeting = (*room_iter)->get_Meeting(meeting_time);
     cout << meeting;
 }
 
-static void print_all_meetings(const Schedule& schedule){
-    if (schedule.m_rooms.empty()) {
+void Schedule::print_all_meetings() const {
+    if (m_rooms.empty()) {
         cout << "List of rooms is empty" << endl;
     }
     else {
-        for (auto room_p : schedule.m_rooms) {
+        cout << "Information for " << m_rooms.size() << " rooms:" << endl;
+        for (auto room_p : m_rooms) {
             cout << *room_p;
         }
     }
 }
 
-static void print_all_people(const Schedule& schedule){
-    if (schedule.m_people.empty()) {
+void Schedule::print_all_people() const {
+    if (m_people.empty()) {
         cout << "List of people is empty" << endl;
     }
     else {
-        for (auto person_p : schedule.m_people) {
+        cout << "Information for " << m_people.size() << " people:" << endl;
+        for (auto person_p : m_people) {
             cout << *person_p << endl;
         }
     }
 }
 
-static void print_memory_allocations(const Schedule& schedule){
+void Schedule::print_memory_allocations() const {
     int total_meetings = 0;
-    for (auto room_p : schedule.m_rooms) {
+    for (auto room_p : m_rooms) {
         total_meetings += room_p->get_number_Meetings();
     }
 
     cout << "Memory allocations:" << '\n';
     cout << "Strings: " << String::get_number() << " with "
          << String::get_total_allocation() << " bytes total" << '\n';
-    cout << "Persons: " << schedule.m_people.size() << '\n';
+    cout << "Persons: " << m_people.size() << '\n';
     cout << "Meetings: " << total_meetings << '\n';
-    cout << "Rooms: " << schedule.m_rooms.size() << '\n';
+    cout << "Rooms: " << m_rooms.size() << '\n';
     cout << "Lists: " << g_Ordered_list_count << '\n';
     cout << "List Nodes: " << g_Ordered_list_Node_count << endl;
 }
 
 
-static void add_to_people_list(Schedule& schedule){
+void Schedule::add_to_people_list(){
     String firstname, lastname, phoneno;
 
     cin >> firstname >> lastname >> phoneno;
 
     Person probe(lastname);
-    auto iter = schedule.m_people.find(&probe);
-    if (iter != schedule.m_people.end()) {
+    auto iter = m_people.find(&probe);
+    if (iter != m_people.end()) {
         throw Error("There is already a person with this last name!\n");
     }
 
-    schedule.m_people.insert(new Person(firstname, lastname, phoneno));
+    m_people.insert(new Person(firstname, lastname, phoneno));
     cout << "Person " << lastname << " added" << endl;
 }
 
-static void add_room(Schedule& schedule){
-    int room_number;
-    cin >> room_number;
+void Schedule::add_room(){
+    int room_number = read_room_number_from_stream(cin);
 
-    if (!check_room_range_valid(room_number)) {
-        throw Error("Room number is not in range!");
-    }
-
+    // Ensure that the room does not already exist
     Room probe_room(room_number);
-    Rooms_t::const_Iterator room_iter = schedule.m_rooms.find(&probe_room);
-    if (room_iter != schedule.m_rooms.end()) {
+    Rooms_t::const_Iterator room_iter = m_rooms.find(&probe_room);
+    if (room_iter != m_rooms.end()) {
         throw Error("There is already a room with this number!");
     }
 
-    schedule.m_rooms.insert(new Room(room_number));
+    m_rooms.insert(new Room(room_number));
     cout << "Room " << room_number << " added" << endl;
 }
 
-static void add_meeting(Schedule& schedule){
-    int room_number;
-    int meeting_time;
-
-    cin >> room_number;
-    if (!check_room_range_valid(room_number)) {
-        throw Error("Room number is not in range!");
-    }
-
-    auto room_iter = schedule.find_room(room_number);
-
-    cin >> meeting_time;
-    if (!check_time_range_valid(meeting_time)) {
-        throw Error("Time is not in range!");
-    }
+void Schedule::add_meeting(){
+    int room_number = read_room_number_from_stream(cin);
+    auto room_iter = find_room(room_number);
+    int meeting_time = read_time_from_stream(cin);
 
     String topic;
     cin >> topic;
@@ -429,74 +413,41 @@ static void add_meeting(Schedule& schedule){
     cout << "Meeting added at " << meeting_time << endl;
 }
 
-static void add_person_to_meeting_in_room(Schedule& schedule){
-    int room_number;
-    int meeting_time;
-
-    cin >> room_number;
-    if (!check_room_range_valid(room_number)) {
-        throw Error("Room number is not in range!");
-    }
-
-    auto room_iter = schedule.find_room(room_number);
-
-    cin >> meeting_time;
-    if (!check_time_range_valid(meeting_time)) {
-        throw Error("Time is not in range!");
-    }
+void Schedule::add_person_to_meeting_in_room(){
+    int room_number = read_room_number_from_stream(cin);
+    auto room_iter = find_room(room_number);
+    int meeting_time = read_time_from_stream(cin);
 
     Meeting& meeting = (*room_iter)->get_Meeting(meeting_time);
+
     String lastname;
     cin >> lastname;
 
-    Person probe(lastname);
-    auto person_iter = schedule.m_people.find(&probe);
-
-    if (person_iter == schedule.m_people.end()) {
-        throw Error("No person with that name!");
-    }
+    auto person_iter = find_person(lastname);
 
     meeting.add_participant(*person_iter);
     cout << "Participant " << lastname << " added" << endl;
 }
 
-static void reschedule_meeting(const char command, Schedule& schedule) {
+void Schedule::reschedule_meeting(const char command) {
     if (command != 'm'){
         throw Error("Unrecognized command!");
     }
 
-    int old_room_number;
-    int old_meeting_time;
-    int new_room_number;
-    int new_meeting_time;
-
-    cin >> old_room_number;
-    if (!check_room_range_valid(old_room_number)) {
-        throw Error("Room number is not in range!");
-    }
-
-    auto old_room_iter = schedule.find_room(old_room_number);
-
-    cin >> old_meeting_time;
-    if (!check_time_range_valid(old_meeting_time)) {
-        throw Error("Time is not in range!");
-    }
-
+    /* we want to find the old room and meeting then find the new room.
+       if any errors occur during this process the called functions will
+       throw an appropriate exception 
+    */
+    int old_room_number = read_room_number_from_stream(cin);
+    auto old_room_iter = find_room(old_room_number);
+    int old_meeting_time = read_time_from_stream(cin);
     Meeting& old_meeting = (*old_room_iter)->get_Meeting(old_meeting_time);
 
-    cin >> new_room_number;
-    if (!check_room_range_valid(new_room_number)) {
-        throw Error("Room number is not in range!");
-    }
+    int new_room_number = read_room_number_from_stream(cin);
+    auto new_room_iter = find_room(new_room_number);
+    int new_meeting_time = read_time_from_stream(cin);
+    Meeting new_meeting(old_meeting);
 
-    auto new_room_iter = schedule.find_room(new_room_number);
-
-    cin >> new_meeting_time;
-    if (!check_time_range_valid(new_meeting_time)) {
-        throw Error("Time is not in range!");
-    }
-
-    Meeting new_meeting(std::move(old_meeting));
     new_meeting.set_time(new_meeting_time);
 
     (*old_room_iter)->remove_Meeting(old_meeting_time);
@@ -506,148 +457,106 @@ static void reschedule_meeting(const char command, Schedule& schedule) {
          << " at " << new_meeting_time << endl;
 }
 
-static void delete_individual_command(Schedule& schedule){
+void Schedule::delete_individual_command(){
     String lastname;
     cin >> lastname;
 
     // Make sure the person exists
-    Person probe(lastname);
-    auto iter = schedule.m_people.find(&probe);
-    if (iter == schedule.m_people.end()) {
-        throw Error("No person with that name!");
-    }
+    auto iter = find_person(lastname);
 
     // If the person is scheduled for a meeting we cannot delete them
-    for (auto room_ptr : schedule.m_rooms) {
-        if (room_ptr->is_participant_present(&probe)) {
+    for (auto room_ptr : m_rooms) {
+        if (room_ptr->is_participant_present(*iter)) {
             throw Error("This person is a participant in a meeting!");
         }
     }
 
     // Free memory allocated for Person object before erasing node
     delete *iter;
-    schedule.m_people.erase(iter);
+    m_people.erase(iter);
     cout << "Person " << lastname << " deleted" << endl;
 }
 
-static void delete_room_command(Schedule& schedule){
-    int room_number;
-
-    cin >> room_number;
-    if (!check_room_range_valid(room_number)) {
-        throw Error("Room number is not in range!");
-    }
-
-    auto room_iter = schedule.find_room(room_number);
+void Schedule::delete_room_command(){
+    int room_number = read_room_number_from_stream(cin);
+    auto room_iter = find_room(room_number);
 
     // Free memory allocated for Room object before erasing node
     delete *room_iter;
-    schedule.m_rooms.erase(room_iter);
+    m_rooms.erase(room_iter);
     cout << "Room " << room_number << " deleted" << endl;
 }
 
-static void delete_meeting_command(Schedule& schedule){
-    int room_number;
-    int meeting_time;
-
-    cin >> room_number;
-    if (!check_room_range_valid(room_number)) {
-        throw Error("Room number is not in range!");
-    }
-
-    auto room_iter = schedule.find_room(room_number);
-
-    cin >> meeting_time;
-    if (!check_time_range_valid(meeting_time)) {
-        throw Error("Time is not in range!");
-    }
+void Schedule::delete_meeting_command(){
+    int room_number = read_room_number_from_stream(cin);
+    auto room_iter = find_room(room_number);
+    int meeting_time = read_time_from_stream(cin);
 
     (*room_iter)->remove_Meeting(meeting_time);
+    cout << "Meeting at " << meeting_time << " deleted" << endl;
 }
 
-static void delete_participant_command(Schedule& schedule){
-    int room_number;
-    int meeting_time;
-
-    cin >> room_number;
-    if (!check_room_range_valid(room_number)) {
-        throw Error("Room number is not in range!");
-    }
-
-    auto room_iter = schedule.find_room(room_number);
-
-    cin >> meeting_time;
-    if (!check_time_range_valid(meeting_time)) {
-        throw Error("Time is not in range!");
-    }
+void Schedule::delete_participant_command(){
+    int room_number = read_room_number_from_stream(cin);
+    auto room_iter = find_room(room_number);
+    int meeting_time = read_time_from_stream(cin);
 
     Meeting& meeting = (*room_iter)->get_Meeting(meeting_time);
 
     String lastname;
     cin >> lastname;
 
-    Person probe(lastname);
-    auto person_iter = schedule.m_people.find(&probe);
-    if (person_iter == schedule.m_people.end()) {
-        throw Error("No person with that name!");
-    }
+    auto person_iter = find_person(lastname);
 
     meeting.remove_participant(*person_iter);
     cout << "Participant " << lastname << " deleted" << endl;
 }
 
-static bool room_has_meetings(const Room *const p) {
+bool room_has_meetings(const Room *const p) {
     return p->has_Meetings();
 }
 
-static void delete_all_individual_command(Schedule& schedule){
+void Schedule::delete_all_individual_command(){
     // Check to see if any meetings exist in any room
-    if (apply_if(schedule.m_rooms.begin(), schedule.m_rooms.end(),
-                 room_has_meetings))
+    if (apply_if(m_rooms.begin(), m_rooms.end(), room_has_meetings))
     {
         throw Error("Cannot clear people list unless there are no meetings!");
     }
 
     // deallocate all Person objects in the people list
-    for (auto p : schedule.m_people) {
+    for (auto p : m_people) {
         delete p;
     }
 
-    schedule.m_people.clear();
+    m_people.clear();
     cout << "All persons deleted" << endl;
 }
 
-static void delete_schedule_command(Schedule& schedule, bool quiet){
-    for (auto room_ptr : schedule.m_rooms) {
+void Schedule::delete_schedule_helper() {
+    for (auto room_ptr : m_rooms) {
         room_ptr->clear_Meetings();
     }
-
-    if (!quiet) {
-        cout << "All meetings deleted" << endl;
-    }
 }
 
-static void deallocate_all(Schedule& schedule, bool quiet){
-    delete_schedule_command(schedule, quiet);
+void Schedule::delete_schedule_command(){
+    delete_schedule_helper();
+    cout << "All meetings deleted" << endl;
+}
 
-    for (auto room_ptr : schedule.m_rooms) {
+void Schedule::deallocate_all(){
+    delete_schedule_helper();
+
+    for (auto room_ptr : m_rooms) {
         delete room_ptr;
     }
-    schedule.m_rooms.clear();
+    m_rooms.clear();
 
-    for (auto person_ptr : schedule.m_people) {
-        delete person_ptr;
-    }
-    schedule.m_people.clear();
+    cout << "All rooms and meetings deleted" << endl;
 
-    if (!quiet) {
-        cout << "All rooms deleted\n"
-             << "All persons deleted" << endl;
-    }
-
+    delete_all_individual_command();
 }
 
-static void save_data_command(const char command, Schedule& schedule){
+void Schedule::save_data_command(const char command){
     if (command != 'd') {
         throw Error("Unrecognized command!");
     }
@@ -660,20 +569,20 @@ static void save_data_command(const char command, Schedule& schedule){
         throw Error("Could not open file!");
     }
 
-    ofs << schedule.m_people.size() << endl;
-    for (auto person_ptr : schedule.m_people) {
+    ofs << m_people.size() << endl;
+    for (auto person_ptr : m_people) {
         person_ptr->save(ofs);
     }
 
-    ofs << schedule.m_rooms.size() << endl;
-    for (auto room_ptr : schedule.m_rooms) {
+    ofs << m_rooms.size() << endl;
+    for (auto room_ptr : m_rooms) {
         room_ptr->save(ofs);
     }
 
     cout << "Data saved" << endl;
 }
 
-static void load_data_command(const char command, Schedule& schedule){
+void Schedule::load_data_command(const char command){
     if (command != 'd') {
         throw Error("Unrecognized command!");
     }
@@ -686,8 +595,9 @@ static void load_data_command(const char command, Schedule& schedule){
         throw Error("Could not open file!");
     }
 
-    People_t new_people;
-    Rooms_t new_rooms;
+    People_t old_people = std::move(m_people);
+    Rooms_t old_rooms = std::move(m_rooms);
+
     try {
         int number_of_people;
         ifs >> number_of_people;
@@ -696,7 +606,7 @@ static void load_data_command(const char command, Schedule& schedule){
         }
 
         for (int i = 0; i < number_of_people; ++i) {
-            new_people.insert(new Person(ifs));
+            m_people.insert(new Person(ifs));
         }
 
         int number_of_rooms;
@@ -706,51 +616,106 @@ static void load_data_command(const char command, Schedule& schedule){
         }
 
         for (int i = 0; i < number_of_rooms; ++i) {
-            new_rooms.insert(new Room(ifs, new_people));
+            m_rooms.insert(new Room(ifs, m_people));
         }
-
-        // At this point the people and rooms have successfully loaded
-        // We can now just swap the new data and old data containers and
-        // allow the destructors and functions run at the end to clean up
-        // the old data
-
-        schedule.m_people.swap(new_people);
-        schedule.m_rooms.swap(new_rooms);
 
         cout << "Data loaded" << endl;
     }
-    catch (Error &e) {
-        cout << e.msg << endl;
+    catch (...) {
+        // Catch any exception then clean up the work in progress by moving
+        // the rooms and people lists to their original state and deleting the
+        // memory allocated before exception
+        for (auto room_ptr : m_rooms) {
+            delete room_ptr;
+        }
+        for (auto person_ptr : m_people) {
+            delete person_ptr;
+        }
+
+        m_people = std::move(old_people);
+        m_rooms = std::move(old_rooms);
+
+        throw;
     }
 
-    for (auto room_ptr : new_rooms) {
+    // deallocate old data before destructor runs
+    for (auto room_ptr : old_rooms) {
         delete room_ptr;
     }
-    for (auto person_ptr : new_people) {
+    for (auto person_ptr : old_people) {
         delete person_ptr;
     }
 }
 
-Rooms_t::Iterator Schedule::find_room(const int room_number) {
+auto Schedule::find_room(const int room_number) ->Rooms_t::Iterator {
     Room probe_room(room_number);
     Rooms_t::Iterator room_iter = m_rooms.find(&probe_room);
     if (room_iter == m_rooms.end()) {
-        discard_rest_of_line(cin);
         throw Error("No room with that number!");
     }
 
     return room_iter;
 }
 
-Rooms_t::const_Iterator Schedule::find_room(const int room_number) const {
+auto Schedule::find_room(const int room_number) const ->Rooms_t::const_Iterator {
     Room probe_room(room_number);
     Rooms_t::const_Iterator room_iter = m_rooms.find(&probe_room);
     if (room_iter == m_rooms.end()) {
-        discard_rest_of_line(cin);
         throw Error("No room with that number!");
     }
 
     return room_iter;
+}
+
+auto Schedule::find_person(const String& lastname) const ->People_t::const_Iterator {
+    Person probe(lastname);
+    auto person_iter = m_people.find(&probe);
+    if (person_iter == m_people.end()) {
+        throw Error("No person with that name!");
+    }
+
+    return person_iter;
+}
+
+auto Schedule::find_person(const String& lastname) ->People_t::Iterator {
+    Person probe(lastname);
+    auto person_iter = m_people.find(&probe);
+    if (person_iter == m_people.end()) {
+        throw Error("No person with that name!");
+    }
+
+    return person_iter;
+}
+
+static int read_int_from_stream(std::istream& is) {
+    int val;
+    is >> val;
+
+    if (!is.good()) {
+        throw Error("Could not read an integer value!");
+    }
+
+    return val;
+}
+
+int Schedule::read_time_from_stream(std::istream& is) const {
+    int time = read_int_from_stream(is);
+
+    if (!is_time_range_valid(time)) {
+        throw Error("Time is not in range!");
+    }
+
+    return time;
+}
+
+int Schedule::read_room_number_from_stream(std::istream& is) const {
+    int room_number = read_int_from_stream(is);
+
+    if (!is_room_range_valid(room_number)) {
+        throw Error("Room number is not in range!");
+    }
+
+    return room_number;
 }
 
 Schedule::~Schedule() {

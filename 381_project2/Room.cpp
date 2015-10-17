@@ -14,7 +14,7 @@ using People_list_t = const Ordered_list < const Person*, Less_than_ptr<const Pe
 Room::Room(std::ifstream& is, People_list_t& people_list) {
     int number_of_meetings;
     is >> m_room_number >> number_of_meetings;
-    if (!is.good()) {
+    if (!is.good() || m_room_number < 0) {
         throw Error("Invalid data found in file!");
     }
 

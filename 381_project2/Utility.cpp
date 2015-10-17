@@ -9,8 +9,3 @@ int convert_time_to_24_hour(int time) {
     return time;
 }
 
-void discard_rest_of_line(std::istream& is) {
-    while (is && is.get() != '\n') {
-        ;
-    }
-}

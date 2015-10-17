@@ -16,12 +16,18 @@ int String::total_allocation = 0;
 bool String::messages_wanted = false;
 
 void String::init(const char* cstr_) {
+    // Calculate length of argument string
     const int len = static_cast<int>(strlen(cstr_));
+
+    // Case for initializing an empty string
     if (len == 0) {
         mp_cstring = &a_null_byte;
         m_allocation = 0;
     }
     else {
+        // for a non-empty String we must allocate memory for each character
+        // in the argument string plus one byte for the null terminator. Then
+        // we copy the argument string into the allocated memory.
         const int allocation_bytes = len + 1;
         mp_cstring = new char[allocation_bytes];
         strncpy(mp_cstring, cstr_, allocation_bytes);
@@ -34,36 +40,42 @@ void String::init(const char* cstr_) {
 }
 
 String::String(const char* cstr_) {
-    init(cstr_);
-
     if (messages_wanted) {
         cout << "Ctor: \"" << mp_cstring << "\"" << endl;
     }
+
+    init(cstr_);
 }
 
 String::String(const String& original) {
-    init(original.mp_cstring);
-
     if (messages_wanted) {
         cout << "Copy ctor: \"" << mp_cstring << "\"" << endl;
     }
+
+    init(original.mp_cstring);
 }
 
-String::String(String&& rhs) noexcept {
-    mp_cstring = rhs.mp_cstring;
-    m_length = rhs.m_length;
-    m_allocation = rhs.m_allocation;
+String::String(String&& rhs) noexcept 
+    : mp_cstring(rhs.mp_cstring), m_length(rhs.m_length),
+      m_allocation(rhs.m_allocation)
+{
+    if (messages_wanted) {
+        cout << "Move ctor: \"" << mp_cstring << "\"" << endl;
+    }
+
     rhs.mp_cstring = &a_null_byte;
     rhs.m_length = 0;
     rhs.m_allocation = 0;
     ++number;
-
-    if (messages_wanted) {
-        cout << "Move ctor: \"" << mp_cstring << "\"" << endl;
-    }
 }
 
 String::~String() noexcept {
+    if (messages_wanted) {
+        cout << "Dtor: \"" << mp_cstring << "\"" << endl;
+    }
+
+    // If the String is non-empty we must delete[] the allocated
+    // memory and track this change in allocation
     if (m_length != 0) {
         assert(mp_cstring != &a_null_byte);
         delete[] mp_cstring;
@@ -72,44 +84,36 @@ String::~String() noexcept {
 
     mp_cstring = nullptr;
     --number;
-
-    if (messages_wanted) {
-        cout << "Dtor: \"" << mp_cstring << "\"" << endl;
-    }
 }
 
 String& String::operator= (const String& rhs) {
-    if (this != &rhs) {
-        String new_string(rhs);
-        swap(new_string);
-    }
-
     if (messages_wanted) {
         cout << "Copy assign from String:  \"" << mp_cstring << "\"" << endl;
     }
+
+    String new_string(rhs);
+    swap(new_string);
 
     return *this;
 }
 
 String& String::operator= (const char* rhs) {
-    if (this->mp_cstring != rhs){
-        String new_string(rhs);
-        swap(new_string);
-    }
-
     if (messages_wanted) {
         cout << "Assign from C-string:  \"" << mp_cstring << "\"" << endl;
     }
+
+    String new_string(rhs);
+    swap(new_string);
 
     return *this;
 }
 
 String& String::operator= (String&& rhs) noexcept {
-    swap(rhs);
-
     if (messages_wanted) {
         cout << "Move assign from String:  \"" << mp_cstring << "\"" << endl;
     }
+
+    swap(rhs);
 
     return *this;
 }
@@ -141,7 +145,12 @@ const char& String::operator[] (int i) const {
 
 const char* String::grow(const int min_new_allocation) {
     assert(min_new_allocation > m_length);
-    
+
+    // We want to grow the string to allow for appending of the string, however
+    // we must account for the case where the string appends itself. For this
+    // the char array containing the original string cannot be deleted until
+    // after the appending is complete. This function returns a pointer that
+    // must be deleted after appending is complete.
     const char* deferred_delete_ptr = nullptr;
     const int new_allocation = 2 * min_new_allocation;
     char* temp_cstr = new char[new_allocation];
@@ -164,9 +173,13 @@ String& String::operator += (char rhs) {
         return *this;
     }
 
+    // The minimum amount of memory needed to append a new char is the
+    // current string length plus one for the new char plus another for
+    // the null-byte
     const int required_allocation = m_length + 2;
     if (m_allocation < required_allocation) {
-        grow(required_allocation);
+        const char* old_string_data = grow(required_allocation);
+        delete[] old_string_data;
     }
 
     mp_cstring[m_length] = rhs;
@@ -193,9 +206,9 @@ String& String::operator += (const char* rhs) {
     m_length += rhs_len;
     mp_cstring[m_length] = '\0';
 
-    if (deferred_delete_ptr) {
-        delete[] deferred_delete_ptr;
-    }
+    // Now that we have copied the String it is safe to delete the old
+    // char data if we had to grow the appended String.
+    delete[] deferred_delete_ptr;
 
     return *this;
 }

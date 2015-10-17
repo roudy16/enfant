@@ -9,8 +9,9 @@ using namespace std;
 int main() {
     String::set_messages_wanted(true);
     String a = "Buffy";
-    String b = std::move(a);
-    String c(b);
+    String b(std::move(a));
+    String c;
+    c = std::move(b);
     c = String("Charles");
     String d;
     d = "Pool";
@@ -21,28 +22,18 @@ int main() {
     c.clear();
 
     string str("Peeple");
-    cout << str << " " << str.length() << endl;
     str[3] = '\0';
-    cout << str << " " << str.length() << endl;
 
-    cout << a << " " << a.get_allocation() << endl;
-    cout << b << " " << b.get_allocation() << endl;
-    cout << d << " " << d.get_allocation() << endl;
     d += e;
-    cout << d << " " << d.get_allocation() << endl;
-    cout << d[3] << endl;
-    cin >> c;
-    cin >> d;
-    cout << c << " " << c.get_allocation() << endl;
-    cout << d << " " << d.get_allocation() << endl;
     cout << String::get_number() << "  " << String::get_total_allocation() << endl;
-    cout << "a: " << a.get_allocation() << endl;
-    cout << "b: " << b.get_allocation() << endl;
-    cout << "c: " << c.get_allocation() << endl;
-    cout << "d: " << d.get_allocation() << endl;
-    cout << "e: " << e.get_allocation() << endl;
     cout << (e += e) << endl;
     cout << (e += e.c_str()) << endl;
+
+    String s0("Sally");
+    s0 += 'M';
+    s0 = s0;
+    const String s1(s0);
+    cout << s1[5] << endl;
 
     return 0;
 }

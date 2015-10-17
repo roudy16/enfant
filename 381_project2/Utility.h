@@ -24,6 +24,5 @@ int convert_time_to_24_hour(int time);
 
 bool person_to_String_comp(String lastname, const Person *const person_ptr);
 
-void discard_rest_of_line(std::istream& is);
 
 #endif // UTILITY_H

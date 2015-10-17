@@ -6,12 +6,6 @@
 /* A Person object simply contains Strings for a person's data.
 Once created, the data cannot be modified. */
 
-/* *** NOTE: If after a function header is a comment "fill this in" remove the comment and replace
-it with the proper code here in the header file.  All other functions should be defined
-in the .cpp file. 
-Comments starting with "***" are instructors to you - remove them from your finished code.
-Remove this comment too. */
-
 class Person {
 public:
     Person(const String& firstname_, const String& lastname_, const String& phoneno_)
