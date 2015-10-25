@@ -25,7 +25,7 @@ Room::Room(std::ifstream& is, const People_list_t& people_list) {
 
     for (int i = 0; i < number_of_meetings; ++i) {
         Meeting m(is, people_list);
-        meetings.push_back(std::move(m));
+        meetings.emplace(std::move(m));
     }
 }
 
@@ -34,7 +34,7 @@ void Room::add_Meeting(const Meeting& m) {
         throw Error("There is already a meeting at that time!");
     }
     else {
-        meetings.push_back(m);
+        meetings.emplace(m);
     }
 }
 
@@ -43,7 +43,7 @@ void Room::add_Meeting(Meeting&& m) {
         throw Error("There is already a meeting at that time!");
     }
     else {
-        meetings.push_back(std::move(m));
+        meetings.emplace(std::move(m));
     }
 }
 
@@ -58,7 +58,7 @@ Meeting& Room::get_Meeting(int time) {
         throw Error("No meeting at that time!");
     }
     else {
-        return *iter;
+        return iter->second;
     }
 }
 
@@ -69,7 +69,7 @@ const Meeting& Room::get_Meeting(int time) const {
         throw Error("No meeting at that time!");
     }
     else {
-        return *iter;
+        return iter->second;
     }
 }
 
@@ -86,7 +86,7 @@ void Room::remove_Meeting(int time) {
 bool Room::is_participant_present(const Person* person_ptr) const {
     bool return_val = false;
     for (auto& meeting : meetings) {
-        if (meeting.is_participant_present(person_ptr)) {
+        if (meeting.second.is_participant_present(person_ptr)) {
             return_val = true;
             break;
         }
@@ -99,7 +99,7 @@ void Room::save(ostream& os) const {
     os << m_room_number << ' ' << meetings.size() << endl;
 
     for (auto& meeting : meetings) {
-        meeting.save(os);
+        meeting.second.save(os);
     }
 }
 
@@ -111,7 +111,7 @@ ostream& operator<< (ostream& os, const Room& room) {
     }
     else {
         for (auto& meeting : room.meetings) {
-            os << meeting;
+            os << meeting.second;
         }
     }
 

@@ -71,6 +71,11 @@ static int read_room_number_from_stream(std::istream& is);
 
 static Rooms_t::iterator get_room_from_input(Schedule& schedule);
 
+static void clear_all_meetings(Schedule& schedule);
+static void clear_all_rooms(Schedule& schedule);
+static void clear_all_people(Schedule& schedule);
+static void deallocate_all(Schedule& schedule);
+
 static void print_person_command(Schedule& schedule);
 static void print_room_command(Schedule& schedule);
 static void print_meeting_command(Schedule& schedule);
@@ -270,7 +275,7 @@ void add_to_people_list_command(Schedule& schedule){
     cin >> firstname >> lastname >> phoneno;
 
     // Ensure the person does not already exist
-    auto iter = schedule.find_person_iter(lastname);
+    auto iter = find_person_iter(schedule, lastname);
     if (iter != schedule.m_people.end()) {
         throw Error("There is already a person with this last name!\n");
     }
@@ -278,6 +283,17 @@ void add_to_people_list_command(Schedule& schedule){
     // Add new Person to people list
     schedule.m_people.insert(new Person(firstname, lastname, phoneno));
     cout << "Person " << lastname << " added" << endl;
+}
+
+// Assists in adding a new Room, does not check if room already exists
+static void add_room_helper(Schedule& schedule, Room* const room_ptr) {
+    Less_than_ptr<Room*> comp;
+    auto room_iter = lower_bound(schedule.m_rooms.begin(),
+                                 schedule.m_rooms.end(),
+                                 room_ptr,
+                                 comp);
+
+    schedule.m_rooms.insert(room_iter, room_ptr);
 }
 
 void add_room_command(Schedule& schedule) {
@@ -291,7 +307,7 @@ void add_room_command(Schedule& schedule) {
     }
 
     // Add new Room to rooms list
-    schedule.m_rooms.insert(new Room(room_number));
+    add_room_helper(schedule, new Room(room_number));
     cout << "Room " << room_number << " added" << endl;
 }
 
@@ -341,10 +357,7 @@ void reschedule_meeting_command(Schedule& schedule) {
     int new_room_number = read_room_number_from_stream(cin);
     Room& new_room = find_room(schedule, new_room_number);
     int new_meeting_time = read_time_from_stream(cin);
-    Meeting new_meeting(old_meeting);
-
-    // TODO use time + move ctor instead
-    new_meeting.set_time(new_meeting_time);
+    Meeting new_meeting(new_meeting_time, move(old_meeting));
 
     old_room.remove_Meeting(old_meeting_time);
     new_room.add_Meeting(std::move(new_meeting));
@@ -432,11 +445,11 @@ int number_of_meetings(Schedule& schedule) {
 }
 
 // TODO seems unneccesary...how do you spell unecessary?
-int number_of_rooms(Schedule& schedule) {
+static int number_of_rooms(Schedule& schedule) {
     return schedule.m_rooms.size();
 }
 
-void delete_all_individual_command(Schedule& schedule){
+static void delete_all_individual_command(Schedule& schedule){
     if (number_of_meetings(schedule) > 0)
     {
         throw Error("Cannot clear people list unless there are no meetings!");
@@ -447,25 +460,25 @@ void delete_all_individual_command(Schedule& schedule){
     cout << "All persons deleted" << endl;
 }
 
-void deallocate_all_command(Schedule& schedule) {
+static void deallocate_all_command(Schedule& schedule) {
     deallocate_all(schedule);
 
     cout << "All rooms and meetings deleted\n"
          << "All persons deleted" << endl;
 }
 
-void delete_schedule_command(Schedule& schedule){
+static void delete_schedule_command(Schedule& schedule){
     clear_all_meetings(schedule);
     cout << "All meetings deleted" << endl;
 }
 
-void clear_all_meetings(Schedule& schedule) {
+static void clear_all_meetings(Schedule& schedule) {
     for_each(schedule.m_rooms.begin(),
              schedule.m_rooms.end(),
              [](Room* rm){ rm->clear_Meetings(); } );
 }
 
-void clear_all_rooms(Schedule& schedule) {
+static void clear_all_rooms(Schedule& schedule) {
     // the one range for
     for (auto room_ptr : schedule.m_rooms) {
         delete room_ptr;
@@ -473,7 +486,7 @@ void clear_all_rooms(Schedule& schedule) {
     schedule.m_rooms.clear();
 }
 
-void clear_all_people(Schedule& schedule) {
+static void clear_all_people(Schedule& schedule) {
     for_each(schedule.m_people.begin(),
              schedule.m_people.end(),
              [](const Person* p){ delete p; });
@@ -481,13 +494,13 @@ void clear_all_people(Schedule& schedule) {
     schedule.m_people.clear();
 }
 
-void deallocate_all(Schedule& schedule){
+static void deallocate_all(Schedule& schedule){
     clear_all_meetings(schedule);
     clear_all_rooms(schedule);
     clear_all_people(schedule);
 }
 
-void save_data_command(Schedule& schedule){
+static void save_data_command(Schedule& schedule){
     string filename;
     cin >> filename;
 
@@ -509,7 +522,7 @@ void save_data_command(Schedule& schedule){
     cout << "Data saved" << endl;
 }
 
-void load_data_command(Schedule& schedule){
+static void load_data_command(Schedule& schedule){
     string filename;
     cin >> filename;
 
@@ -538,7 +551,7 @@ void load_data_command(Schedule& schedule){
         }
 
         for (int i = 0; i < number_of_rooms; ++i) {
-            schedule.m_rooms.insert(new Room(ifs, schedule.m_people));
+            add_room_helper(schedule, new Room(ifs, schedule.m_people));
         }
 
         cout << "Data loaded" << endl;
@@ -555,7 +568,7 @@ void load_data_command(Schedule& schedule){
     }
 }
 
-Room& find_room(Schedule& schedule, const int room_number) {
+static Room& find_room(Schedule& schedule, const int room_number) {
     auto room_iter = find_room_iter(schedule, room_number);
     if (room_iter == schedule.m_rooms.end()) {
         throw Error("No room with that number!");
@@ -564,7 +577,9 @@ Room& find_room(Schedule& schedule, const int room_number) {
     return **room_iter;
 }
 
-Rooms_t::iterator find_room_iter(Schedule& schedule, const int room_number) {
+static Rooms_t::iterator find_room_iter(Schedule& schedule,
+                                        const int room_number)
+{
     Room probe_room(room_number);
     Rooms_t::iterator room_iter = lower_bound(schedule.m_rooms.begin(),
                                               schedule.m_rooms.end(),
@@ -577,22 +592,22 @@ Rooms_t::iterator find_room_iter(Schedule& schedule, const int room_number) {
     return room_iter;
 }
 
-Meeting& find_meeting(Schedule& schedule, const int room_number, const int meeting_time) {
+static Meeting& find_meeting(Schedule& schedule,
+                             const int room_number,
+                             const int meeting_time)
+{
     Room& room = find_room(schedule, room_number);
     return room.get_Meeting(meeting_time);
 }
 
-People_t::const_iterator find_person_iter(Schedule& schedule, const string& lastname) {
+static People_t::iterator find_person_iter(Schedule& schedule,
+                                           const string& lastname)
+{
     const Person probe(lastname);
     return schedule.m_people.find(&probe);
 }
 
-People_t::iterator find_person_iter(Schedule& schedule, const string& lastname) {
-    const Person probe(lastname);
-    return schedule.m_people.find(&probe);
-}
-
-const Person& find_person(Schedule& schedule, const string& lastname) {
+static const Person& find_person(Schedule& schedule, const string& lastname) {
     auto person_iter = find_person_iter(schedule, lastname);
     if (person_iter == schedule.m_people.end()) {
         throw Error("No person with that name!");

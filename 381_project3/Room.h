@@ -86,6 +86,10 @@ public:
         return m_room_number < rhs.m_room_number;
     }
 
+    bool operator== (const int rhs) const {
+        return m_room_number == rhs;
+    }
+
     friend std::ostream& operator<< (std::ostream&, const Room&);
 
 private:
