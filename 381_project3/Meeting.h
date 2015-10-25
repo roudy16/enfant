@@ -19,6 +19,7 @@ in order by time, and an output operator to simplify printing the Meeting inform
 We let the compiler supply the destructor and the copy/move constructors and assignment operators.
 */
 
+
 class Meeting {
 public:
     Meeting(int time_, const std::string& topic_) : m_time(time_), m_topic(topic_) {}
