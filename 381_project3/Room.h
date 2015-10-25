@@ -2,7 +2,7 @@
 #define ROOM_H
 
 #include <set>
-#include <list>
+#include <map>
 #include "Meeting.h"
 #include "Utility.h"
 
@@ -23,6 +23,11 @@ to be able to access the Meeting container in order to search for a specific par
 We let the compiler supply the destructor and copy/move constructors and assignment operators.
 */ 
 
+// Ordering for meetings from earliest time to latest time
+struct Time_comp {
+    bool operator()(int lhs, int rhs) const;
+};
+
 class Room {
 public:
     // Construct a room with the specified room number and no meetings
@@ -34,7 +39,7 @@ public:
     // No check made for whether the Room already exists or not.
     // Throw Error exception if invalid data discovered in file.
     // Input for a member variable value is read directly into the member variable.
-    Room(std::ifstream& is, const std::set<const Person*, Comp_objects_by_ptr<const Person>>& people_list);
+    Room(std::ifstream& is, const std::set<const Person*, Less_than_ptr<const Person*>>& people_list);
 
     // Accessors
     int get_room_number() const
@@ -84,7 +89,7 @@ public:
     friend std::ostream& operator<< (std::ostream&, const Room&);
 
 private:
-    using Meetings_t = std::list<Meeting>;
+    using Meetings_t = std::map<int, Meeting, Time_comp>;
     Meetings_t meetings;
 
     int m_room_number;

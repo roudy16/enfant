@@ -8,7 +8,13 @@
 
 using namespace std;
 
-using People_list_t = std::set<const Person*, Comp_objects_by_ptr<const Person>>;
+using People_list_t = std::set<const Person*, Less_than_ptr<const Person*>>;
+
+bool Time_comp::operator()(int lhs, int rhs) const {
+    lhs = convert_time_to_24_hour(lhs);
+    rhs = convert_time_to_24_hour(rhs);
+    return lhs < rhs;
+}
 
 Room::Room(std::ifstream& is, const People_list_t& people_list) {
     int number_of_meetings;

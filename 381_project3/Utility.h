@@ -20,8 +20,8 @@ struct Error {
 };
 
 template <typename T>
-struct Comp_objects_by_ptr{
-    bool operator()(const T* lhs, const T* rhs) { return *lhs < *rhs; }
+struct Less_than_ptr{
+    bool operator()(const T lhs, const T rhs) { return *lhs < *rhs; }
 };
 
 int convert_time_to_24_hour(int time);

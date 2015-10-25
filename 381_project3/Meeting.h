@@ -27,20 +27,22 @@ public:
     // construct a Meeting with only a time
     Meeting(int time_) : m_time(time_) {}
 
+    // Move constructor leaves original in empty state
+    Meeting(Meeting&& original);
+
+    // construct Meeting with same participants as original but new time
+    Meeting(int time_, Meeting&& original);
+
     // Construct a Meeting from an input file stream in save format
     // Throw Error exception if invalid data discovered in file.
     // No check made for whether the Meeting already exists or not.
     // Person list is needed to resolve references to meeting participants
     // Input for a member variable value is read directly into the member variable.
-    Meeting(std::ifstream& is, const std::set<const Person*, Comp_objects_by_ptr<const Person>>& people);
+    Meeting(std::ifstream& is, const std::set<const Person*, Less_than_ptr<const Person*>>& people);
 
     // accessors
     int get_time() const {
         return m_time;
-    }
-
-    void set_time(int time_) {
-        m_time = time_;
     }
 
     // Meeting objects manage their own participant list. Participants
@@ -58,17 +60,19 @@ public:
 
     // This operator defines the order relation between meetings, based just on the time
     bool operator< (const Meeting& other) const;
-    
+
+    // TODO possibly remove
     bool operator== (const Meeting& other) const;
 
     friend std::ostream& operator<< (std::ostream&, const Meeting&);
 private:
-    using Participants_t = const std::set<const Person*, Comp_objects_by_ptr<const Person>>;
+    using Participants_t = std::set<const Person*, Less_than_ptr<const Person*>>;
     Participants_t participants;
 
-    int m_time;
     std::string m_topic;
+    int m_time;
 };
+
 
 // Print the Meeting data as follows:
 // The meeting time and topic on one line, followed either by:

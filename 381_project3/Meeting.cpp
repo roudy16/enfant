@@ -3,8 +3,27 @@
 #include <fstream>
 #include <ostream>
 #include <string>
+#include <utility>
 
 using namespace std;
+
+Meeting::Meeting(Meeting&& original)
+    : participants(move(original.participants)),
+    m_topic(move(original.m_topic)),
+    m_time(original.m_time)
+{
+    // Leave original in empty state
+    original.participants.clear();
+}
+
+Meeting::Meeting(int time_, Meeting&& original)
+    : participants(move(original.participants)),
+    m_topic(move(original.m_topic)),
+    m_time(time_)
+{
+    // Leave original in empty state
+    original.participants.clear();
+}
 
 Meeting::Meeting(ifstream& is, const Participants_t& people) {
     int number_of_participants;
