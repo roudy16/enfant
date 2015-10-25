@@ -2,7 +2,9 @@
 #define MEETING_H
 
 #include <string>
+#include <set>
 #include "Person.h"
+#include "Utility.h"
 
 /* Meeting class - this class represents a Meeting in terms of a time, topic, and 
 list of participants. 
@@ -29,7 +31,7 @@ public:
     // No check made for whether the Meeting already exists or not.
     // Person list is needed to resolve references to meeting participants
     // Input for a member variable value is read directly into the member variable.
-    Meeting(std::ifstream& is, const Ordered_list<const Person*, Less_than_ptr<const Person*> >& people);
+    Meeting(std::ifstream& is, const std::set<const Person*, Comp_objects_by_ptr<const Person>>& people);
 
     // accessors
     int get_time() const {
@@ -55,10 +57,12 @@ public:
 
     // This operator defines the order relation between meetings, based just on the time
     bool operator< (const Meeting& other) const;
+    
+    bool operator== (const Meeting& other) const;
 
     friend std::ostream& operator<< (std::ostream&, const Meeting&);
 private:
-    using Participants_t = Ordered_list<const Person*, Less_than_ptr<const Person*>>;
+    using Participants_t = const std::set<const Person*, Comp_objects_by_ptr<const Person>>;
     Participants_t participants;
 
     int m_time;

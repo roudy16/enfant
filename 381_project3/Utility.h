@@ -19,6 +19,11 @@ struct Error {
 	const char* msg;
 };
 
+template <typename T>
+struct Comp_objects_by_ptr{
+    bool operator()(const T* lhs, const T* rhs) { return *lhs < *rhs; }
+};
+
 int convert_time_to_24_hour(int time);
 
 bool person_to_string_comp(std::string lastname, const Person *const person_ptr);

@@ -2,10 +2,9 @@
 #include "Utility.h"
 #include <fstream>
 #include <ostream>
+#include <string>
 
-using std::endl;
-using std::ostream;
-using std::ifstream;
+using namespace std;
 
 Meeting::Meeting(ifstream& is, const Participants_t& people) {
     int number_of_participants;
@@ -15,7 +14,7 @@ Meeting::Meeting(ifstream& is, const Participants_t& people) {
     }
 
     for (int i = 0; i < number_of_participants; ++i){
-        String lastname;
+        string lastname;
 
         is >> lastname;
         if (!is.good()) {
@@ -71,6 +70,10 @@ bool Meeting::operator< (const Meeting& other) const {
     const int lhs = convert_time_to_24_hour(m_time);
     const int rhs = convert_time_to_24_hour(other.m_time);
     return lhs < rhs;
+}
+
+bool Meeting::operator== (const Meeting& other) const {
+    return !(*this < other || other < *this);
 }
 
 ostream& operator<< (ostream& os, const Meeting& meeting) {

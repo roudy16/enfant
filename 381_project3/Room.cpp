@@ -4,14 +4,13 @@
 #include <fstream>
 #include <ostream>
 #include <utility>
+#include <algorithm>
 
-using std::endl;
-using std::ostream;
-using std::ifstream;
+using namespace std;
 
-using People_list_t = const Ordered_list < const Person*, Less_than_ptr<const Person*> > ;
+using People_list_t = std::set<const Person*, Comp_objects_by_ptr<const Person>>;
 
-Room::Room(std::ifstream& is, People_list_t& people_list) {
+Room::Room(std::ifstream& is, const People_list_t& people_list) {
     int number_of_meetings;
     is >> m_room_number >> number_of_meetings;
     if (!is.good() || m_room_number < 0) {
@@ -20,7 +19,7 @@ Room::Room(std::ifstream& is, People_list_t& people_list) {
 
     for (int i = 0; i < number_of_meetings; ++i) {
         Meeting m(is, people_list);
-        meetings.insert(std::move(m));
+        meetings.push_back(std::move(m));
     }
 }
 
@@ -29,7 +28,7 @@ void Room::add_Meeting(const Meeting& m) {
         throw Error("There is already a meeting at that time!");
     }
     else {
-        meetings.insert(m);
+        meetings.push_back(m);
     }
 }
 
@@ -38,17 +37,28 @@ void Room::add_Meeting(Meeting&& m) {
         throw Error("There is already a meeting at that time!");
     }
     else {
-        meetings.insert(std::move(m));
+        meetings.push_back(std::move(m));
     }
 }
 
 bool Room::is_Meeting_present(int time) const {
-    auto iter = meetings.find(Meeting(time));
+    auto iter = find(meetings.begin(), meetings.end(), Meeting(time));
     return iter != meetings.end();
 }
 
 Meeting& Room::get_Meeting(int time) {
-    auto iter = meetings.find(Meeting(time));
+    auto iter = find(meetings.begin(), meetings.end(), Meeting(time));
+    if (iter == meetings.end()) {
+        throw Error("No meeting at that time!");
+    }
+    else {
+        return *iter;
+    }
+}
+
+const Meeting& Room::get_Meeting(int time) const {
+    const Meeting probe(time);
+    auto iter = find(meetings.begin(), meetings.end(), probe);
     if (iter == meetings.end()) {
         throw Error("No meeting at that time!");
     }
@@ -58,7 +68,7 @@ Meeting& Room::get_Meeting(int time) {
 }
 
 void Room::remove_Meeting(int time) {
-    auto iter = meetings.find(Meeting(time));
+    auto iter = find(meetings.begin(), meetings.end(), Meeting(time));
     if (iter == meetings.end()) {
         throw Error("No meeting at that time!");
     }

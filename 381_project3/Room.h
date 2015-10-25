@@ -1,8 +1,10 @@
 #ifndef ROOM_H
 #define ROOM_H
 
+#include <set>
+#include <list>
 #include "Meeting.h"
-#include "Ordered_list.h"
+#include "Utility.h"
 
 /* A Room object contains a room number and a list containing Meeting objects stored with
 meeting times as the key.  When created, a Room has no Meetings. When destroyed, the Meeting
@@ -32,7 +34,7 @@ public:
     // No check made for whether the Room already exists or not.
     // Throw Error exception if invalid data discovered in file.
     // Input for a member variable value is read directly into the member variable.
-    Room(std::ifstream& is, const Ordered_list<const Person*, Less_than_ptr<const Person*> >& people_list);
+    Room(std::ifstream& is, const std::set<const Person*, Comp_objects_by_ptr<const Person>>& people_list);
 
     // Accessors
     int get_room_number() const
@@ -61,6 +63,7 @@ public:
     bool is_Meeting_present(int time) const;
     // Return a reference if the Meeting is present, throw exception if not.
     Meeting& get_Meeting(int time);
+    const Meeting& get_Meeting(int time) const;
     // Remove the specified Meeting, throw exception if a Meeting at that time was not found.
     void remove_Meeting(int time);
     // Remove and destroy all meetings
@@ -81,7 +84,7 @@ public:
     friend std::ostream& operator<< (std::ostream&, const Room&);
 
 private:
-    using Meetings_t = Ordered_list < Meeting > ;
+    using Meetings_t = std::list<Meeting>;
     Meetings_t meetings;
 
     int m_room_number;
