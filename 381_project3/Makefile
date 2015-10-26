@@ -20,7 +20,7 @@ CFLAGS = -std=c++14 -g -pedantic-errors -Wall -c
 #no load flags defined, but -l would be used to include a special library
 LFLAGS = 
 
-OBJS =  Room.o Person.o Meeting.o Utility.o
+OBJS =  p3_main.o Room.o Person.o Meeting.o Utility.o
 PROG = proj3exe
 
 default: $(PROG)
@@ -40,10 +40,10 @@ $(PROG): $(OBJS)
 p3_main.o: p3_main.cpp Room.h Meeting.h Person.h Utility.h 
 	$(CC) $(CFLAGS) p3_main.cpp
 
-Room.o: Room.cpp Room.h Ordered_list.h Meeting.h Utility.h
+Room.o: Room.cpp Room.h Meeting.h Utility.h
 	$(CC) $(CFLAGS) Room.cpp
 
-Meeting.o: Meeting.cpp Meeting.h Ordered_list.h Person.h Utility.h 
+Meeting.o: Meeting.cpp Meeting.h Person.h Utility.h 
 	$(CC) $(CFLAGS) Meeting.cpp
 
 Person.o: Person.cpp Person.h Utility.h 

@@ -116,7 +116,7 @@ static void init_command_table(map<string, void(*)(Schedule&)> &commands) {
     commands["am"] = &add_meeting_command;
     commands["ap"] = &add_person_to_meeting_in_room_command;
 
-    commands["di"] = &deallocate_all_command;
+    commands["di"] = &delete_individual_command;
     commands["dr"] = &delete_room_command;
     commands["dm"] = &delete_meeting_command;
     commands["dp"] = &delete_participant_command;
@@ -168,7 +168,7 @@ int main() {
             auto command_iter = commands.find(command_input);
             if (command_iter == commands.end()) {
                 // Check if 'quit' command was entered
-                if (command_input.compare(0, 2, "qq")) {
+                if (command_input.compare(0, 2, "qq") == 0) {
                     break; // Break out of while loop
                 }
                 else {
@@ -214,9 +214,7 @@ void print_person_command(Schedule& schedule) {
 }
 
 void print_room_command(Schedule& schedule) {
-    int room_number;
-    cin >> room_number;
-
+    int room_number = read_room_number_from_stream(cin);
     const Room& room = find_room(schedule, room_number);
     cout << room;
 }
@@ -444,11 +442,6 @@ int number_of_meetings(Schedule& schedule) {
     return num_meetings;
 }
 
-// TODO seems unneccesary...how do you spell unecessary?
-static int number_of_rooms(Schedule& schedule) {
-    return schedule.m_rooms.size();
-}
-
 static void delete_all_individual_command(Schedule& schedule){
     if (number_of_meetings(schedule) > 0)
     {
@@ -585,7 +578,9 @@ static Rooms_t::iterator find_room_iter(Schedule& schedule,
                                               schedule.m_rooms.end(),
                                               &probe_room);
 
-    if ((*room_iter)->get_room_number() != room_number) {
+    if (room_iter == schedule.m_rooms.end() ||
+        (*room_iter)->get_room_number() != room_number)
+    {
         room_iter = schedule.m_rooms.end();
     }
 

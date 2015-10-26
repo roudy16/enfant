@@ -51,6 +51,14 @@ Meeting::Meeting(ifstream& is, const Participants_t& people) {
     }
 }
 
+Meeting& Meeting::operator=(Meeting&& rhs) {
+    participants = move(rhs.participants);
+    m_topic = move(rhs.m_topic);
+    m_time = move(rhs.m_time);
+
+    return *this;
+}
+
 void Meeting::add_participant(const Person* p) {
     if (is_participant_present(p)) {
         throw Error("This person is already a participant!");
@@ -93,6 +101,10 @@ bool Meeting::operator< (const Meeting& other) const {
 
 bool Meeting::operator== (const Meeting& other) const {
     return !(*this < other || other < *this);
+}
+
+bool Meeting::operator== (const int time) const {
+    return m_time == time;
 }
 
 ostream& operator<< (ostream& os, const Meeting& meeting) {

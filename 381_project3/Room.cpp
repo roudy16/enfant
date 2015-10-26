@@ -25,35 +25,35 @@ Room::Room(std::ifstream& is, const People_list_t& people_list) {
 
     for (int i = 0; i < number_of_meetings; ++i) {
         Meeting m(is, people_list);
-        meetings.emplace(std::move(m));
+        meetings[m.get_time()] = move(m);
     }
 }
 
-void Room::add_Meeting(const Meeting& m) {
-    if (is_Meeting_present(m.get_time())) {
-        throw Error("There is already a meeting at that time!");
-    }
-    else {
-        meetings.emplace(m);
-    }
-}
+//void Room::add_Meeting(const Meeting& m) {
+    //if (is_Meeting_present(m.get_time())) {
+        //throw Error("There is already a meeting at that time!");
+    //}
+    //else {
+        //meetings.emplace(m.get_time(), m);
+    //}
+//}
 
 void Room::add_Meeting(Meeting&& m) {
     if (is_Meeting_present(m.get_time())) {
         throw Error("There is already a meeting at that time!");
     }
     else {
-        meetings.emplace(std::move(m));
+        meetings[m.get_time()] = move(m);
     }
 }
 
 bool Room::is_Meeting_present(int time) const {
-    auto iter = find(meetings.begin(), meetings.end(), Meeting(time));
+    auto iter = meetings.find(time);
     return iter != meetings.end();
 }
 
 Meeting& Room::get_Meeting(int time) {
-    auto iter = find(meetings.begin(), meetings.end(), Meeting(time));
+    auto iter = meetings.find(time);
     if (iter == meetings.end()) {
         throw Error("No meeting at that time!");
     }
@@ -63,8 +63,7 @@ Meeting& Room::get_Meeting(int time) {
 }
 
 const Meeting& Room::get_Meeting(int time) const {
-    const Meeting probe(time);
-    auto iter = find(meetings.begin(), meetings.end(), probe);
+    auto iter = meetings.find(time);
     if (iter == meetings.end()) {
         throw Error("No meeting at that time!");
     }
@@ -74,7 +73,7 @@ const Meeting& Room::get_Meeting(int time) const {
 }
 
 void Room::remove_Meeting(int time) {
-    auto iter = find(meetings.begin(), meetings.end(), Meeting(time));
+    auto iter = meetings.find(time);
     if (iter == meetings.end()) {
         throw Error("No meeting at that time!");
     }

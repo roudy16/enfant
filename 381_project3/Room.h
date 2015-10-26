@@ -52,7 +52,7 @@ public:
 
     // Add the Meeting, throw exception if there is already a Meeting at that time.
     // A copy of the supplied Meeting is stored in the Meeting container.
-    void add_Meeting(const Meeting& m);
+    //void add_Meeting(const Meeting& m);
     // The supplied Meeting is moved into the Meeting container.
     void add_Meeting(Meeting&& m);
 

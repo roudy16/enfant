@@ -22,7 +22,9 @@ We let the compiler supply the destructor and the copy/move constructors and ass
 
 class Meeting {
 public:
-    Meeting(int time_, const std::string& topic_) : m_time(time_), m_topic(topic_) {}
+    Meeting() {}
+
+    Meeting(int time_, const std::string& topic_) : m_topic(topic_), m_time(time_) {}
 
     // construct a Meeting with only a time
     Meeting(int time_) : m_time(time_) {}
@@ -39,6 +41,8 @@ public:
     // Person list is needed to resolve references to meeting participants
     // Input for a member variable value is read directly into the member variable.
     Meeting(std::ifstream& is, const std::set<const Person*, Less_than_ptr<const Person*>>& people);
+
+    Meeting& operator=(Meeting&& rhs);
 
     // accessors
     int get_time() const {
@@ -63,6 +67,8 @@ public:
 
     // TODO possibly remove
     bool operator== (const Meeting& other) const;
+
+    bool operator== (const int time) const;
 
     friend std::ostream& operator<< (std::ostream&, const Meeting&);
 private:
