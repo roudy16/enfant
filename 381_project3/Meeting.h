@@ -65,9 +65,6 @@ public:
     // This operator defines the order relation between meetings, based just on the time
     bool operator< (const Meeting& other) const;
 
-    // TODO possibly remove
-    bool operator== (const Meeting& other) const;
-
     bool operator== (const int time) const;
 
     friend std::ostream& operator<< (std::ostream&, const Meeting&);

@@ -99,10 +99,6 @@ bool Meeting::operator< (const Meeting& other) const {
     return lhs < rhs;
 }
 
-bool Meeting::operator== (const Meeting& other) const {
-    return !(*this < other || other < *this);
-}
-
 bool Meeting::operator== (const int time) const {
     return m_time == time;
 }
