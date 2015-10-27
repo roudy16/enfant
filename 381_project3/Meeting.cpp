@@ -12,8 +12,6 @@ Meeting::Meeting(Meeting&& original)
     m_topic(move(original.m_topic)),
     m_time(original.m_time)
 {
-    // Leave original in empty state
-    original.participants.clear();
 }
 
 Meeting::Meeting(int time_, Meeting&& original)
@@ -21,8 +19,6 @@ Meeting::Meeting(int time_, Meeting&& original)
     m_topic(move(original.m_topic)),
     m_time(time_)
 {
-    // Leave original in empty state
-    original.participants.clear();
 }
 
 Meeting::Meeting(ifstream& is, const Participants_t& people) {
@@ -32,6 +28,7 @@ Meeting::Meeting(ifstream& is, const Participants_t& people) {
         throw Error("Invalid data found in file!");
     }
 
+    // TODO step1
     for (int i = 0; i < number_of_participants; ++i){
         string lastname;
 
@@ -88,6 +85,7 @@ void Meeting::remove_participant(const Person* p) {
 void Meeting::save(ostream& os) const {
     os << m_time << ' ' << m_topic << ' ' << participants.size() << '\n';
 
+    // TODO step1
     for (auto p : participants) {
         os << p->get_lastname() << endl;
     }
@@ -99,10 +97,6 @@ bool Meeting::operator< (const Meeting& other) const {
     return lhs < rhs;
 }
 
-bool Meeting::operator== (const int time) const {
-    return m_time == time;
-}
-
 ostream& operator<< (ostream& os, const Meeting& meeting) {
     os << "Meeting time: " << meeting.m_time << ", Topic: " << meeting.m_topic
        << "\nParticipants:";
@@ -112,6 +106,8 @@ ostream& operator<< (ostream& os, const Meeting& meeting) {
     }
     else {
         os << endl;
+
+        // TODO step1
         for (auto p : meeting.participants) {
             os << *p << endl;
         }

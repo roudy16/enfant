@@ -23,20 +23,12 @@ Room::Room(std::ifstream& is, const People_list_t& people_list) {
         throw Error("Invalid data found in file!");
     }
 
+    // TODO step1
     for (int i = 0; i < number_of_meetings; ++i) {
         Meeting m(is, people_list);
         meetings[m.get_time()] = move(m);
     }
 }
-
-//void Room::add_Meeting(const Meeting& m) {
-    //if (is_Meeting_present(m.get_time())) {
-        //throw Error("There is already a meeting at that time!");
-    //}
-    //else {
-        //meetings.emplace(m.get_time(), m);
-    //}
-//}
 
 void Room::add_Meeting(Meeting&& m) {
     if (is_Meeting_present(m.get_time())) {
@@ -84,6 +76,7 @@ void Room::remove_Meeting(int time) {
 
 bool Room::is_participant_present(const Person* person_ptr) const {
     bool return_val = false;
+    // TODO step1
     for (auto& meeting : meetings) {
         if (meeting.second.is_participant_present(person_ptr)) {
             return_val = true;
@@ -97,6 +90,7 @@ bool Room::is_participant_present(const Person* person_ptr) const {
 void Room::save(ostream& os) const {
     os << m_room_number << ' ' << meetings.size() << endl;
 
+    // TODO step1
     for (auto& meeting : meetings) {
         meeting.second.save(os);
     }
@@ -109,6 +103,7 @@ ostream& operator<< (ostream& os, const Room& room) {
         os << "No meetings are scheduled" << endl;
     }
     else {
+        // TODO step1
         for (auto& meeting : room.meetings) {
             os << meeting.second;
         }

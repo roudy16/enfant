@@ -26,15 +26,16 @@ using People_t = set<const Person*, Less_than_ptr<const Person*>>;
 struct Schedule {
     Rooms_t m_rooms;
     People_t m_people;
-
-    Schedule& operator=(Schedule&& original);
-    ~Schedule();
 };
 
 
 /* ############################ */
 /* HELPER FUNCTION DECLARATIONS */
 /* ############################ */
+
+
+// Initialize a table of function pointers that correspond to input commands 
+static void init_command_table(map<string, void(*)(Schedule&)> &commands);
 
 // Find a room in the schedule by number if it exists, throw an Error
 // if no such Room is found
@@ -45,7 +46,7 @@ static Rooms_t::iterator find_room_iter(Schedule& schedule, const int room_numbe
 
 // Find a meeting in the schedule by number if it exists, throw an Error
 // if no such Meeting is found
-static Meeting& find_meeting(Schedule& schedule, const int room_number, const int meeting_time);
+//static Meeting& find_meeting(Schedule& schedule, const int room_number, const int meeting_time);
 
 // Find a person in the schedule by lastname if it exists, throw an Error
 // if no such Person is found
@@ -99,6 +100,7 @@ static void print_room_command(Schedule& schedule);
 static void print_meeting_command(Schedule& schedule);
 static void print_all_meetings_command(Schedule& schedule);
 static void print_all_people_command(Schedule& schedule);
+static void print_commitments_command(Schedule& schedule);
 static void print_memory_allocations_command(Schedule& schedule);
 static void add_to_people_list_command(Schedule& schedule);
 static void add_room_command(Schedule& schedule);
@@ -127,6 +129,7 @@ static void init_command_table(map<string, void(*)(Schedule&)> &commands) {
     commands["pm"] = &print_meeting_command;
     commands["ps"] = &print_all_meetings_command;
     commands["pg"] = &print_all_people_command;
+    commands["pc"] = &print_commitments_command;
     commands["pa"] = &print_memory_allocations_command;
 
     commands["ai"] = &add_to_people_list_command;
@@ -165,12 +168,14 @@ int main() {
         try {
             cout << "\nEnter command: ";
 
-            // read two characters while skipping whitespace
+            // read two characters while skipping whitespace then find 
+            // associated function pointer if it exists.
             cin >> command_input[0] >> command_input[1];
-
             auto command_iter = commands.find(command_input);
+
+            // If function pointer not found check to see if quit command was
+            // entered, throw unrecognized command Error otherwise.
             if (command_iter == commands.end()) {
-                // Check if 'quit' command was entered
                 if (command_input.compare(0, 2, "qq") == 0) {
                     break; // Break out of while loop
                 }
@@ -195,6 +200,7 @@ int main() {
         }
     } // End while loop
 
+    deallocate_all(schedule);
     printf("Done\n");
     return 0;
 }
@@ -239,7 +245,7 @@ static int read_room_number_from_stream(std::istream& is) {
     return room_number;
 }
 
-void print_person_command(Schedule& schedule) {
+static void print_person_command(Schedule& schedule) {
     string lastname;
     cin >> lastname;
 
@@ -247,13 +253,13 @@ void print_person_command(Schedule& schedule) {
     cout << person << endl;
 }
 
-void print_room_command(Schedule& schedule) {
+static void print_room_command(Schedule& schedule) {
     int room_number = read_room_number_from_stream(cin);
     const Room& room = find_room(schedule, room_number);
     cout << room;
 }
 
-void print_meeting_command(Schedule& schedule) {
+static void print_meeting_command(Schedule& schedule) {
     int room_number = read_room_number_from_stream(cin);
     const Room& room = find_room(schedule, room_number);
     int meeting_time = read_time_from_stream(cin);
@@ -261,7 +267,7 @@ void print_meeting_command(Schedule& schedule) {
     cout << meeting;
 }
 
-void print_all_meetings_command(Schedule& schedule) {
+static void print_all_meetings_command(Schedule& schedule) {
     if (schedule.m_rooms.empty()) {
         cout << "List of rooms is empty" << endl;
     }
@@ -273,7 +279,7 @@ void print_all_meetings_command(Schedule& schedule) {
     }
 }
 
-void print_all_people_command(Schedule& schedule) {
+static void print_all_people_command(Schedule& schedule) {
     if (schedule.m_people.empty()) {
         cout << "List of people is empty" << endl;
     }
@@ -285,7 +291,11 @@ void print_all_people_command(Schedule& schedule) {
     }
 }
 
-void print_memory_allocations_command(Schedule& schedule) {
+static void print_commitments_command(Schedule& schedule) {
+    // TODO implement this
+}
+
+static void print_memory_allocations_command(Schedule& schedule) {
     int total_meetings = 0;
 
     // Count total number of meetings in the schedule
@@ -300,7 +310,7 @@ void print_memory_allocations_command(Schedule& schedule) {
 }
 
 
-void add_to_people_list_command(Schedule& schedule){
+static void add_to_people_list_command(Schedule& schedule){
     string firstname, lastname, phoneno;
     cin >> firstname >> lastname >> phoneno;
 
@@ -326,7 +336,7 @@ static void add_room_helper(Schedule& schedule, Room* const room_ptr) {
     schedule.m_rooms.insert(room_iter, room_ptr);
 }
 
-void add_room_command(Schedule& schedule) {
+static void add_room_command(Schedule& schedule) {
     int room_number = read_room_number_from_stream(cin);
 
     // Ensure that the room does not already exist
@@ -341,7 +351,7 @@ void add_room_command(Schedule& schedule) {
     cout << "Room " << room_number << " added" << endl;
 }
 
-void add_meeting_command(Schedule& schedule) {
+static void add_meeting_command(Schedule& schedule) {
     // Read and check room number for validity
     int room_number = read_room_number_from_stream(cin);
 
@@ -358,7 +368,7 @@ void add_meeting_command(Schedule& schedule) {
     cout << "Meeting added at " << meeting_time << endl;
 }
 
-void add_person_to_meeting_in_room_command(Schedule& schedule) {
+static void add_person_to_meeting_in_room_command(Schedule& schedule) {
     int room_number = read_room_number_from_stream(cin);
     Room& room = find_room(schedule, room_number);
     int meeting_time = read_time_from_stream(cin);
@@ -370,29 +380,50 @@ void add_person_to_meeting_in_room_command(Schedule& schedule) {
 
     const Person& person = find_person(schedule, lastname);
 
+    if (meeting.is_participant_present(&person)) {
+        throw Error("This person is already a participant!");
+    }
+
+    // TODO verify no Commitment conflict
+
     meeting.add_participant(&person);
     cout << "Participant " << lastname << " added" << endl;
 }
 
-void reschedule_meeting_command(Schedule& schedule) {
+static void reschedule_meeting_command(Schedule& schedule) {
     /* we want to find the old room and meeting then find the new room.
        if any errors occur during this process the called functions will
        throw an appropriate exception 
     */
+
+    // Find room of meeting we want to reschedule
     int old_room_number = read_room_number_from_stream(cin);
     Room& old_room = find_room(schedule, old_room_number);
+
+    // Find meeting we want to reschedule
     int old_meeting_time = read_time_from_stream(cin);
     Meeting& old_meeting = old_room.get_Meeting(old_meeting_time);
 
+    // Find room we want to move the meeting to
     int new_room_number = read_room_number_from_stream(cin);
     Room& new_room = find_room(schedule, new_room_number);
+
+    // Ensure no meeting is already scheduled at that time in the new room
+    // and check to the case where no change is needed
     int new_meeting_time = read_time_from_stream(cin);
-    Meeting new_meeting(new_meeting_time);
+    if (old_room_number == new_room_number && old_meeting_time == new_meeting_time) {
+        cout << "No change made to schedule" << endl;
+        return;
+    }
+    if (new_room.is_Meeting_present(new_meeting_time)) {
+        throw Error("There is already a meeting at that time!");
+    }
 
-    // TODO this is broken
-    new_room.add_Meeting(std::move(new_meeting));
+    // At this point it is safe to create the new_meeting in the new room by
+    // moving the contents of the old meeting but changing the meeting time
+    Meeting new_meeting(new_meeting_time, move(old_meeting));
+    new_room.add_Meeting(move(new_meeting));
     old_room.remove_Meeting(old_meeting_time);
-
 
     cout << "Meeting rescheduled to room " << new_room_number
          << " at " << new_meeting_time << endl;
@@ -405,7 +436,7 @@ static void detect_room_participant_helper(Room* room_ptr, const Person* person_
     }
 }
 
-void delete_individual(Schedule& schedule, const string& lastname) {
+static void delete_individual(Schedule& schedule, const string& lastname) {
     // Make sure the person exists
     auto person_iter = find_person_iter(schedule, lastname);
 
@@ -420,7 +451,7 @@ void delete_individual(Schedule& schedule, const string& lastname) {
     schedule.m_people.erase(person_iter);
 }
 
-void delete_individual_command(Schedule& schedule){
+static void delete_individual_command(Schedule& schedule){
     string lastname;
     cin >> lastname;
 
@@ -429,12 +460,12 @@ void delete_individual_command(Schedule& schedule){
     cout << "Person " << lastname << " deleted" << endl;
 }
 
-Rooms_t::iterator get_room_from_input(Schedule& schedule) {
+static Rooms_t::iterator get_room_from_input(Schedule& schedule) {
     int room_number = read_room_number_from_stream(cin);
     return find_room_iter(schedule, room_number);
 }
 
-void delete_room_command(Schedule& schedule){
+static void delete_room_command(Schedule& schedule){
     auto room_iter = get_room_from_input(schedule);
     int room_number = (*room_iter)->get_room_number();
 
@@ -444,7 +475,7 @@ void delete_room_command(Schedule& schedule){
     cout << "Room " << room_number << " deleted" << endl;
 }
 
-void delete_meeting_command(Schedule& schedule){
+static void delete_meeting_command(Schedule& schedule){
     auto room_iter = get_room_from_input(schedule);
 
     int meeting_time = read_time_from_stream(cin);
@@ -453,7 +484,7 @@ void delete_meeting_command(Schedule& schedule){
     cout << "Meeting at " << meeting_time << " deleted" << endl;
 }
 
-void delete_participant_command(Schedule& schedule){
+static void delete_participant_command(Schedule& schedule){
     auto room_iter = get_room_from_input(schedule);
     int meeting_time = read_time_from_stream(cin);
 
@@ -468,7 +499,7 @@ void delete_participant_command(Schedule& schedule){
     cout << "Participant " << lastname << " deleted" << endl;
 }
 
-int number_of_meetings(Schedule& schedule) {
+static int number_of_meetings(Schedule& schedule) {
     int num_meetings = 0;
     // Check to see if any meetings exist in any room
     for_each(schedule.m_rooms.begin(),
@@ -587,6 +618,7 @@ static void load_data_command(Schedule& schedule){
         }
 
         cout << "Data loaded" << endl;
+        deallocate_all(old_schedule);
     }
     catch (...) {
         // Deallocate any objects created before Error thrown then move old data
@@ -631,13 +663,13 @@ static Rooms_t::iterator find_room_iter(Schedule& schedule,
     return room_iter;
 }
 
-static Meeting& find_meeting(Schedule& schedule,
-                             const int room_number,
-                             const int meeting_time)
-{
-    Room& room = find_room(schedule, room_number);
-    return room.get_Meeting(meeting_time);
-}
+//static Meeting& find_meeting(Schedule& schedule,
+                             //const int room_number,
+                             //const int meeting_time)
+//{
+    //Room& room = find_room(schedule, room_number);
+    //return room.get_Meeting(meeting_time);
+//}
 
 static People_t::iterator find_person_iter(Schedule& schedule,
                                            const string& lastname)
@@ -653,20 +685,5 @@ static const Person& find_person(Schedule& schedule, const string& lastname) {
     }
 
     return **person_iter;
-}
-
-Schedule::~Schedule() {
-    deallocate_all(*this);
-}
-
-Schedule& Schedule::operator=(Schedule&& original) {
-    if (this == &original) return *this;
-
-    m_people = move(original.m_people);
-    m_rooms = move(original.m_rooms);
-    original.m_people.clear();
-    original.m_rooms.clear();
-
-    return *this;
 }
 

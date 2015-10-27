@@ -42,6 +42,7 @@ public:
     // Input for a member variable value is read directly into the member variable.
     Meeting(std::ifstream& is, const std::set<const Person*, Less_than_ptr<const Person*>>& people);
 
+    // Move assignment
     Meeting& operator=(Meeting&& rhs);
 
     // accessors
@@ -64,8 +65,6 @@ public:
 
     // This operator defines the order relation between meetings, based just on the time
     bool operator< (const Meeting& other) const;
-
-    bool operator== (const int time) const;
 
     friend std::ostream& operator<< (std::ostream&, const Meeting&);
 private:
