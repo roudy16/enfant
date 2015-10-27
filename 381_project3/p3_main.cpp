@@ -44,6 +44,10 @@ static Room& find_room(Schedule& schedule, const int room_number);
 // Find a room in the schedule by number if it exists
 static Rooms_t::iterator find_room_iter(Schedule& schedule, const int room_number);
 
+// Perform binary search for a Room with same room number
+static Rooms_t::iterator find_room_iter_helper(Schedule& schedule,
+                                               const int room_number);
+
 // Find a meeting in the schedule by number if it exists, throw an Error
 // if no such Meeting is found
 //static Meeting& find_meeting(Schedule& schedule, const int room_number, const int meeting_time);
@@ -54,6 +58,9 @@ static const Person& find_person(Schedule& schedule, const string& lastname);
 
 // Find a person in the schedule by lastname if it exists.
 static People_t::iterator find_person_iter(Schedule& schedule, const string& lastname);
+
+// Returns true if a Room with matching room number exists in the Schedule
+static bool is_room_present(Schedule& schedule, const int room_number);
 
 // ignores characters until a newline character '\n' is read, then the beginning of
 // the stream is set to just after the '\n'
@@ -189,7 +196,7 @@ int main() {
         }
         catch (Error& e) {
             discard_rest_of_line(cin);
-            cout << e.msg;
+            cout << e.msg << endl;
         }
         catch (std::bad_alloc& e){
             // TODO handle bad allocs, look at spec for what to do
@@ -200,7 +207,7 @@ int main() {
         }
     } // End while loop
 
-    deallocate_all(schedule);
+    deallocate_all_command(schedule);
     printf("Done\n");
     return 0;
 }
@@ -317,7 +324,7 @@ static void add_to_people_list_command(Schedule& schedule){
     // Ensure the person does not already exist
     auto iter = find_person_iter(schedule, lastname);
     if (iter != schedule.m_people.end()) {
-        throw Error("There is already a person with this last name!\n");
+        throw Error("There is already a person with this last name!");
     }
 
     // Add new Person to people list
@@ -327,22 +334,25 @@ static void add_to_people_list_command(Schedule& schedule){
 
 // Assists in adding a new Room, does not check if room already exists
 static void add_room_helper(Schedule& schedule, Room* const room_ptr) {
-    Less_than_ptr<Room*> comp;
-    auto room_iter = lower_bound(schedule.m_rooms.begin(),
-                                 schedule.m_rooms.end(),
-                                 room_ptr,
-                                 comp);
+    auto room_iter = find_room_iter_helper(schedule, room_ptr->get_room_number());
 
     schedule.m_rooms.insert(room_iter, room_ptr);
+}
+
+static bool is_room_present(Schedule& schedule, const int room_number) {
+    // Find the first Room with a number that is not less than room_number
+    auto room_iter = find_room_iter_helper(schedule, room_number);
+
+    // Return true if Room with room_number was found
+    return room_iter != schedule.m_rooms.end() &&
+        (*room_iter)->get_room_number() == room_number;
 }
 
 static void add_room_command(Schedule& schedule) {
     int room_number = read_room_number_from_stream(cin);
 
     // Ensure that the room does not already exist
-    Room probe_room(room_number);
-    auto room_iter = find(schedule.m_rooms.begin(), schedule.m_rooms.end(), &probe_room);
-    if (room_iter != schedule.m_rooms.end()) {
+    if (is_room_present(schedule, room_number)) {
         throw Error("There is already a room with this number!");
     }
 
@@ -640,17 +650,23 @@ static Room& find_room(Schedule& schedule, const int room_number) {
     return **room_iter;
 }
 
-static Rooms_t::iterator find_room_iter(Schedule& schedule,
-                                        const int room_number)
+static Rooms_t::iterator find_room_iter_helper(Schedule& schedule,
+                                               const int room_number)
 {
     // Create a comparator and a probe Room to use to try to find a Room
     // with the same number as the room number passed in
     Less_than_ptr<Room*> comp;
     Room probe_room(room_number);
-    Rooms_t::iterator room_iter = lower_bound(schedule.m_rooms.begin(),
-                                              schedule.m_rooms.end(),
-                                              &probe_room,
-                                              comp);
+    return lower_bound(schedule.m_rooms.begin(),
+                       schedule.m_rooms.end(),
+                       &probe_room,
+                       comp);
+}
+
+static Rooms_t::iterator find_room_iter(Schedule& schedule,
+                                        const int room_number)
+{
+    auto room_iter = find_room_iter_helper(schedule, room_number);
 
     // If a lower bound was found but it is not the Room we are trying to find
     // we want to return end() to indicate the Room was not found

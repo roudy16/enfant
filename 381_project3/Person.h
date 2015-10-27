@@ -11,6 +11,7 @@ Once created, the data cannot be modified. */
 
 class Person {
 public:
+    // Default ctor and dtor do nothing
     Person();
     ~Person();
 
@@ -30,19 +31,25 @@ public:
         return m_lastname;
     }
 
-    // TODO fuck, there is no good way to do this... seems like you have to break encapsulation
     // Write a Person's data to a stream in save format with final endl.
     void save(std::ostream& os) const;
 
-    bool has_commitment(const int time) const;
+    // Returns true if Person has commitment at time
+    bool has_commitment(int time) const;
 
-    void add_commitment(const int new_room_number, const int new_time);
+    // Adds a new commitment to commitments list, throws an Error if Person
+    // already has a commitment at that time
+    void add_commitment(int new_room_number, int new_time, const std::string& topic);
 
-    void change_commitment(const int old_time, const int new_room_number, const int new_time);
+    // Removes a commitment from the commitments list
+    void remove_commitment(int time);
 
+    // Changes the commitment at the old time to a new commitment in a new
+    // Room at a new time
+    void change_commitment(int old_time, int new_room_number, int new_time);
+
+    // Prints all commitments to std::cout
     void print_commitments() const;
-
-
 
     // This operator defines the order relation between Persons, based just on the last name
     bool operator< (const Person& rhs) const {
@@ -52,28 +59,37 @@ public:
     friend std::ostream& operator<< (std::ostream&, const Person&);
 
 private:
-    class Commitment {
-    public:
-        int get_room_number() const;
-        int get_time() const;
-        void change_to(const int new_room_number, const int new_time);
-        bool operator< (const Commitment& rhs) const;
-
-    private:
-        int mp_room_number;
-        int m_time;
-    };
-
+    class Commitment;
+    using Commitments_t = std::list<Commitment>;
 
     Person(const Person& person) = delete;
     Person(Person&& person) = delete;
     Person& operator=(const Person& rhs) = delete;
 
-    std::list<Commitment> m_commitments;
+    void add_commitment(Commitment&& original);
+    bool verify_commitments_ordering() const;
+
+    // MEMBER VARIABLES
+    Commitments_t m_commitments;
     std::string m_firstname;
     std::string m_lastname;
     std::string m_phoneno;
 
+    // Private class that only the Person needs to have access to
+    class Commitment {
+    public:
+        Commitment(const std::string& topic, int room_number, int time);
+
+        void print() const;
+        bool operator< (const Commitment& rhs) const;
+        bool operator== (int time) const;
+
+        friend class Person;
+    private:
+        std::string m_topic;
+        int m_room_number;
+        int m_time;
+    };
 };
 
 
