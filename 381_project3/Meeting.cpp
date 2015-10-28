@@ -11,6 +11,17 @@
 using namespace std;
 using namespace std::placeholders;
 
+Meeting::Meeting()
+{
+}
+
+Meeting::~Meeting() {
+    // Remove all participants
+    for_each(m_participants.begin(),
+        m_participants.end(),
+        bind(&Meeting::remove_participant, this, _1));
+}
+
 Meeting::Meeting(Meeting&& original)
     : m_participants(move(original.m_participants)),
     m_topic(move(original.m_topic)),
@@ -32,7 +43,7 @@ Meeting::Meeting(int location_, int time_, const std::string& topic_)
 Meeting::Meeting(int location_, int time_, Meeting&& original)
     : m_participants(move(original.m_participants)),
     m_topic(move(original.m_topic)),
-    m_location(original.m_location),
+    m_location(location_),
     m_time(time_)
 {
 }

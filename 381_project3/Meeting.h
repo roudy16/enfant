@@ -22,7 +22,11 @@ We let the compiler supply the destructor and the copy/move constructors and ass
 
 class Meeting {
 public:
-    Meeting() {}
+    using Participants_t = std::set<const Person*, Less_than_ptr<const Person*>>;
+
+    Meeting();
+
+    ~Meeting();
 
     Meeting(int location_, int time_, const std::string& topic_);
 
@@ -32,7 +36,7 @@ public:
     // Move constructor leaves original in empty state
     Meeting(Meeting&& original);
 
-    // construct Meeting with same participants as original but new time
+    // construct Meeting with same participantsand topic as original but new time and location
     Meeting(int location_, int time_, Meeting&& original);
 
     // Construct a Meeting from an input file stream in save format
@@ -40,7 +44,7 @@ public:
     // No check made for whether the Meeting already exists or not.
     // Person list is needed to resolve references to meeting participants
     // Input for a member variable value is read directly into the member variable.
-    Meeting(std::ifstream& is, const std::set<const Person*, Less_than_ptr<const Person*>>& people, int location);
+    Meeting(std::ifstream& is, const Participants_t& people, int location);
 
     // Move assignment
     Meeting& operator=(Meeting&& rhs);
@@ -74,7 +78,6 @@ public:
 
     friend std::ostream& operator<< (std::ostream&, const Meeting&);
 private:
-    using Participants_t = std::set<const Person*, Less_than_ptr<const Person*>>;
 
     Participants_t m_participants;
     std::string m_topic;

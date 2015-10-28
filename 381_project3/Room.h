@@ -23,7 +23,6 @@ to be able to access the Meeting container in order to search for a specific par
 We let the compiler supply the destructor and copy/move constructors and assignment operators.
 */ 
 
-// Ordering for meetings from earliest time to latest time
 struct Time_comp {
     bool operator()(int lhs, int rhs) const;
 };
@@ -31,7 +30,7 @@ struct Time_comp {
 class Room {
 public:
     // Construct a room with the specified room number and no meetings
-    Room(int room_number_) : m_room_number(room_number_) {}
+    Room(int room_number_);
 
     // Construct a Room from an input file stream in save format, using the people list,
     // restoring all the Meeting information. 
@@ -42,39 +41,33 @@ public:
     Room(std::ifstream& is, const std::set<const Person*, Less_than_ptr<const Person*>>& people_list);
 
     // Accessors
-    int get_room_number() const
-    {
-        return m_room_number;
-    }
+    int get_room_number() const;
 
     // Room objects manage their own Meeting container. Meetings are objects in
     // the container. The container of Meetings is not available to clients.
 
     // Add the Meeting, throw exception if there is already a Meeting at that time.
-    // A copy of the supplied Meeting is stored in the Meeting container.
-    //void add_Meeting(const Meeting& m);
-    // The supplied Meeting is moved into the Meeting container.
-    void add_Meeting(Meeting&& m);
+    // This function does not allocate a new Meeting
+    //void add_Meeting(Meeting* meeting_ptr);
+
+    // Allocates a new meeting and adds it to the meetings container
+    void add_Meeting(int time, const std::string& topic);
+
+    void move_Meeting(int time, Meeting* old_meeting_ptr);
 
     // Return true if there is at least one meeting, false if none
-    bool has_Meetings() const {
-        return !meetings.empty();
-    }
+    bool has_Meetings() const;
     // Return the number of meetings in this room
-    int get_number_Meetings() const {
-        return meetings.size();
-    }
+    int get_number_Meetings() const;
     // Return true if there is a Meeting at the time, false if not.
     bool is_Meeting_present(int time) const;
     // Return a reference if the Meeting is present, throw exception if not.
-    Meeting& get_Meeting(int time);
-    const Meeting& get_Meeting(int time) const;
+    Meeting* get_Meeting(int time);
+    const Meeting* get_Meeting(int time) const;
     // Remove the specified Meeting, throw exception if a Meeting at that time was not found.
     void remove_Meeting(int time);
     // Remove and destroy all meetings
-    void clear_Meetings() {
-        meetings.clear();
-    }
+    void clear_Meetings();
     // Return true if the person is present in any of the meetings
     bool is_participant_present(const Person* person_ptr) const;
 
@@ -82,16 +75,18 @@ public:
     void save(std::ostream& os) const;
 
     // This operator defines the order relation between Rooms, based just on the number
-    bool operator< (const Room& rhs) const {
-        return m_room_number < rhs.m_room_number;
-    }
+    bool operator< (const Room& rhs) const;
 
     friend std::ostream& operator<< (std::ostream&, const Room&);
 
 private:
-    using Meetings_t = std::map<int, Meeting, Time_comp>;
-    Meetings_t meetings;
 
+    using Meetings_t = std::map<int, Meeting*, Time_comp>;
+
+    void deallocate_all_meetings();
+    void add_meeting_check(int time) const;
+
+    Meetings_t m_meetings;
     int m_room_number;
 };
 

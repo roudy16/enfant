@@ -30,6 +30,11 @@ struct Less_than_ptr{
 
 int convert_time_to_24_hour(int time);
 
+//template <typename IT>
+//void deallocate_in_range(IT& first, const IT& last) {
+    //for_each(first, last, [](IT::value_type p){ delete p; });
+//}
+
 bool person_to_string_comp(std::string lastname, const Person *const person_ptr);
 
 

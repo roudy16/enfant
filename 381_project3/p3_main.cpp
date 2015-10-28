@@ -273,8 +273,8 @@ static void print_meeting_command(Schedule& schedule) {
     int room_number = read_room_number_from_stream(cin);
     const Room& room = find_room(schedule, room_number);
     int meeting_time = read_time_from_stream(cin);
-    const Meeting& meeting = room.get_Meeting(meeting_time);
-    cout << meeting;
+    const Meeting* meeting = room.get_Meeting(meeting_time);
+    cout << *meeting;
 }
 
 static void print_all_meetings_command(Schedule& schedule) {
@@ -379,9 +379,7 @@ static void add_meeting_command(Schedule& schedule) {
     string topic;
     cin >> topic;
 
-    Meeting new_meeting(room_number, meeting_time, topic);
-
-    room.add_Meeting(std::move(new_meeting));
+    room.add_Meeting(meeting_time, topic);
 
     cout << "Meeting added at " << meeting_time << endl;
 }
@@ -391,19 +389,19 @@ static void add_person_to_meeting_in_room_command(Schedule& schedule) {
     Room& room = find_room(schedule, room_number);
 
     int meeting_time = read_time_from_stream(cin);
-    Meeting& meeting = room.get_Meeting(meeting_time);
+    Meeting* meeting = room.get_Meeting(meeting_time);
 
     string lastname;
     cin >> lastname;
 
     const Person& person = find_person(schedule, lastname);
 
-    if (meeting.is_participant_present(&person)) {
+    if (meeting->is_participant_present(&person)) {
         throw Error("This person is already a participant!");
     }
 
     // Add participant to meeting
-    meeting.add_participant(&person);
+    meeting->add_participant(&person);
     cout << "Participant " << lastname << " added" << endl;
 }
 
@@ -419,7 +417,7 @@ static void reschedule_meeting_command(Schedule& schedule) {
 
     // Find meeting we want to reschedule
     int old_meeting_time = read_time_from_stream(cin);
-    Meeting& old_meeting = old_room.get_Meeting(old_meeting_time);
+    Meeting* old_meeting = old_room.get_Meeting(old_meeting_time);
 
     // Find room we want to move the meeting to
     int new_room_number = read_room_number_from_stream(cin);
@@ -437,17 +435,17 @@ static void reschedule_meeting_command(Schedule& schedule) {
     }
 
     // Check to see if there are any commitment conflicts
-    if (old_meeting.conflicts_exist(new_meeting_time)) {
+    if (old_meeting->conflicts_exist(new_meeting_time)) {
         throw Error("A participant is already committed at the new time!");
     }
 
     // At this point it is safe to create the new_meeting in the new room by
     // moving the contents of the old meeting but changing the meeting time.
-    Meeting new_meeting(new_room_number, new_meeting_time, move(old_meeting));
-    new_room.add_Meeting(move(new_meeting));
+    //Meeting new_meeting(new_room_number, new_meeting_time, move(old_meeting));
+    new_room.move_Meeting(new_meeting_time, old_meeting);
 
     // We inform the participants of the reschedule so they update their commitments
-    new_room.get_Meeting(new_meeting_time).inform_participants_of_reschedule(old_meeting_time);
+    new_room.get_Meeting(new_meeting_time)->inform_participants_of_reschedule(old_meeting_time);
 
     // Remove the old Meeting object from the Room
     old_room.remove_Meeting(old_meeting_time);
@@ -515,14 +513,14 @@ static void delete_participant_command(Schedule& schedule){
     auto room_iter = get_room_from_input(schedule);
     int meeting_time = read_time_from_stream(cin);
 
-    Meeting& meeting = (*room_iter)->get_Meeting(meeting_time);
+    Meeting* meeting = (*room_iter)->get_Meeting(meeting_time);
 
     string lastname;
     cin >> lastname;
 
     auto person_iter = find_person_iter(schedule, lastname);
 
-    meeting.remove_participant(*person_iter);
+    meeting->remove_participant(*person_iter);
     cout << "Participant " << lastname << " deleted" << endl;
 }
 
