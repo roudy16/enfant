@@ -35,8 +35,8 @@ public:
     // Write a Person's data to a stream in save format with final endl.
     void save(std::ostream& os) const;
 
-    // Returns true if Person has commitment at time
-    bool has_commitment(int time) const;
+    // Returns true if Person has commitment at time that is conflicts with meeting
+    bool has_commitment_conflict(const Meeting* const meeting_ptr, int time) const;
 
     // Adds a new commitment to commitments list, throws an Error if Person
     // already has a commitment at that time
@@ -71,8 +71,11 @@ private:
 
     void add_commitment(Commitment&& original) const;
     bool verify_commitments_ordering() const;
+    Commitments_t::iterator find_commitment(int time) const;
 
     // MEMBER VARIABLES
+    // The Person should not change name or phone number but over its lifetime
+    // its commitments can change
     mutable Commitments_t m_commitments;
     std::string m_firstname;
     std::string m_lastname;

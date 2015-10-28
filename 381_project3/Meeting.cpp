@@ -115,15 +115,11 @@ void Meeting::remove_participant(const Person* p) {
 }
 
 bool Meeting::conflicts_exist(int time) const {
-    bool has_conflict = false;
-    for_each(m_participants.begin(),
+    auto person_iter = find_if(m_participants.begin(),
         m_participants.end(),
-        [&](const Person* p) {
-            if (has_conflict) return;
-            if (p->has_commitment(time)) has_conflict = true;
-        });
+        [=](const Person* p)->bool{ return p->has_commitment_conflict(this, time); });
 
-    return has_conflict;
+    return person_iter != m_participants.end();
 }
 
 

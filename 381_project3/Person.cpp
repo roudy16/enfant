@@ -9,6 +9,7 @@
 #include <cassert>
 
 using namespace std;
+using namespace std::placeholders;
 
 Person::Person() {}
 
@@ -24,16 +25,20 @@ void Person::save(ostream& os) const {
     os << *this << endl;
 }
 
-bool Person::has_commitment(int time) const {
+bool Person::has_commitment_conflict(const Meeting* const meeting_ptr, int time) const {
     auto commitment_iter = find(m_commitments.begin(),
                                 m_commitments.end(),
                                 time);
 
-    return commitment_iter != m_commitments.end();
+    if (commitment_iter == m_commitments.end()) {
+        return false;
+    }
+
+    return commitment_iter->mp_meeting != meeting_ptr;
 }
 
 void Person::add_commitment(const Meeting* meeting_ptr) const {
-    if (has_commitment(meeting_ptr->get_time())) {
+    if (has_commitment_conflict(meeting_ptr, meeting_ptr->get_time())) {
         throw Error("Person is already committed at that time!");
     }
 
@@ -59,19 +64,24 @@ void Person::add_commitment(Commitment&& original) const
     assert(verify_commitments_ordering());
 }
 
-void Person::remove_commitment(int time) const {
-    auto commitment_iter = find(m_commitments.begin(),
-                                m_commitments.end(),
-                                time);
+Person::Commitments_t::iterator Person::find_commitment(int time) const {
+    return find_if(m_commitments.begin(),
+                   m_commitments.end(),
+                   [=](const Commitment& c)->bool{ return c == time; });
+}
 
+void Person::remove_commitment(int time) const {
+    auto commitment_iter = find_commitment(time);
     m_commitments.erase(commitment_iter);
     assert(verify_commitments_ordering());
 }
 
+static bool meeting_is_at_time(const Meeting* meeting_ptr, int time) {
+    return meeting_ptr->get_time() == time;
+}
+
 void Person::change_commitment(int old_time, const Meeting* new_meeting_ptr) const {
-    auto commitment_iter = find(m_commitments.begin(),
-                                m_commitments.end(),
-                                old_time);
+    auto commitment_iter = find_commitment(old_time);
 
     assert(commitment_iter != m_commitments.end());
 
