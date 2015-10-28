@@ -198,6 +198,9 @@ int main() {
             discard_rest_of_line(cin);
             cout << e.msg << endl;
         }
+        catch (LoadError& le) {
+            cout << "Invalid data found in file!" << endl;
+        }
         catch (std::bad_alloc& e){
             // TODO handle bad allocs, look at spec for what to do
             cout << e.what() << endl;
@@ -208,7 +211,7 @@ int main() {
     } // End while loop
 
     deallocate_all_command(schedule);
-    printf("Done\n");
+    cout << "Done" << endl;
     return 0;
 }
 
@@ -280,6 +283,7 @@ static void print_all_meetings_command(Schedule& schedule) {
     }
     else {
         cout << "Information for " << schedule.m_rooms.size() << " rooms:" << endl;
+         // TODO step1
         for (auto room_p : schedule.m_rooms) {
             cout << *room_p;
         }
@@ -299,7 +303,11 @@ static void print_all_people_command(Schedule& schedule) {
 }
 
 static void print_commitments_command(Schedule& schedule) {
-    // TODO implement this
+    string lastname;
+    cin >> lastname;
+
+    const Person& person = find_person(schedule, lastname);
+    person.print_commitments();
 }
 
 static void print_memory_allocations_command(Schedule& schedule) {
@@ -371,7 +379,7 @@ static void add_meeting_command(Schedule& schedule) {
     string topic;
     cin >> topic;
 
-    Meeting new_meeting(meeting_time, topic);
+    Meeting new_meeting(room_number, meeting_time, topic);
 
     room.add_Meeting(std::move(new_meeting));
 
@@ -381,8 +389,8 @@ static void add_meeting_command(Schedule& schedule) {
 static void add_person_to_meeting_in_room_command(Schedule& schedule) {
     int room_number = read_room_number_from_stream(cin);
     Room& room = find_room(schedule, room_number);
-    int meeting_time = read_time_from_stream(cin);
 
+    int meeting_time = read_time_from_stream(cin);
     Meeting& meeting = room.get_Meeting(meeting_time);
 
     string lastname;
@@ -394,8 +402,7 @@ static void add_person_to_meeting_in_room_command(Schedule& schedule) {
         throw Error("This person is already a participant!");
     }
 
-    // TODO verify no Commitment conflict
-
+    // Add participant to meeting
     meeting.add_participant(&person);
     cout << "Participant " << lastname << " added" << endl;
 }
@@ -429,10 +436,20 @@ static void reschedule_meeting_command(Schedule& schedule) {
         throw Error("There is already a meeting at that time!");
     }
 
+    // Check to see if there are any commitment conflicts
+    if (old_meeting.conflicts_exist(new_meeting_time)) {
+        throw Error("A participant is already committed at the new time!");
+    }
+
     // At this point it is safe to create the new_meeting in the new room by
-    // moving the contents of the old meeting but changing the meeting time
-    Meeting new_meeting(new_meeting_time, move(old_meeting));
+    // moving the contents of the old meeting but changing the meeting time.
+    Meeting new_meeting(new_room_number, new_meeting_time, move(old_meeting));
     new_room.add_Meeting(move(new_meeting));
+
+    // We inform the participants of the reschedule so they update their commitments
+    new_room.get_Meeting(new_meeting_time).inform_participants_of_reschedule(old_meeting_time);
+
+    // Remove the old Meeting object from the Room
     old_room.remove_Meeting(old_meeting_time);
 
     cout << "Meeting rescheduled to room " << new_room_number
@@ -605,6 +622,8 @@ static void load_data_command(Schedule& schedule){
     // Save old contents in case original state needs to be restored
     Schedule old_schedule;
     old_schedule = move(schedule);
+    schedule.m_people.clear();
+    schedule.m_rooms.clear();
 
     try {
         int number_of_people;

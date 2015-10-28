@@ -24,31 +24,31 @@ class Meeting {
 public:
     Meeting() {}
 
-    Meeting(int time_, const std::string& topic_) : m_topic(topic_), m_time(time_) {}
+    Meeting(int location_, int time_, const std::string& topic_);
 
     // construct a Meeting with only a time
-    Meeting(int time_) : m_time(time_) {}
+    Meeting(int location_, int time_);
 
     // Move constructor leaves original in empty state
     Meeting(Meeting&& original);
 
     // construct Meeting with same participants as original but new time
-    Meeting(int time_, Meeting&& original);
+    Meeting(int location_, int time_, Meeting&& original);
 
     // Construct a Meeting from an input file stream in save format
     // Throw Error exception if invalid data discovered in file.
     // No check made for whether the Meeting already exists or not.
     // Person list is needed to resolve references to meeting participants
     // Input for a member variable value is read directly into the member variable.
-    Meeting(std::ifstream& is, const std::set<const Person*, Less_than_ptr<const Person*>>& people);
+    Meeting(std::ifstream& is, const std::set<const Person*, Less_than_ptr<const Person*>>& people, int location);
 
     // Move assignment
     Meeting& operator=(Meeting&& rhs);
 
     // accessors
-    int get_time() const {
-        return m_time;
-    }
+    int get_time() const;
+    int get_location() const;
+    const std::string& get_topic() const;
 
     // Meeting objects manage their own participant list. Participants
     // are identified by a pointer to that individual's Person object.
@@ -60,6 +60,12 @@ public:
     // Remove from the list, throw exception if participant was not found.
     void remove_participant(const Person* p);
 
+    // returns true if any of the meeting's participants have a commitment
+    // at the passed in time.
+    bool conflicts_exist(int time) const;
+
+    void inform_participants_of_reschedule(int old_time) const;
+
     // Write a Meeting's data to a stream in save format with final endl.
     void save(std::ostream& os) const;
 
@@ -69,9 +75,10 @@ public:
     friend std::ostream& operator<< (std::ostream&, const Meeting&);
 private:
     using Participants_t = std::set<const Person*, Less_than_ptr<const Person*>>;
-    Participants_t participants;
 
+    Participants_t m_participants;
     std::string m_topic;
+    int m_location;
     int m_time;
 };
 

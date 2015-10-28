@@ -1,4 +1,5 @@
 #include "Person.h"
+#include "Meeting.h"
 #include "Utility.h"
 #include <fstream>
 #include <utility>
@@ -31,12 +32,12 @@ bool Person::has_commitment(int time) const {
     return commitment_iter != m_commitments.end();
 }
 
-void Person::add_commitment(int new_room_number, int new_time, const string& topic) {
-    if (has_commitment(new_time)) {
+void Person::add_commitment(const Meeting* meeting_ptr) const {
+    if (has_commitment(meeting_ptr->get_time())) {
         throw Error("Person is already committed at that time!");
     }
 
-    Commitment new_commitment(topic, new_room_number, new_time);
+    Commitment new_commitment(meeting_ptr);
 
     auto insert_iter = lower_bound(m_commitments.begin(),
                                    m_commitments.end(),
@@ -47,7 +48,7 @@ void Person::add_commitment(int new_room_number, int new_time, const string& top
     assert(verify_commitments_ordering());
 }
 
-void Person::add_commitment(Commitment&& original) 
+void Person::add_commitment(Commitment&& original) const
 {
     auto insert_iter = lower_bound(m_commitments.begin(),
                                    m_commitments.end(),
@@ -58,7 +59,7 @@ void Person::add_commitment(Commitment&& original)
     assert(verify_commitments_ordering());
 }
 
-void Person::remove_commitment(int time) {
+void Person::remove_commitment(int time) const {
     auto commitment_iter = find(m_commitments.begin(),
                                 m_commitments.end(),
                                 time);
@@ -67,7 +68,7 @@ void Person::remove_commitment(int time) {
     assert(verify_commitments_ordering());
 }
 
-void Person::change_commitment(int old_time, int new_room_number, int new_time) {
+void Person::change_commitment(int old_time, const Meeting* new_meeting_ptr) const {
     auto commitment_iter = find(m_commitments.begin(),
                                 m_commitments.end(),
                                 old_time);
@@ -75,14 +76,15 @@ void Person::change_commitment(int old_time, int new_room_number, int new_time) 
     assert(commitment_iter != m_commitments.end());
 
     // create a new commitment that has the updated room and time
-    Commitment& old_commitment(*commitment_iter);
-    Commitment changed_commitment(old_commitment.m_topic,
-                                  old_commitment.m_room_number,
-                                  old_commitment.m_time);
+    Commitment changed_commitment(new_meeting_ptr);
 
     // Remove the old commitment and insert the changed commitment
     m_commitments.erase(commitment_iter);
     add_commitment(move(changed_commitment));
+}
+
+void Person::clear_commitments() const {
+    m_commitments.clear();
 }
 
 void Person::print_commitments() const {
@@ -117,24 +119,25 @@ bool Person::verify_commitments_ordering() const {
     return is_ordered;
 }
 
-Person::Commitment::Commitment(const string& topic, int room_number, int time)
-    : m_topic(topic), m_room_number(room_number), m_time(time)
+Person::Commitment::Commitment(const Meeting* new_meeting_ptr)
+    : mp_meeting(new_meeting_ptr)
 {
 }
 
 void Person::Commitment::print() const {
-    cout << "Room:" << m_room_number
-         << " Time: " << m_time
-         << " Topic: " << m_topic << endl;
+    cout << "Room:" << mp_meeting->get_location()
+         << " Time: " << mp_meeting->get_time()
+         << " Topic: " << mp_meeting->get_topic() << endl;
 }
 
 bool Person::Commitment::operator< (const Commitment& rhs) const {
-    return m_room_number < rhs.m_room_number &&
-           m_time < rhs.m_time;
+    return mp_meeting->get_location() < rhs.mp_meeting->get_location() ||
+           (mp_meeting->get_location() == rhs.mp_meeting->get_location() && 
+            mp_meeting->get_time() < rhs.mp_meeting->get_time());
 }
 
 bool Person::Commitment::operator== (int time) const {
-    return m_time == time;
+    return mp_meeting->get_time() == time;
 }
 
 ostream& operator<< (ostream& os, const Person& person) {

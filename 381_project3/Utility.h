@@ -19,6 +19,10 @@ struct Error {
     const char* msg;
 };
 
+struct LoadError {};
+
+// TODO maybe a function to read single string from std::cin
+
 template <typename T>
 struct Less_than_ptr{
     bool operator()(const T lhs, const T rhs) const { return *lhs < *rhs; }

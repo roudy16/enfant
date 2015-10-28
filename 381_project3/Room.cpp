@@ -20,12 +20,12 @@ Room::Room(std::ifstream& is, const People_list_t& people_list) {
     int number_of_meetings;
     is >> m_room_number >> number_of_meetings;
     if (!is.good() || m_room_number < 0) {
-        throw Error("Invalid data found in file!");
+        throw LoadError();
     }
 
     // TODO step1
     for (int i = 0; i < number_of_meetings; ++i) {
-        Meeting m(is, people_list);
+        Meeting m(is, people_list, m_room_number);
         meetings[m.get_time()] = move(m);
     }
 }

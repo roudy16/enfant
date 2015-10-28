@@ -5,6 +5,7 @@
 #include <string>
 #include <list>
 
+class Meeting;
 
 /* A Person object simply contains Strings for a person's data.
 Once created, the data cannot be modified. */
@@ -39,14 +40,16 @@ public:
 
     // Adds a new commitment to commitments list, throws an Error if Person
     // already has a commitment at that time
-    void add_commitment(int new_room_number, int new_time, const std::string& topic);
+    void add_commitment(const Meeting*) const;
 
     // Removes a commitment from the commitments list
-    void remove_commitment(int time);
+    void remove_commitment(int time) const;
 
     // Changes the commitment at the old time to a new commitment in a new
     // Room at a new time
-    void change_commitment(int old_time, int new_room_number, int new_time);
+    void change_commitment(int old_time, const Meeting* new_meeting_ptr) const;
+
+    void clear_commitments() const;
 
     // Prints all commitments to std::cout
     void print_commitments() const;
@@ -66,11 +69,11 @@ private:
     Person(Person&& person) = delete;
     Person& operator=(const Person& rhs) = delete;
 
-    void add_commitment(Commitment&& original);
+    void add_commitment(Commitment&& original) const;
     bool verify_commitments_ordering() const;
 
     // MEMBER VARIABLES
-    Commitments_t m_commitments;
+    mutable Commitments_t m_commitments;
     std::string m_firstname;
     std::string m_lastname;
     std::string m_phoneno;
@@ -78,7 +81,7 @@ private:
     // Private class that only the Person needs to have access to
     class Commitment {
     public:
-        Commitment(const std::string& topic, int room_number, int time);
+        Commitment(const Meeting*);
 
         void print() const;
         bool operator< (const Commitment& rhs) const;
@@ -86,12 +89,9 @@ private:
 
         friend class Person;
     private:
-        std::string m_topic;
-        int m_room_number;
-        int m_time;
+        const Meeting* mp_meeting;
     };
 };
-
 
 // output firstname, lastname, phoneno with one separating space, NO endl
 std::ostream& operator<< (std::ostream& os, const Person& person);
