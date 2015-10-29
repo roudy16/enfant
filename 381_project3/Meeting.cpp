@@ -57,7 +57,7 @@ Meeting::Meeting(ifstream& is, const Participants_t& people, int location) {
 
     // TODO step1
     for (int i = 0; i < number_of_participants; ++i){
-        string lastname = read_string_from_input();
+        string lastname = read_string_from_stream(is);
         check_file_stream_status(is);
 
         Person person(lastname);
@@ -120,10 +120,12 @@ void Meeting::remove_participant(const Person* p) {
 }
 
 bool Meeting::conflicts_exist(int time) const {
+    // Find the first participant that has a conflict
     auto person_iter = find_if(m_participants.begin(),
         m_participants.end(),
         [=](const Person* p)->bool{ return p->has_commitment_conflict(this, time); });
 
+    // Return true if any participant has a conflict
     return person_iter != m_participants.end();
 }
 
@@ -133,18 +135,16 @@ void Meeting::inform_participants_of_reschedule(int old_time) const
 {
     for_each(m_participants.begin(),
         m_participants.end(),
-        [=](const Person* p){
-            p->change_commitment(old_time, this);
-        });
+        [old_time, this](const Person* p){ p->change_commitment(old_time, this); });
 }
 
 void Meeting::save(ostream& os) const {
     os << m_time << ' ' << m_topic << ' ' << m_participants.size() << '\n';
 
-    // TODO step1
-    for (auto p : m_participants) {
-        os << p->get_lastname() << endl;
-    }
+    // Print save info for each participant
+    for_each(m_participants.begin(),
+        m_participants.end(),
+        [&os](const Person* p){ os << p->get_lastname() << endl; });
 }
 
 bool Meeting::operator< (const Meeting& other) const {

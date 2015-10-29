@@ -29,7 +29,7 @@ struct Less_than_ptr{
 
 int convert_time_to_24_hour(int time);
 
-std::string&& read_string_from_input();
+std::string read_string_from_stream(std::istream& is);
 
 void check_file_stream_status(std::ifstream& ifs);
 

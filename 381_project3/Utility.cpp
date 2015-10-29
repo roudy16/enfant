@@ -3,6 +3,7 @@
 #include <iostream>
 #include <fstream>
 
+using std::istream;
 using std::ifstream;
 using std::string;
 using std::cin;
@@ -14,10 +15,10 @@ int convert_time_to_24_hour(int time) {
     return time;
 }
 
-std::string&& read_string_from_input() {
+string read_string_from_stream(istream& is) {
     string temp;
-    cin >> temp;
-    return move(temp);
+    is >> temp;
+    return temp;
 }
 
 void check_file_stream_status(ifstream& ifs) {

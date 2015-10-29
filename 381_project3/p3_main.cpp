@@ -262,7 +262,7 @@ static int read_room_number_from_stream(std::istream& is) {
 }
 
 static void print_person_command(Schedule& schedule) {
-    string lastname = read_string_from_input();
+    string lastname = read_string_from_stream(cin);
 
     const Person& person = find_person(schedule, lastname);
     cout << person << endl;
@@ -308,7 +308,7 @@ static void print_all_people_command(Schedule& schedule) {
 }
 
 static void print_commitments_command(Schedule& schedule) {
-    string lastname = read_string_from_input();
+    string lastname = read_string_from_stream(cin);
 
     const Person& person = find_person(schedule, lastname);
     person.print_commitments();
@@ -380,7 +380,7 @@ static void add_meeting_command(Schedule& schedule) {
     Room& room = find_room(schedule, room_number);
     int meeting_time = read_time_from_stream(cin);
 
-    string topic = read_string_from_input();
+    string topic = read_string_from_stream(cin);
 
     room.add_Meeting(meeting_time, topic);
 
@@ -394,7 +394,7 @@ static void add_person_to_meeting_in_room_command(Schedule& schedule) {
     int meeting_time = read_time_from_stream(cin);
     Meeting* meeting = room.get_Meeting(meeting_time);
 
-    string lastname = read_string_from_input();
+    string lastname = read_string_from_stream(cin);
 
     const Person& person = find_person(schedule, lastname);
 
@@ -480,7 +480,7 @@ static void delete_individual(Schedule& schedule, const string& lastname) {
 }
 
 static void delete_individual_command(Schedule& schedule){
-    string lastname = read_string_from_input();
+    string lastname = read_string_from_stream(cin);
 
     delete_individual(schedule, lastname);
 
@@ -517,7 +517,7 @@ static void delete_participant_command(Schedule& schedule){
 
     Meeting* meeting = (*room_iter)->get_Meeting(meeting_time);
 
-    string lastname = read_string_from_input();
+    string lastname = read_string_from_stream(cin);
 
     auto person_iter = find_person_iter(schedule, lastname);
     if (person_iter == schedule.m_people.end()) {
@@ -591,7 +591,7 @@ static void deallocate_all(Schedule& schedule){
 }
 
 static void save_data_command(Schedule& schedule){
-    string filename = read_string_from_input();
+    string filename = read_string_from_stream(cin);
 
     std::ofstream ofs(filename.c_str());
     if (!ofs.good()) {
@@ -612,7 +612,7 @@ static void save_data_command(Schedule& schedule){
 }
 
 static void load_data_command(Schedule& schedule){
-    string filename = read_string_from_input();
+    string filename = read_string_from_stream(cin);
 
     ifstream ifs(filename);
     if (!ifs.is_open()) {
