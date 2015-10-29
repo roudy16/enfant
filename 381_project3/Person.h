@@ -16,10 +16,9 @@ public:
     Person();
     ~Person();
 
-    Person(const std::string& firstname_, const std::string& lastname_, const std::string& phoneno_)
-        : m_firstname(firstname_), m_lastname(lastname_), m_phoneno(phoneno_) {}
+    Person(const std::string& firstname_, const std::string& lastname_, const std::string& phoneno_);
     // construct a Person object with only a lastname
-    Person(const std::string& lastname_) : m_lastname(lastname_) {}
+    Person(const std::string& lastname_);
 
     // Construct a Person object from a file stream in save format.
     // Throw Error exception if invalid data discovered in file.
@@ -28,9 +27,7 @@ public:
     Person(std::ifstream& is);
 
     // Accessors
-    std::string get_lastname() const {
-        return m_lastname;
-    }
+    std::string get_lastname() const;
 
     // Write a Person's data to a stream in save format with final endl.
     void save(std::ostream& os) const;
@@ -62,7 +59,7 @@ public:
     friend std::ostream& operator<< (std::ostream&, const Person&);
 
 private:
-    class Commitment;
+    struct Commitment;
     using Commitments_t = std::list<Commitment>;
 
     Person(const Person& person) = delete;
@@ -81,17 +78,14 @@ private:
     std::string m_lastname;
     std::string m_phoneno;
 
-    // Private class that only the Person needs to have access to
-    class Commitment {
-    public:
+    // Private struct that only the Person needs to have access to
+    struct Commitment {
         Commitment(const Meeting*);
 
         void print() const;
         bool operator< (const Commitment& rhs) const;
         bool operator== (int time) const;
 
-        friend class Person;
-    private:
         const Meeting* mp_meeting;
     };
 };

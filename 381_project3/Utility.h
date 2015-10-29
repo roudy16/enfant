@@ -2,6 +2,7 @@
 #define UTILITY_H
 
 #include <string>
+#include <fstream>
 
 class Person;
 
@@ -19,8 +20,6 @@ struct Error {
     const char* msg;
 };
 
-struct LoadError {};
-
 // TODO maybe a function to read single string from std::cin
 
 template <typename T>
@@ -30,12 +29,11 @@ struct Less_than_ptr{
 
 int convert_time_to_24_hour(int time);
 
-//template <typename IT>
-//void deallocate_in_range(IT& first, const IT& last) {
-    //for_each(first, last, [](IT::value_type p){ delete p; });
-//}
+std::string&& read_string_from_input();
 
-bool person_to_string_comp(std::string lastname, const Person *const person_ptr);
+void check_file_stream_status(std::ifstream& ifs);
+
+//bool person_to_string_comp(std::string lastname, const Person *const person_ptr);
 
 
 #endif // UTILITY_H

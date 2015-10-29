@@ -15,10 +15,19 @@ Person::Person() {}
 
 Person::~Person() {}
 
+Person::Person(const std::string& lastname_) : m_lastname(lastname_) {}
+
+Person::Person(const std::string& firstname_, const std::string& lastname_, const std::string& phoneno_)
+    : m_firstname(firstname_), m_lastname(lastname_), m_phoneno(phoneno_) {}
+
 Person::Person(ifstream& is){
     is >> m_firstname;
     is >> m_lastname;
     is >> m_phoneno;
+}
+
+std::string Person::get_lastname() const {
+    return m_lastname;
 }
 
 void Person::save(ostream& os) const {
@@ -74,10 +83,6 @@ void Person::remove_commitment(int time) const {
     auto commitment_iter = find_commitment(time);
     m_commitments.erase(commitment_iter);
     assert(verify_commitments_ordering());
-}
-
-static bool meeting_is_at_time(const Meeting* meeting_ptr, int time) {
-    return meeting_ptr->get_time() == time;
 }
 
 void Person::change_commitment(int old_time, const Meeting* new_meeting_ptr) const {

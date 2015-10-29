@@ -24,7 +24,7 @@ Room::Room(std::ifstream& is, const People_list_t& people_list) {
     int number_of_meetings;
     is >> m_room_number >> number_of_meetings;
     if (!is.good() || m_room_number < 0) {
-        throw LoadError();
+        throw Error("Invalid data found in file!");
     }
 
     // TODO step1, check if this is the allowed case

@@ -51,25 +51,19 @@ Meeting::Meeting(int location_, int time_, Meeting&& original)
 Meeting::Meeting(ifstream& is, const Participants_t& people, int location) {
     int number_of_participants;
     is >> m_time >> m_topic >> number_of_participants;
-    if (!is.good()) {
-        throw LoadError();
-    }
+    check_file_stream_status(is);
 
     m_location = location;
 
     // TODO step1
     for (int i = 0; i < number_of_participants; ++i){
-        string lastname;
-
-        is >> lastname;
-        if (!is.good()) {
-            throw LoadError();
-        }
+        string lastname = read_string_from_input();
+        check_file_stream_status(is);
 
         Person person(lastname);
         auto iter = people.find(&person);
         if (iter == people.end()) {
-            throw LoadError();
+            throw Error("Invalid data found in file!");
         }
         else {
             add_participant(*iter);
@@ -169,10 +163,10 @@ ostream& operator<< (ostream& os, const Meeting& meeting) {
     else {
         os << endl;
 
-        // TODO step1
-        for (auto p : meeting.m_participants) {
-            os << *p << endl;
-        }
+        // Allow each participant to print themselves to the stream
+        for_each(meeting.m_participants.begin(),
+            meeting.m_participants.end(),
+            bind(&Person::save, _1, ref(os)));
     }
     return os;
 }

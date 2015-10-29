@@ -195,18 +195,24 @@ int main() {
             command_iter->second(schedule);
         }
         catch (Error& e) {
-            discard_rest_of_line(cin);
+            // Print error message
             cout << e.msg << endl;
-        }
-        catch (LoadError& le) {
-            cout << "Invalid data found in file!" << endl;
+
+            // If we've reached EOF allow program to exit normally
+            if (cin.eof()) break;
+
+            discard_rest_of_line(cin);
         }
         catch (std::bad_alloc& e){
-            // TODO handle bad allocs, look at spec for what to do
+            // Print message then allow program to exit normally
             cout << e.what() << endl;
+            break;
         } 
         catch (...) {
             // catch all for stuff thrown from not my code
+            // Exit program in this case
+            cout << "Unhandled error encountered" << endl;
+            break;
         }
     } // End while loop
 
@@ -256,8 +262,7 @@ static int read_room_number_from_stream(std::istream& is) {
 }
 
 static void print_person_command(Schedule& schedule) {
-    string lastname;
-    cin >> lastname;
+    string lastname = read_string_from_input();
 
     const Person& person = find_person(schedule, lastname);
     cout << person << endl;
@@ -303,8 +308,7 @@ static void print_all_people_command(Schedule& schedule) {
 }
 
 static void print_commitments_command(Schedule& schedule) {
-    string lastname;
-    cin >> lastname;
+    string lastname = read_string_from_input();
 
     const Person& person = find_person(schedule, lastname);
     person.print_commitments();
@@ -376,8 +380,7 @@ static void add_meeting_command(Schedule& schedule) {
     Room& room = find_room(schedule, room_number);
     int meeting_time = read_time_from_stream(cin);
 
-    string topic;
-    cin >> topic;
+    string topic = read_string_from_input();
 
     room.add_Meeting(meeting_time, topic);
 
@@ -391,8 +394,7 @@ static void add_person_to_meeting_in_room_command(Schedule& schedule) {
     int meeting_time = read_time_from_stream(cin);
     Meeting* meeting = room.get_Meeting(meeting_time);
 
-    string lastname;
-    cin >> lastname;
+    string lastname = read_string_from_input();
 
     const Person& person = find_person(schedule, lastname);
 
@@ -423,13 +425,14 @@ static void reschedule_meeting_command(Schedule& schedule) {
     int new_room_number = read_room_number_from_stream(cin);
     Room& new_room = find_room(schedule, new_room_number);
 
-    // Ensure no meeting is already scheduled at that time in the new room
-    // and check to the case where no change is needed
+    // Check to the case where no change is needed
     int new_meeting_time = read_time_from_stream(cin);
     if (old_room_number == new_room_number && old_meeting_time == new_meeting_time) {
         cout << "No change made to schedule" << endl;
         return;
     }
+
+    // Ensure no meeting is already scheduled at that time in the new room
     if (new_room.is_Meeting_present(new_meeting_time)) {
         throw Error("There is already a meeting at that time!");
     }
@@ -477,8 +480,7 @@ static void delete_individual(Schedule& schedule, const string& lastname) {
 }
 
 static void delete_individual_command(Schedule& schedule){
-    string lastname;
-    cin >> lastname;
+    string lastname = read_string_from_input();
 
     delete_individual(schedule, lastname);
 
@@ -515,10 +517,12 @@ static void delete_participant_command(Schedule& schedule){
 
     Meeting* meeting = (*room_iter)->get_Meeting(meeting_time);
 
-    string lastname;
-    cin >> lastname;
+    string lastname = read_string_from_input();
 
     auto person_iter = find_person_iter(schedule, lastname);
+    if (person_iter == schedule.m_people.end()) {
+        throw Error("No person with that name!");
+    }
 
     meeting->remove_participant(*person_iter);
     cout << "Participant " << lastname << " deleted" << endl;
@@ -587,8 +591,7 @@ static void deallocate_all(Schedule& schedule){
 }
 
 static void save_data_command(Schedule& schedule){
-    string filename;
-    cin >> filename;
+    string filename = read_string_from_input();
 
     std::ofstream ofs(filename.c_str());
     if (!ofs.good()) {
@@ -609,26 +612,22 @@ static void save_data_command(Schedule& schedule){
 }
 
 static void load_data_command(Schedule& schedule){
-    string filename;
-    cin >> filename;
+    string filename = read_string_from_input();
 
-    std::ifstream ifs(filename.c_str());
-    if (!ifs.good()) {
+    ifstream ifs(filename);
+    if (!ifs.is_open()) {
         throw Error("Could not open file!");
     }
 
     // Save old contents in case original state needs to be restored
-    Schedule old_schedule;
-    old_schedule = move(schedule);
+    Schedule old_schedule(move(schedule));
     schedule.m_people.clear();
     schedule.m_rooms.clear();
 
     try {
         int number_of_people;
         ifs >> number_of_people;
-        if (!ifs.good()) {
-            throw Error("Invalid data found in file!");
-        }
+        check_file_stream_status(ifs);
 
         for (int i = 0; i < number_of_people; ++i) {
             schedule.m_people.insert(new Person(ifs));
@@ -636,9 +635,7 @@ static void load_data_command(Schedule& schedule){
 
         int number_of_rooms;
         ifs >> number_of_rooms;
-        if (!ifs.good()) {
-            throw Error("Invalid data found in file!");
-        }
+        check_file_stream_status(ifs);
 
         for (int i = 0; i < number_of_rooms; ++i) {
             add_room_helper(schedule, new Room(ifs, schedule.m_people));
