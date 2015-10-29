@@ -26,3 +26,7 @@ void check_file_stream_status(ifstream& ifs) {
         throw Error("Invalid data found in file!");
     }
 }
+
+Error::Error(const char* msg_ = "") : msg(msg_)
+{
+}

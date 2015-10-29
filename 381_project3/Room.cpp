@@ -27,7 +27,7 @@ Room::Room(std::ifstream& is, const People_list_t& people_list) {
         throw Error("Invalid data found in file!");
     }
 
-    // TODO step1, check if this is the allowed case
+    // Allocate and load new Meetings from the file
     for (int i = 0; i < number_of_meetings; ++i) {
         Meeting* meeting_ptr = new Meeting(is, people_list, m_room_number);
         m_meetings[meeting_ptr->get_time()] = meeting_ptr;
@@ -51,11 +51,6 @@ void Room::add_meeting_check(int time) const {
     }
 }
 
-//void Room::add_Meeting(Meeting* meeting_ptr) {
-    //add_meeting_check(meeting_ptr->get_time());
-    //m_meetings[meeting_ptr->get_time()] = meeting_ptr;
-//}
-
 void Room::add_Meeting(int time, const string& topic) {
     add_meeting_check(time);
     m_meetings[time] = new Meeting(m_room_number, time, topic);
@@ -63,8 +58,13 @@ void Room::add_Meeting(int time, const string& topic) {
 
 void Room::move_Meeting(int time, Meeting* old_meeting_ptr) {
     add_meeting_check(time);
-    Meeting* new_meeting_ptr = new Meeting(m_room_number, time, move(*old_meeting_ptr));
+
+    // Create a new Meeting object and add it to the Meeting container
+    Meeting* new_meeting_ptr = new Meeting(m_room_number, time, *old_meeting_ptr);
     m_meetings[time] = new_meeting_ptr;
+
+    // Have participants update their Commitments
+    new_meeting_ptr->inform_participants_of_reschedule(old_meeting_ptr->get_time());
 }
 
 bool Room::is_Meeting_present(int time) const {
@@ -114,26 +114,25 @@ void Room::remove_Meeting(int time) {
     }
 }
 
-bool Room::is_participant_present(const Person* person_ptr) const {
-    bool return_val = false;
-    // TODO step1
-    for (auto& meeting : m_meetings) {
-        if (meeting.second->is_participant_present(person_ptr)) {
-            return_val = true;
-            break;
-        }
-    }
 
-    return return_val;
+bool Room::is_participant_present(const Person* person_ptr) const {
+    // Find first Meeting that the Person is a participant in
+    auto meeting_iter = find_if(m_meetings.begin(),
+        m_meetings.end(),
+        [=](Meetings_t::const_iterator::value_type pair)->bool { 
+            return pair.second->is_participant_present(person_ptr); 
+        });
+
+    // Return true of a Meeting was found that contains the Person
+    return meeting_iter != m_meetings.end();
 }
 
 void Room::save(ostream& os) const {
     os << m_room_number << ' ' << m_meetings.size() << endl;
 
-    // TODO step1
-    for (auto& meeting : m_meetings) {
-        meeting.second->save(os);
-    }
+    for_each(m_meetings.begin(),
+        m_meetings.end(),
+        [&os](Meetings_t::const_iterator::value_type pair){ pair.second->save(os); });
 }
 
 bool Room::operator< (const Room& rhs) const {
@@ -147,10 +146,10 @@ ostream& operator<< (ostream& os, const Room& room) {
         os << "No meetings are scheduled" << endl;
     }
     else {
-        // TODO step1
-        for (auto& meeting : room.m_meetings) {
-            os << *(meeting.second);
-        }
+        // Have each Meeting output itself
+        for_each(room.m_meetings.begin(),
+            room.m_meetings.end(),
+            [&os](Room::Meetings_t::const_iterator::value_type pair){ os << *(pair.second); });
     }
 
     return os;

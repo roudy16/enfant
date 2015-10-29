@@ -35,6 +35,9 @@ public:
     // Returns true if Person has commitment at time that is conflicts with meeting
     bool has_commitment_conflict(const Meeting* const meeting_ptr, int time) const;
 
+    // Returns true if Person has any commitments
+    bool has_commitments() const;
+
     // Adds a new commitment to commitments list, throws an Error if Person
     // already has a commitment at that time
     void add_commitment(const Meeting*) const;
@@ -52,9 +55,7 @@ public:
     void print_commitments() const;
 
     // This operator defines the order relation between Persons, based just on the last name
-    bool operator< (const Person& rhs) const {
-        return m_lastname < rhs.m_lastname;
-    }
+    bool operator< (const Person& rhs) const;
 
     friend std::ostream& operator<< (std::ostream&, const Person&);
 
@@ -66,7 +67,7 @@ private:
     Person(Person&& person) = delete;
     Person& operator=(const Person& rhs) = delete;
 
-    void add_commitment(Commitment&& original) const;
+    void add_commitment(Commitment& original) const;
     bool verify_commitments_ordering() const;
     Commitments_t::iterator find_commitment(int time) const;
 

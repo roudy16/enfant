@@ -11,10 +11,6 @@
 using namespace std;
 using namespace std::placeholders;
 
-Meeting::Meeting()
-{
-}
-
 Meeting::~Meeting() {
     // Remove all participants
     for_each(m_participants.begin(),
@@ -40,7 +36,7 @@ Meeting::Meeting(int location_, int time_, const std::string& topic_)
 {
 }
 
-Meeting::Meeting(int location_, int time_, Meeting&& original)
+Meeting::Meeting(int location_, int time_, Meeting& original)
     : m_participants(move(original.m_participants)),
     m_topic(move(original.m_topic)),
     m_location(location_),
@@ -49,25 +45,29 @@ Meeting::Meeting(int location_, int time_, Meeting&& original)
 }
 
 Meeting::Meeting(ifstream& is, const Participants_t& people, int location) {
+    // Read meeting information from file
     int number_of_participants;
     is >> m_time >> m_topic >> number_of_participants;
     check_file_stream_status(is);
 
     m_location = location;
 
-    // TODO step1
+    // Load participants from file
     for (int i = 0; i < number_of_participants; ++i){
         string lastname = read_string_from_stream(is);
         check_file_stream_status(is);
 
+        // Verify a Person with lastname exists in the people list then add
+        // them as a participant.
         Person person(lastname);
         auto iter = people.find(&person);
+
+        // If the Person does not exists the file data must be invalid
         if (iter == people.end()) {
             throw Error("Invalid data found in file!");
         }
-        else {
-            add_participant(*iter);
-        }
+
+        add_participant(*iter);
     }
 }
 
@@ -119,6 +119,12 @@ void Meeting::remove_participant(const Person* p) {
     }
 }
 
+void Meeting::remove_all_participants() {
+    for_each(m_participants.begin(),
+        m_participants.end(),
+        bind(&Meeting::remove_participant, this, _1));
+}
+
 bool Meeting::conflicts_exist(int time) const {
     // Find the first participant that has a conflict
     auto person_iter = find_if(m_participants.begin(),
@@ -133,6 +139,7 @@ bool Meeting::conflicts_exist(int time) const {
 
 void Meeting::inform_participants_of_reschedule(int old_time) const 
 {
+    // Have each person update their commitment for this Meeting
     for_each(m_participants.begin(),
         m_participants.end(),
         [old_time, this](const Person* p){ p->change_commitment(old_time, this); });

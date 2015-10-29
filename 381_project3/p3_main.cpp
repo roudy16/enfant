@@ -17,6 +17,7 @@
 #include <cassert>
 
 using namespace std;
+using namespace std::placeholders;
 
 // Type aliases for containers of Rooms and Persons 
 using Rooms_t = vector<Room*>;
@@ -47,10 +48,6 @@ static Rooms_t::iterator find_room_iter(Schedule& schedule, const int room_numbe
 // Perform binary search for a Room with same room number
 static Rooms_t::iterator find_room_iter_helper(Schedule& schedule,
                                                const int room_number);
-
-// Find a meeting in the schedule by number if it exists, throw an Error
-// if no such Meeting is found
-//static Meeting& find_meeting(Schedule& schedule, const int room_number, const int meeting_time);
 
 // Find a person in the schedule by lastname if it exists, throw an Error
 // if no such Person is found
@@ -83,9 +80,6 @@ static int read_time_from_stream(std::istream& is);
 static int read_room_number_from_stream(std::istream& is);
 
 static Rooms_t::iterator get_room_from_input(Schedule& schedule);
-
-// Throw an Error if Person is in a participant in a Meeting within the Room
-static void detect_room_participant_helper(Room* room_ptr, const Person* person_ptr);
 
 // Assists in adding a new Room, does not check if room already exists
 static void add_room_helper(Schedule& schedule, Room* const room_ptr);
@@ -288,10 +282,11 @@ static void print_all_meetings_command(Schedule& schedule) {
     }
     else {
         cout << "Information for " << schedule.m_rooms.size() << " rooms:" << endl;
-         // TODO step1
-        for (auto room_p : schedule.m_rooms) {
-            cout << *room_p;
-        }
+
+        // Allow each Room to output itself
+        for_each(schedule.m_rooms.begin(),
+            schedule.m_rooms.end(),
+            [](Room* rm){ cout << *rm; });
     }
 }
 
@@ -301,9 +296,11 @@ static void print_all_people_command(Schedule& schedule) {
     }
     else {
         cout << "Information for " << schedule.m_people.size() << " people:" << endl;
-        for (auto person_p : schedule.m_people) {
-            cout << *person_p << endl;
-        }
+
+        // Allow each Person to output themselves
+        for_each(schedule.m_people.begin(),
+            schedule.m_people.end(),
+            [](const Person* p){ cout << *p << endl; });
     }
 }
 
@@ -329,7 +326,7 @@ static void print_memory_allocations_command(Schedule& schedule) {
 }
 
 
-static void add_to_people_list_command(Schedule& schedule){
+static void add_to_people_list_command(Schedule& schedule) {
     string firstname, lastname, phoneno;
     cin >> firstname >> lastname >> phoneno;
 
@@ -444,11 +441,8 @@ static void reschedule_meeting_command(Schedule& schedule) {
 
     // At this point it is safe to create the new_meeting in the new room by
     // moving the contents of the old meeting but changing the meeting time.
-    //Meeting new_meeting(new_room_number, new_meeting_time, move(old_meeting));
-    new_room.move_Meeting(new_meeting_time, old_meeting);
-
     // We inform the participants of the reschedule so they update their commitments
-    new_room.get_Meeting(new_meeting_time)->inform_participants_of_reschedule(old_meeting_time);
+    new_room.move_Meeting(new_meeting_time, old_meeting);
 
     // Remove the old Meeting object from the Room
     old_room.remove_Meeting(old_meeting_time);
@@ -457,22 +451,15 @@ static void reschedule_meeting_command(Schedule& schedule) {
          << " at " << new_meeting_time << endl;
 }
 
-// Throw Error if Person is in a Meeting in the Room
-static void detect_room_participant_helper(Room* room_ptr, const Person* person_ptr) {
-    if (room_ptr->is_participant_present(person_ptr)) {
-        throw Error("This person is a participant in a meeting!");
-    }
-}
-
 static void delete_individual(Schedule& schedule, const string& lastname) {
     // Make sure the person exists
     auto person_iter = find_person_iter(schedule, lastname);
 
     // If the person is scheduled for a meeting we cannot delete them, check
     // to see if the person is in any meetings
-    for_each(schedule.m_rooms.begin(),
-        schedule.m_rooms.end(),
-        bind(detect_room_participant_helper, std::placeholders::_1, *person_iter));
+    if ((*person_iter)->has_commitments()) {
+        throw Error("This person is a participant in a meeting!");
+    }
 
     // Free memory allocated for Person object before erasing node
     delete *person_iter;
@@ -591,29 +578,31 @@ static void deallocate_all(Schedule& schedule){
 }
 
 static void save_data_command(Schedule& schedule){
+    // Open file for writing
     string filename = read_string_from_stream(cin);
-
-    std::ofstream ofs(filename.c_str());
+    std::ofstream ofs(filename);
     if (!ofs.good()) {
         throw Error("Could not open file!");
     }
 
+    // Save each Person
     ofs << schedule.m_people.size() << endl;
-    for (auto person_ptr : schedule.m_people) {
-        person_ptr->save(ofs);
-    }
+    for_each(schedule.m_people.begin(),
+             schedule.m_people.end(),
+             bind(&Person::save, _1, ref(ofs)));
 
+    // Save each Room
     ofs << schedule.m_rooms.size() << endl;
-    for (auto room_ptr : schedule.m_rooms) {
-        room_ptr->save(ofs);
-    }
+    for_each(schedule.m_rooms.begin(),
+             schedule.m_rooms.end(),
+             bind(&Room::save, _1, ref(ofs)));
 
     cout << "Data saved" << endl;
 }
 
 static void load_data_command(Schedule& schedule){
+    // Read filename and open file for reading
     string filename = read_string_from_stream(cin);
-
     ifstream ifs(filename);
     if (!ifs.is_open()) {
         throw Error("Could not open file!");
@@ -655,18 +644,7 @@ static void load_data_command(Schedule& schedule){
     }
 }
 
-static Room& find_room(Schedule& schedule, const int room_number) {
-    auto room_iter = find_room_iter(schedule, room_number);
-    if (room_iter == schedule.m_rooms.end()) {
-        throw Error("No room with that number!");
-    }
-
-    return **room_iter;
-}
-
-static Rooms_t::iterator find_room_iter_helper(Schedule& schedule,
-                                               const int room_number)
-{
+static Rooms_t::iterator find_room_iter_helper(Schedule& schedule, const int room_number) {
     // Create a comparator and a probe Room to use to try to find a Room
     // with the same number as the room number passed in
     Less_than_ptr<Room*> comp;
@@ -677,9 +655,8 @@ static Rooms_t::iterator find_room_iter_helper(Schedule& schedule,
                        comp);
 }
 
-static Rooms_t::iterator find_room_iter(Schedule& schedule,
-                                        const int room_number)
-{
+static Rooms_t::iterator find_room_iter(Schedule& schedule, const int room_number) {
+    // Get iterator to lower bound for provided room number
     auto room_iter = find_room_iter_helper(schedule, room_number);
 
     // If a lower bound was found but it is not the Room we are trying to find
@@ -693,13 +670,14 @@ static Rooms_t::iterator find_room_iter(Schedule& schedule,
     return room_iter;
 }
 
-//static Meeting& find_meeting(Schedule& schedule,
-                             //const int room_number,
-                             //const int meeting_time)
-//{
-    //Room& room = find_room(schedule, room_number);
-    //return room.get_Meeting(meeting_time);
-//}
+static Room& find_room(Schedule& schedule, const int room_number) {
+    auto room_iter = find_room_iter(schedule, room_number);
+    if (room_iter == schedule.m_rooms.end()) {
+        throw Error("No room with that number!");
+    }
+
+    return **room_iter;
+}
 
 static People_t::iterator find_person_iter(Schedule& schedule,
                                            const string& lastname)

@@ -24,7 +24,7 @@ class Meeting {
 public:
     using Participants_t = std::set<const Person*, Less_than_ptr<const Person*>>;
 
-    Meeting();
+    Meeting() = default;
 
     ~Meeting();
 
@@ -33,11 +33,13 @@ public:
     // construct a Meeting with only a time
     Meeting(int location_, int time_);
 
+    // TODO make default
     // Move constructor leaves original in empty state
     Meeting(Meeting&& original);
 
     // construct Meeting with same participantsand topic as original but new time and location
-    Meeting(int location_, int time_, Meeting&& original);
+    // the original meeting is left in an empty state
+    Meeting(int location_, int time_, Meeting& original);
 
     // Construct a Meeting from an input file stream in save format
     // Throw Error exception if invalid data discovered in file.
@@ -63,6 +65,8 @@ public:
     bool is_participant_present(const Person* p) const;
     // Remove from the list, throw exception if participant was not found.
     void remove_participant(const Person* p);
+
+    void remove_all_participants();
 
     // returns true if any of the meeting's participants have a commitment
     // at the passed in time.
