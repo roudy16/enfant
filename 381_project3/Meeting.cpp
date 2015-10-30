@@ -12,10 +12,7 @@ using namespace std;
 using namespace std::placeholders;
 
 Meeting::~Meeting() {
-    // Remove all participants
-    for_each(m_participants.begin(),
-        m_participants.end(),
-        bind(&Meeting::remove_participant, this, _1));
+    remove_all_participants();
 }
 
 Meeting::Meeting(Meeting&& original)
@@ -118,7 +115,7 @@ void Meeting::remove_all_participants() {
 }
 
 void Meeting::move_participants_to(Meeting& other) {
-    m_participants = move(other.m_participants);
+    other.m_participants = move(m_participants);
 }
 
 bool Meeting::conflicts_exist(int time) const {

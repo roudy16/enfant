@@ -90,13 +90,13 @@ void Person::add_commitment(const Meeting* meeting_ptr) const {
 
     Commitment new_commitment(meeting_ptr);
 
-    // Find the first Commitment that whose time is greater than or equal
-    // to that of the new_commitment
+    // Find the first Commitment that compares not less than new_commitment using
+    // the Commitment::operator<
     auto insert_iter = find_if(m_commitments.begin(),
         m_commitments.end(),
         [&](const Commitment& c)->bool{return !(c < new_commitment); });
 
-    m_commitments.emplace(insert_iter, move(new_commitment));
+    m_commitments.insert(insert_iter, new_commitment);
     assert(verify_commitments_ordering());
 }
 
