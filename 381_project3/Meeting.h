@@ -37,10 +37,6 @@ public:
     // Move constructor leaves original in empty state
     Meeting(Meeting&& original);
 
-    // construct Meeting with same participantsand topic as original but new time and location
-    // the original meeting is left in an empty state
-    Meeting(int location_, int time_, Meeting& original);
-
     // Construct a Meeting from an input file stream in save format
     // Throw Error exception if invalid data discovered in file.
     // No check made for whether the Meeting already exists or not.
@@ -67,6 +63,10 @@ public:
     void remove_participant(const Person* p);
 
     void remove_all_participants();
+
+    // Move this Meeting's participants to the other Meeting, this Meeting
+    // is left with no participants
+    void move_participants_to(Meeting& other);
 
     // returns true if any of the meeting's participants have a commitment
     // at the passed in time.

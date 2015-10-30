@@ -5,6 +5,7 @@
 #include <utility>
 #include <iostream>
 #include <algorithm>
+#include <iterator>
 #include <functional>
 #include <cassert>
 
@@ -34,10 +35,40 @@ void Person::save(ostream& os) const {
     os << *this << endl;
 }
 
+bool Person::verify_commitments_ordering() const {
+#ifdef DEBUG
+    // Lists with one or fewer items are always in order
+    if (m_commitments.size() < 2) {
+        return true;
+    }
+
+    // Compare all Commitments in the list to ensure proper ordering.
+    auto it = m_commitments.begin();
+    bool is_ordered = true;
+    for_each(m_commitments.begin(),
+        m_commitments.end(),
+        [&](const Commitment& c) {
+        if (!is_ordered) return;
+        // increment it so that it points to the item in the list 
+        // ahead of c
+        if ((++it) == m_commitments.end()) return;
+        is_ordered = c < *it;
+    });
+
+    return is_ordered;
+#else
+    return true;
+#endif
+}
+
 bool Person::has_commitment_conflict(const Meeting* const meeting_ptr, int time) const {
-    auto commitment_iter = find(m_commitments.begin(),
-                                m_commitments.end(),
-                                time);
+    // Attempt to find a Commitment that conflicts with passed in meeting and time
+    auto commitment_iter = find_if(m_commitments.begin(),
+                                   m_commitments.end(),
+                                   [=](const Commitment& c)->bool{
+                                       return c.mp_meeting != meeting_ptr &&
+                                              c.mp_meeting->get_time() == time;
+                                   });
 
     // If no Commitment with matching time was found then there is no conflict
     if (commitment_iter == m_commitments.end()) {
@@ -59,31 +90,33 @@ void Person::add_commitment(const Meeting* meeting_ptr) const {
 
     Commitment new_commitment(meeting_ptr);
 
-    auto insert_iter = lower_bound(m_commitments.begin(),
-                                   m_commitments.end(),
-                                   new_commitment);
+    // Find the first Commitment that whose time is greater than or equal
+    // to that of the new_commitment
+    auto insert_iter = find_if(m_commitments.begin(),
+        m_commitments.end(),
+        [&](const Commitment& c)->bool{return !(c < new_commitment); });
 
-
-    m_commitments.insert(insert_iter, move(new_commitment));
+    m_commitments.emplace(insert_iter, move(new_commitment));
     assert(verify_commitments_ordering());
 }
 
-void Person::add_commitment(Commitment& original) const
-{
-    auto insert_iter = lower_bound(m_commitments.begin(),
-                                   m_commitments.end(),
-                                   original);
+//void Person::add_commitment(Commitment& original) const
+//{
+    // TODO disallowed on std::list
+    //auto insert_iter = lower_bound(m_commitments.begin(),
+                                   //m_commitments.end(),
+                                   //original);
 
-    m_commitments.insert(insert_iter, original);
+    //m_commitments.insert(insert_iter, original);
 
-    assert(verify_commitments_ordering());
-}
+    //assert(verify_commitments_ordering());
+//}
 
 Person::Commitments_t::iterator Person::find_commitment(int time) const {
     // Find the Commitment that matches the time if it exists
     return find_if(m_commitments.begin(),
                    m_commitments.end(),
-                   [=](const Commitment& c)->bool{ return c == time; });
+                   [=](const Commitment& c)->bool{ return c.mp_meeting->get_time() == time; });
 }
 
 void Person::remove_commitment(int time) const {
@@ -96,15 +129,9 @@ void Person::remove_commitment(int time) const {
 }
 
 void Person::change_commitment(int old_time, const Meeting* new_meeting_ptr) const {
-    auto commitment_iter = find_commitment(old_time);
-    assert(commitment_iter != m_commitments.end());
-
-    // create a new commitment that has the updated room and time
-    Commitment changed_commitment(new_meeting_ptr);
-
     // Remove the old commitment and insert the changed commitment
-    m_commitments.erase(commitment_iter);
-    add_commitment(changed_commitment);
+    remove_commitment(old_time);
+    add_commitment(new_meeting_ptr);
 }
 
 void Person::clear_commitments() const {
@@ -125,24 +152,6 @@ void Person::print_commitments() const {
              [](const Commitment& c){ c.print(); });
 }
 
-bool Person::verify_commitments_ordering() const {
-    Commitments_t::const_iterator it = m_commitments.begin();
-    if (it == m_commitments.end()) {
-        return true;
-    }
-
-    bool is_ordered = true;
-    for_each(m_commitments.begin(),
-             m_commitments.end(),
-             [&](const Commitment& c) {
-                 if (!is_ordered) return;
-                 if ((++it) == m_commitments.end()) return;
-                 is_ordered = c < *it;
-             });
-
-    return is_ordered;
-}
-
 bool Person::operator< (const Person& rhs) const {
     return m_lastname < rhs.m_lastname;
 }
@@ -161,15 +170,12 @@ void Person::Commitment::print() const {
 bool Person::Commitment::operator< (const Commitment& rhs) const {
     return mp_meeting->get_location() < rhs.mp_meeting->get_location() ||
            (mp_meeting->get_location() == rhs.mp_meeting->get_location() && 
-            mp_meeting->get_time() < rhs.mp_meeting->get_time());
-}
-
-bool Person::Commitment::operator== (int time) const {
-    return mp_meeting->get_time() == time;
+            *mp_meeting < *rhs.mp_meeting);
 }
 
 ostream& operator<< (ostream& os, const Person& person) {
-    os << person.m_firstname << ' ' << person.m_lastname << ' ' << person.m_phoneno;
+    string person_output = person.m_firstname + ' ' + person.m_lastname + ' ' + person.m_phoneno;
+    copy(person_output.begin(), person_output.end(), ostream_iterator<char>(os));
     return os;
 }
 

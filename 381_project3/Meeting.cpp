@@ -36,14 +36,6 @@ Meeting::Meeting(int location_, int time_, const std::string& topic_)
 {
 }
 
-Meeting::Meeting(int location_, int time_, Meeting& original)
-    : m_participants(move(original.m_participants)),
-    m_topic(move(original.m_topic)),
-    m_location(location_),
-    m_time(time_)
-{
-}
-
 Meeting::Meeting(ifstream& is, const Participants_t& people, int location) {
     // Read meeting information from file
     int number_of_participants;
@@ -125,6 +117,10 @@ void Meeting::remove_all_participants() {
         bind(&Meeting::remove_participant, this, _1));
 }
 
+void Meeting::move_participants_to(Meeting& other) {
+    m_participants = move(other.m_participants);
+}
+
 bool Meeting::conflicts_exist(int time) const {
     // Find the first participant that has a conflict
     auto person_iter = find_if(m_participants.begin(),
@@ -134,8 +130,6 @@ bool Meeting::conflicts_exist(int time) const {
     // Return true if any participant has a conflict
     return person_iter != m_participants.end();
 }
-
-
 
 void Meeting::inform_participants_of_reschedule(int old_time) const 
 {

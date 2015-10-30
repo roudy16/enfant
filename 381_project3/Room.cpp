@@ -60,7 +60,8 @@ void Room::move_Meeting(int time, Meeting* old_meeting_ptr) {
     add_meeting_check(time);
 
     // Create a new Meeting object and add it to the Meeting container
-    Meeting* new_meeting_ptr = new Meeting(m_room_number, time, *old_meeting_ptr);
+    Meeting* new_meeting_ptr = new Meeting(m_room_number, time, old_meeting_ptr->get_topic());
+    old_meeting_ptr->move_participants_to(*new_meeting_ptr);
     m_meetings[time] = new_meeting_ptr;
 
     // Have participants update their Commitments

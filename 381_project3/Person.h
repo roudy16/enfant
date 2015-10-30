@@ -68,8 +68,12 @@ private:
     Person& operator=(const Person& rhs) = delete;
 
     void add_commitment(Commitment& original) const;
-    bool verify_commitments_ordering() const;
     Commitments_t::iterator find_commitment(int time) const;
+
+    // Checks list ordering invarient, returns true if invarient holds.
+    // NOTE: This function only performs checks if DEBUG preprocessor symbol is defined
+    // otherwise it always returns true
+    bool verify_commitments_ordering() const;
 
     // MEMBER VARIABLES
     // The Person should not change name or phone number but over its lifetime
@@ -85,7 +89,6 @@ private:
 
         void print() const;
         bool operator< (const Commitment& rhs) const;
-        bool operator== (int time) const;
 
         const Meeting* mp_meeting;
     };
