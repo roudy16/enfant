@@ -10,7 +10,7 @@ using namespace std;
 
 using People_list_t = std::set<const Person*, Less_than_ptr<const Person*>>;
 
-bool Time_comp::operator()(int lhs, int rhs) const {
+bool Room::Time_comp::operator()(int lhs, int rhs) const {
     lhs = convert_time_to_24_hour(lhs);
     rhs = convert_time_to_24_hour(rhs);
     return lhs < rhs;
@@ -60,7 +60,7 @@ void Room::add_Meeting(int time, const string& topic) {
     m_meetings[time] = new Meeting(m_room_number, time, topic);
 }
 
-void Room::move_Meeting(int time, Meeting* old_meeting_ptr) {
+void Room::move_Meeting(int time, Room* old_room, Meeting* old_meeting_ptr) {
     add_meeting_check(time);
 
     // Create a new Meeting object and add it to the Meeting container
@@ -70,6 +70,9 @@ void Room::move_Meeting(int time, Meeting* old_meeting_ptr) {
 
     // Have participants update their Commitments
     new_meeting_ptr->inform_participants_of_reschedule(old_meeting_ptr->get_time());
+
+    // Remove the old Meeting object from the Room
+    old_room->remove_Meeting(old_meeting_ptr->get_time());
 }
 
 bool Room::is_Meeting_present(int time) const {

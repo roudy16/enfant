@@ -5,6 +5,7 @@
 #include <string>
 #include <list>
 
+// Forward declare Meeting class
 class Meeting;
 
 /* A Person object simply contains Strings for a person's data.
@@ -15,6 +16,7 @@ public:
     // Destructor
     ~Person() = default;
 
+    // construct a Person object with first and last name and phoneno
     Person(const std::string& firstname_, const std::string& lastname_, const std::string& phoneno_);
     // construct a Person object with only a lastname
     Person(const std::string& lastname_);
@@ -84,7 +86,8 @@ private:
 
     using Commitments_t = std::list<Commitment>;
 
-    void add_commitment(Commitment& original) const;
+    // Returns an iterator to the Commitment with matching time if it exists,
+    // returns an iterator to end otherwise.
     Commitments_t::iterator find_commitment(int time) const;
 
     // Checks list ordering invarient, returns true if invarient holds.

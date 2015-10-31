@@ -4,8 +4,6 @@
 #include <string>
 #include <fstream>
 
-class Person;
-
 /* Utility functions, constants, and classes used by more than one other modules */
 
 // Times in 24-hour format

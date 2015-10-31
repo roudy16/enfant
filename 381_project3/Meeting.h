@@ -3,7 +3,6 @@
 
 #include <string>
 #include <set>
-#include "Person.h"
 #include "Utility.h"
 
 /* Meeting class - this class represents a Meeting in terms of a time, topic, and 
@@ -19,6 +18,8 @@ in order by time, and an output operator to simplify printing the Meeting inform
 We let the compiler supply the destructor and the copy/move constructors and assignment operators.
 */
 
+// Forward declare Person class
+class Person;
 
 class Meeting {
 public:
@@ -60,6 +61,9 @@ public:
     // at the passed in time.
     bool conflicts_exist(int time) const;
 
+    // Informs participants that this Meeting has been moved from the old time.
+    // The old time may be the same as th new time, this indicates a Room change.
+    // This allows participants to update their commitments.
     void inform_participants_of_reschedule(int old_time) const;
 
     // Write a Meeting's data to a stream in save format with final endl.

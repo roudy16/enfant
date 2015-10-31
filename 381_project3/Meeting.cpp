@@ -1,4 +1,5 @@
 #include "Meeting.h"
+#include "Person.h"
 #include "Utility.h"
 #include <fstream>
 #include <ostream>
@@ -99,8 +100,10 @@ void Meeting::move_participants_to(Meeting& other) {
 bool Meeting::conflicts_exist(int time) const {
     // Find the first participant that has a conflict
     auto person_iter = find_if(m_participants.begin(),
-        m_participants.end(),
-        [=](const Person* p)->bool{ return p->has_commitment_conflict(this, time); });
+                               m_participants.end(),
+                               [=](const Person* p)->bool{ 
+                                   return p->has_commitment_conflict(this, time); 
+                               });
 
     // Return true if any participant has a conflict
     return person_iter != m_participants.end();

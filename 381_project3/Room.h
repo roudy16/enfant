@@ -3,8 +3,6 @@
 
 #include <set>
 #include <map>
-#include "Meeting.h"
-#include "Utility.h"
 
 /* A Room object contains a room number and a list containing Meeting objects stored with
 meeting times as the key.  When created, a Room has no Meetings. When destroyed, the Meeting
@@ -23,9 +21,9 @@ to be able to access the Meeting container in order to search for a specific par
 We let the compiler supply the destructor and copy/move constructors and assignment operators.
 */ 
 
-struct Time_comp {
-    bool operator()(int lhs, int rhs) const;
-};
+// Forward declare Person and Meeting classes
+class Person;
+class Meeting;
 
 class Room {
 public:
@@ -45,6 +43,7 @@ public:
     // Accessor
     int get_room_number() const;
     int get_number_Meetings() const;
+
     // Return a reference if the Meeting is present, throw exception if not.
     Meeting* get_Meeting(int time);
     const Meeting* get_Meeting(int time) const;
@@ -58,17 +57,23 @@ public:
 
     // Allocates a new meeting and adds it to the meetings container
     void add_Meeting(int time, const std::string& topic);
+
     // Allocates a new meeting and moves the old meetings participants to it.
     // old meeting is left with no participants.
-    void move_Meeting(int time, Meeting* old_meeting_ptr);
+    void move_Meeting(int time, Room* old_room, Meeting* old_meeting_ptr);
+
     // Return true if there is at least one meeting, false if none
     bool has_Meetings() const;
+
     // Return the number of meetings in this room
     bool is_Meeting_present(int time) const;
+
     // Remove the specified Meeting, throw exception if a Meeting at that time was not found.
     void remove_Meeting(int time);
+
     // Remove and destroy all meetings
     void clear_Meetings();
+
     // Return true if the person is present in any of the meetings
     bool is_participant_present(const Person* person_ptr) const;
 
@@ -92,9 +97,18 @@ private:
     // Copy assignment
     Room& operator=(const Room&) = delete;
 
+    // Comparator for Meetings container
+    struct Time_comp {
+        bool operator()(int lhs, int rhs) const;
+    };
+
     using Meetings_t = std::map<int, Meeting*, Time_comp>;
 
+    // Delete all Meetings
     void deallocate_all_meetings();
+
+    // Check to see if a Meeting already exists at time before adding another
+    // Meeting at that time
     void add_meeting_check(int time) const;
 
     Meetings_t m_meetings;

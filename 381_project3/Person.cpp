@@ -64,13 +64,8 @@ bool Person::has_commitment_conflict(const Meeting* const meeting_ptr, int time)
                                               c.mp_meeting->get_time() == time;
                                    });
 
-    // If no Commitment with matching time was found then there is no conflict
-    if (commitment_iter == m_commitments.end()) {
-        return false;
-    }
-
-    // Return true if the commitment meeting is not the same as the passed in Meeting
-    return commitment_iter->mp_meeting != meeting_ptr;
+    // return true if a conflict was found
+    return commitment_iter != m_commitments.end();
 }
 
 bool Person::has_commitments() const {
@@ -156,7 +151,14 @@ bool Person::Commitment::operator< (const Commitment& rhs) const {
 ostream& operator<< (ostream& os, const Person& person) {
     // Set up string to be output then copy it to cout via std::copy
     // and an ostream_iterator.
-    string person_output = person.m_firstname + ' ' + person.m_lastname + ' ' + person.m_phoneno;
+
+    // use of += avoids extra string copying
+    string person_output = person.m_firstname;
+    person_output += ' ';
+    person_output += person.m_lastname;
+    person_output += ' ';
+    person_output += person.m_phoneno;
+
     copy(person_output.begin(), person_output.end(), ostream_iterator<char>(os));
     return os;
 }
