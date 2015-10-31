@@ -119,7 +119,6 @@ void Room::remove_Meeting(int time) {
     }
 }
 
-
 bool Room::is_participant_present(const Person* person_ptr) const {
     // Find first Meeting that the Person is a participant in
     auto meeting_iter = find_if(m_meetings.begin(),

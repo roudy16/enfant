@@ -352,7 +352,6 @@ static void print_memory_allocations_command(Schedule& schedule) {
     cout << "Rooms: " << schedule.m_rooms.size() << '\n';
 }
 
-
 static void add_to_people_list_command(Schedule& schedule) {
     string firstname = read_string_from_stream(cin);
     string lastname = read_string_from_stream(cin);
@@ -503,7 +502,14 @@ static void delete_individual_command(Schedule& schedule){
 
 static Rooms_t::iterator get_room_from_input(Schedule& schedule) {
     int room_number = read_room_number_from_stream(cin);
-    return find_room_iter(schedule, room_number);
+    auto room_iter = find_room_iter(schedule, room_number);
+
+    // Check if Room was found
+    if (room_iter == schedule.m_rooms.end()) {
+        throw Error("No room with that number!");
+    }
+
+    return room_iter;
 }
 
 static void delete_room_command(Schedule& schedule){
@@ -702,4 +708,3 @@ static People_t::iterator find_person_iter(Schedule& schedule,
     const Person probe(lastname);
     return schedule.m_people.find(&probe);
 }
-
