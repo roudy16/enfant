@@ -31,6 +31,8 @@ class Room {
 public:
     // Construct a room with the specified room number and no meetings
     Room(int room_number_);
+    // Destructor
+    ~Room();
 
     // Construct a Room from an input file stream in save format, using the people list,
     // restoring all the Meeting information. 
@@ -40,8 +42,12 @@ public:
     // Input for a member variable value is read directly into the member variable.
     Room(std::ifstream& is, const std::set<const Person*, Less_than_ptr<const Person*>>& people_list);
 
-    // Accessors
+    // Accessor
     int get_room_number() const;
+    int get_number_Meetings() const;
+    // Return a reference if the Meeting is present, throw exception if not.
+    Meeting* get_Meeting(int time);
+    const Meeting* get_Meeting(int time) const;
 
     // Room objects manage their own Meeting container. Meetings are objects in
     // the container. The container of Meetings is not available to clients.
@@ -52,18 +58,13 @@ public:
 
     // Allocates a new meeting and adds it to the meetings container
     void add_Meeting(int time, const std::string& topic);
-
+    // Allocates a new meeting and moves the old meetings participants to it.
+    // old meeting is left with no participants.
     void move_Meeting(int time, Meeting* old_meeting_ptr);
-
     // Return true if there is at least one meeting, false if none
     bool has_Meetings() const;
     // Return the number of meetings in this room
-    int get_number_Meetings() const;
-    // Return true if there is a Meeting at the time, false if not.
     bool is_Meeting_present(int time) const;
-    // Return a reference if the Meeting is present, throw exception if not.
-    Meeting* get_Meeting(int time);
-    const Meeting* get_Meeting(int time) const;
     // Remove the specified Meeting, throw exception if a Meeting at that time was not found.
     void remove_Meeting(int time);
     // Remove and destroy all meetings
@@ -80,6 +81,16 @@ public:
     friend std::ostream& operator<< (std::ostream&, const Room&);
 
 private:
+    // Default constructor
+    Room() = delete;
+    // Move constructor
+    Room(Room&&) = delete;
+    // Copy constructor
+    Room(const Room&) = delete;
+    // Move assignment
+    Room& operator=(Room&&) = delete;
+    // Copy assignment
+    Room& operator=(const Room&) = delete;
 
     using Meetings_t = std::map<int, Meeting*, Time_comp>;
 

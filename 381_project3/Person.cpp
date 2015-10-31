@@ -6,15 +6,9 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
-#include <functional>
 #include <cassert>
 
 using namespace std;
-using namespace std::placeholders;
-
-Person::Person() {}
-
-Person::~Person() {}
 
 Person::Person(const std::string& lastname_) : m_lastname(lastname_) {}
 
@@ -48,12 +42,12 @@ bool Person::verify_commitments_ordering() const {
     for_each(m_commitments.begin(),
         m_commitments.end(),
         [&](const Commitment& c) {
-        if (!is_ordered) return;
-        // increment it so that it points to the item in the list 
-        // ahead of c
-        if ((++it) == m_commitments.end()) return;
-        is_ordered = c < *it;
-    });
+            if (!is_ordered) return;
+            // increment it so that it points to the item in the list 
+            // ahead of c, return if it points to end()
+            if ((++it) == m_commitments.end()) return;
+            is_ordered = c < *it;
+        });
 
     return is_ordered;
 #else
@@ -100,18 +94,6 @@ void Person::add_commitment(const Meeting* meeting_ptr) const {
     assert(verify_commitments_ordering());
 }
 
-//void Person::add_commitment(Commitment& original) const
-//{
-    // TODO disallowed on std::list
-    //auto insert_iter = lower_bound(m_commitments.begin(),
-                                   //m_commitments.end(),
-                                   //original);
-
-    //m_commitments.insert(insert_iter, original);
-
-    //assert(verify_commitments_ordering());
-//}
-
 Person::Commitments_t::iterator Person::find_commitment(int time) const {
     // Find the Commitment that matches the time if it exists
     return find_if(m_commitments.begin(),
@@ -132,10 +114,6 @@ void Person::change_commitment(int old_time, const Meeting* new_meeting_ptr) con
     // Remove the old commitment and insert the changed commitment
     remove_commitment(old_time);
     add_commitment(new_meeting_ptr);
-}
-
-void Person::clear_commitments() const {
-    m_commitments.clear();
 }
 
 void Person::print_commitments() const {
@@ -168,14 +146,17 @@ void Person::Commitment::print() const {
 }
 
 bool Person::Commitment::operator< (const Commitment& rhs) const {
+    // Commitments are ordered first by room number then by time
+    // of the associated Meeting
     return mp_meeting->get_location() < rhs.mp_meeting->get_location() ||
            (mp_meeting->get_location() == rhs.mp_meeting->get_location() && 
             *mp_meeting < *rhs.mp_meeting);
 }
 
 ostream& operator<< (ostream& os, const Person& person) {
+    // Set up string to be output then copy it to cout via std::copy
+    // and an ostream_iterator.
     string person_output = person.m_firstname + ' ' + person.m_lastname + ' ' + person.m_phoneno;
     copy(person_output.begin(), person_output.end(), ostream_iterator<char>(os));
     return os;
 }
-

@@ -24,18 +24,10 @@ class Meeting {
 public:
     using Participants_t = std::set<const Person*, Less_than_ptr<const Person*>>;
 
-    Meeting() = default;
-
+    // Destructor
     ~Meeting();
-
+    // Construct a Meeting with provided location, time, and topic
     Meeting(int location_, int time_, const std::string& topic_);
-
-    // construct a Meeting with only a time
-    Meeting(int location_, int time_);
-
-    // TODO make default
-    // Move constructor leaves original in empty state
-    Meeting(Meeting&& original);
 
     // Construct a Meeting from an input file stream in save format
     // Throw Error exception if invalid data discovered in file.
@@ -43,9 +35,6 @@ public:
     // Person list is needed to resolve references to meeting participants
     // Input for a member variable value is read directly into the member variable.
     Meeting(std::ifstream& is, const Participants_t& people, int location);
-
-    // Move assignment
-    Meeting& operator=(Meeting&& rhs);
 
     // accessors
     int get_time() const;
@@ -59,9 +48,8 @@ public:
     void add_participant(const Person* p);
     // Return true if the person is a participant, false if not.
     bool is_participant_present(const Person* p) const;
-    // Remove from the list, throw exception if participant was not found.
+    // Remove Person from the list, throw exception if participant was not found.
     void remove_participant(const Person* p);
-
     void remove_all_participants();
 
     // Move this Meeting's participants to the other Meeting, this Meeting
@@ -82,6 +70,16 @@ public:
 
     friend std::ostream& operator<< (std::ostream&, const Meeting&);
 private:
+    // Default constructor
+    Meeting() = delete;
+    // Move constructor
+    Meeting(Meeting&&) = delete;
+    // Copy constructor
+    Meeting(const Meeting&) = delete;
+    // Move assignment
+    Meeting& operator=(Meeting&&) = delete;
+    // Copy assignment
+    Meeting& operator=(const Meeting&) = delete;
 
     Participants_t m_participants;
     std::string m_topic;

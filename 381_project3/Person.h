@@ -12,9 +12,8 @@ Once created, the data cannot be modified. */
 
 class Person {
 public:
-    // Default ctor and dtor do nothing
-    Person();
-    ~Person();
+    // Destructor
+    ~Person() = default;
 
     Person(const std::string& firstname_, const std::string& lastname_, const std::string& phoneno_);
     // construct a Person object with only a lastname
@@ -49,8 +48,6 @@ public:
     // Room at a new time
     void change_commitment(int old_time, const Meeting* new_meeting_ptr) const;
 
-    void clear_commitments() const;
-
     // Prints all commitments to std::cout
     void print_commitments() const;
 
@@ -60,12 +57,32 @@ public:
     friend std::ostream& operator<< (std::ostream&, const Person&);
 
 private:
-    struct Commitment;
-    using Commitments_t = std::list<Commitment>;
+    // Default Constructor
+    Person() = delete;
+    // Move Constructor
+    Person(Person&&) = delete;
+    // Copy Constructor
+    Person(const Person&) = delete;
+    // Move Assignment
+    Person& operator=(Person&&) = delete;
+    // Copy Assignment
+    Person& operator=(Person&) = delete;
 
-    Person(const Person& person) = delete;
-    Person(Person&& person) = delete;
-    Person& operator=(const Person& rhs) = delete;
+    // Private struct that only the Person needs to have access to
+    struct Commitment {
+        Commitment(const Meeting*);
+
+        // Print commitment info to cout
+        void print() const;
+        // Commitments are ordered first by room number then by time
+        // of the associated Meeting
+        bool operator< (const Commitment& rhs) const;
+
+        // Pointer to Commitment's associated Meeting
+        const Meeting* mp_meeting;
+    };
+
+    using Commitments_t = std::list<Commitment>;
 
     void add_commitment(Commitment& original) const;
     Commitments_t::iterator find_commitment(int time) const;
@@ -75,23 +92,12 @@ private:
     // otherwise it always returns true
     bool verify_commitments_ordering() const;
 
-    // MEMBER VARIABLES
     // The Person should not change name or phone number but over its lifetime
     // its commitments can change
     mutable Commitments_t m_commitments;
     std::string m_firstname;
     std::string m_lastname;
     std::string m_phoneno;
-
-    // Private struct that only the Person needs to have access to
-    struct Commitment {
-        Commitment(const Meeting*);
-
-        void print() const;
-        bool operator< (const Commitment& rhs) const;
-
-        const Meeting* mp_meeting;
-    };
 };
 
 // output firstname, lastname, phoneno with one separating space, NO endl

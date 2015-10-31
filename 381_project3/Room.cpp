@@ -20,6 +20,10 @@ Room::Room(int room_number_) : m_room_number(room_number_)
 {
 }
 
+Room::~Room() {
+    deallocate_all_meetings();
+}
+
 Room::Room(std::ifstream& is, const People_list_t& people_list) {
     int number_of_meetings;
     is >> m_room_number >> number_of_meetings;

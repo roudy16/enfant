@@ -15,19 +15,6 @@ Meeting::~Meeting() {
     remove_all_participants();
 }
 
-Meeting::Meeting(Meeting&& original)
-    : m_participants(move(original.m_participants)),
-    m_topic(move(original.m_topic)),
-    m_location(original.m_location),
-    m_time(original.m_time)
-{
-}
-
-Meeting::Meeting(int location_, int time_)
-    : m_location(location_), m_time(time_)
-{
-}
-
 Meeting::Meeting(int location_, int time_, const std::string& topic_)
     : m_topic(topic_), m_location(location_), m_time(time_) 
 {
@@ -58,15 +45,6 @@ Meeting::Meeting(ifstream& is, const Participants_t& people, int location) {
 
         add_participant(*iter);
     }
-}
-
-Meeting& Meeting::operator=(Meeting&& rhs) {
-    m_participants = move(rhs.m_participants);
-    m_topic = move(rhs.m_topic);
-    m_location = move(rhs.m_location);
-    m_time = move(rhs.m_time);
-
-    return *this;
 }
 
 int Meeting::get_time() const {
