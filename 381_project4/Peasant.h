@@ -1,3 +1,6 @@
+#ifndef PEASANT_H
+#define PEASANT_H
+
 /* 
 A Peasant is an Agent that can move food between Structures. It can be commanded to
 start_working, whereupon it moves to the source, picks up food, returns to destination,
@@ -34,3 +37,5 @@ public:
 
     // output information about the current state
     void describe() const override;
+
+#endif // PEASANT_H

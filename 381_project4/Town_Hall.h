@@ -1,3 +1,9 @@
+#ifndef TOWN_HALL_H
+#define TOWN_HALL_H
+
+#include "Structure.h"
+#include <string>
+
 /* 
 A Town_Hall is a structure that provides for depositing and withdrawing food,
 but does no updating.
@@ -10,12 +16,14 @@ If any protected or private members are shown here, then your class must also ha
 You must delete this comment and all other comments that start with "***".
 */
 
+class Point;
 
+class Town_Hall : public Structure {
 public:
-    Town_Hall (const std::string& name_, Point location_);
-    
+    Town_Hall(const std::string& name_, Point location_);
+
     ~Town_Hall();
-    
+
     // deposit adds in the supplied amount
     void deposit(double deposit_amount) override;
 
@@ -26,3 +34,7 @@ public:
 
     // output information about the current state
     void describe() const override;
+
+};
+
+#endif // TOWN_HALL_H

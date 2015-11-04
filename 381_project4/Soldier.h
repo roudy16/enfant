@@ -1,3 +1,6 @@
+#ifndef SOLDIER_H
+#define SOLDIER_H
+
 /*
 A Soldier is an Agent that has attack and defense behaviors. It can be commanded
 to start attacking another Agent and will continue the attack as long as 
@@ -35,3 +38,5 @@ public:
 
     // output information about the current state
     void describe() const override;
+
+#endif // SOLDIER_H

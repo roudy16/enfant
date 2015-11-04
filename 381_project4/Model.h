@@ -1,3 +1,8 @@
+#ifndef MODEL_H
+#define MODEL_H
+
+#include <string>
+
 /*
 Model is part of a simplified Model-View-Controller pattern.
 Model keeps track of the Sim_objects in our little world. It is the only
@@ -23,10 +28,15 @@ If any protected or private members are shown here, then your class must also ha
 You must delete this comment and all other comments that start with "***".
 */
 
-/* 
-*** Here provide the appropriate declarations for a global variable named g_Model_ptr of type Model*
- - follow the Header File Guidelines. 
- */
+// Forward declarations
+class Model;
+class View;
+class Point;
+class Structure;
+class Agent;
+
+// global pointer to the Model
+extern Model* g_Model_ptr;
  
 class Model {
 public:
@@ -37,7 +47,7 @@ public:
     ~Model();
 
     // return the current time
-    int get_time() {return time;}
+    int get_time() {return m_time;}
 
     // is name already in use for either agent or structure?
     // return true if the name matches the name of an existing agent or structure
@@ -76,7 +86,7 @@ public:
     
 private:
     // *** declare an int member variable to store the simulated time
-
+    int m_time;
 
 
     // disallow copy/move construction or assignment
@@ -85,3 +95,5 @@ private:
     Model(Model&&) = delete;
     Model& operator= (Model&&) = delete;
 };
+
+#endif // MODEL_H

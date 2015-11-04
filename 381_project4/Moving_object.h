@@ -1,6 +1,8 @@
 #ifndef MOVING_OBJECT
 #define MOVING_OBJECT
+
 #include "Geometry.h"
+
 /* Moving_object encapsulates the calculations needed to make an object move 
 from one point to another, moving a specified distance on each update_location call.
 */

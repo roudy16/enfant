@@ -1,3 +1,6 @@
+#ifndef SIM_OBJECT_H
+#define SIM_OBJECT_H
+
 /* The Sim_object class provides the interface for all of simulation objects. 
 It also stores the object's name, and has pure virtual accessor functions for 
 the object's position and other information. */
@@ -29,3 +32,4 @@ private:
     std::string name;
 };
 
+#endif // SIM_OBJECT_H

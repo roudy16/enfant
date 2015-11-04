@@ -1,3 +1,9 @@
+#ifndef FARM_H
+#define FARM_H
+
+#include "Structure.h"
+#include <string>
+
 /*
 A Farm is a Structure that when updated, increments the amount of food on hand
 by the production rate amount.
@@ -11,11 +17,14 @@ If any protected or private members are shown here, then your class must also ha
 You must delete this comment and all other comments that start with "***".
 */
 
+class Point;
+
+class Farm : public Structure {
 public:
-    Farm (const std::string& name_, Point location_);
-    
+    Farm(const std::string& name_, Point location_);
+
     ~Farm();
-        
+
     // returns the specified amount, or the remaining amount, whichever is less,
     // and deducts that amount from the amount on hand
     double withdraw(double amount_to_get) override;
@@ -25,4 +34,7 @@ public:
 
     // output information about the current state
     void describe() const override;
-    
+
+};
+
+#endif // FARM_H

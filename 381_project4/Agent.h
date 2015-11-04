@@ -1,3 +1,6 @@
+#ifndef AGENT_H
+#define AGENT_H
+
 /*
 Agents are a kind of Sim_object, and privately inherit from Moving_object.
 Agents can be commanded to move to a destination. Agents have a health, which
@@ -17,7 +20,7 @@ You must delete this comment and all other comments that start with "***".
 class Structure;
 
 // *** declare as inheriting from Sim_object and Moving_object, as specified
-
+class Agent : public Sim_object, private Moving_object {
 public:
 
     // *** declare destructor so that a message can be output in the destructor definition
@@ -25,14 +28,14 @@ public:
     // *** provide the definition of the following reader functions here in the class declaration
     // return true if this agent is Alive or Disappearing
     bool is_alive() const
-    bool is_disappearing() const
-    
-    // return this Agent's location
-    Point get_location() const override;
+        bool is_disappearing() const
+
+        // return this Agent's location
+        Point get_location() const override;
 
     // return true if this Agent is in motion
     bool is_moving() const;
-    
+
     // tell this Agent to start moving to location destination_
     virtual void move_to(Point destination_);
 
@@ -44,13 +47,13 @@ public:
     // A derived class can override this function.
     // The function lose_health is called to handle the effect of the attack.
     virtual void take_hit(int attack_strength, Agent *attacker_ptr);
-    
+
     // update the moving state and Agent state of this object.
     void update() override;
-    
+
     // output information about the current state
     void describe() const override;
-    
+
     // ask Model to broadcast our current state to all Views
     void broadcast_current_state() const override;
 
@@ -62,10 +65,13 @@ public:
     virtual void start_attacking(Agent *);
 
 protected:
-     // *** Make this an abstract class by making the constructor protected to prevent direct creation.
+    // *** Make this an abstract class by making the constructor protected to prevent direct creation.
     // *** create with initial health is 5, speed is 5, state is Alive
     Agent(const std::string& name_, Point location_);
 
     // calculate loss of health due to hit.
     // if health decreases to zero or negative, Agent state becomes Dying, and any movement is stopped.
     void lose_health(int attack_strength);
+};
+
+#endif // AGENT_H
