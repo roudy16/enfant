@@ -30,58 +30,58 @@ You must delete this comment and all other comments that start with "***".
  
 class Model {
 public:
-	// create the initial objects
-	Model();
-	
-	// destroy all objects
-	~Model();
+    // create the initial objects
+    Model();
+    
+    // destroy all objects
+    ~Model();
 
-	// return the current time
-	int get_time() {return time;}
+    // return the current time
+    int get_time() {return time;}
 
-	// is name already in use for either agent or structure?
+    // is name already in use for either agent or structure?
     // return true if the name matches the name of an existing agent or structure
-	bool is_name_in_use(const std::string& name) const;
+    bool is_name_in_use(const std::string& name) const;
 
-	// is there a structure with this name?
-	bool is_structure_present(const std::string& name) const;
-	// add a new structure; assumes none with the same name
-	void add_structure(Structure*);
-	// will throw Error("Structure not found!") if no structure of that name
-	Structure* get_structure_ptr(const std::string& name) const;
+    // is there a structure with this name?
+    bool is_structure_present(const std::string& name) const;
+    // add a new structure; assumes none with the same name
+    void add_structure(Structure*);
+    // will throw Error("Structure not found!") if no structure of that name
+    Structure* get_structure_ptr(const std::string& name) const;
 
-	// is there an agent with this name?
-	bool is_agent_present(const std::string& name) const;
-	// add a new agent; assumes none with the same name
-	void add_agent(Agent*);
-	// will throw Error("Agent not found!") if no agent of that name
-	Agent* get_agent_ptr(const std::string& name) const;
-	
-	// tell all objects to describe themselves to the console
-	void describe() const;
-	// increment the time, and tell all objects to update themselves
-	void update();	
-	
-	/* View services */
-	// Attaching a View adds it to the container and causes it to be updated
+    // is there an agent with this name?
+    bool is_agent_present(const std::string& name) const;
+    // add a new agent; assumes none with the same name
+    void add_agent(Agent*);
+    // will throw Error("Agent not found!") if no agent of that name
+    Agent* get_agent_ptr(const std::string& name) const;
+    
+    // tell all objects to describe themselves to the console
+    void describe() const;
+    // increment the time, and tell all objects to update themselves
+    void update();    
+    
+    /* View services */
+    // Attaching a View adds it to the container and causes it to be updated
     // with all current objects'location (or other state information.
-	void attach(View*);
-	// Detach the View by discarding the supplied pointer from the container of Views
+    void attach(View*);
+    // Detach the View by discarding the supplied pointer from the container of Views
     // - no updates sent to it thereafter.
-	void detach(View*);
+    void detach(View*);
     // notify the views about an object's location
-	void notify_location(const std::string& name, Point location);
-	// notify the views that an object is now gone
-	void notify_gone(const std::string& name);
-	
+    void notify_location(const std::string& name, Point location);
+    // notify the views that an object is now gone
+    void notify_gone(const std::string& name);
+    
 private:
-	// *** declare an int member variable to store the simulated time
+    // *** declare an int member variable to store the simulated time
 
 
 
-	// disallow copy/move construction or assignment
-	Model(const Model&) = delete;
-	Model& operator= (const Model&)  = delete;
-	Model(Model&&) = delete;
-	Model& operator= (Model&&) = delete;
+    // disallow copy/move construction or assignment
+    Model(const Model&) = delete;
+    Model& operator= (const Model&)  = delete;
+    Model(Model&&) = delete;
+    Model& operator= (Model&&) = delete;
 };

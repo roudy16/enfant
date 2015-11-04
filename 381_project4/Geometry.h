@@ -37,16 +37,16 @@ struct Polar_vector;
 // A Point contains an (x, y) pair to represent coordinates
 struct Point
 {
-	double x;
-	double y;
-	
-	Point (double in_x = 0., double in_y = 0.) :
-		x(in_x), y(in_y)
-		{}
+    double x;
+    double y;
+    
+    Point (double in_x = 0., double in_y = 0.) :
+        x(in_x), y(in_y)
+        {}
 
-	// compare two Points
-	bool operator== (const Point& rhs) const;
-	bool operator!= (const Point& rhs) const;	
+    // compare two Points
+    bool operator== (const Point& rhs) const;
+    bool operator!= (const Point& rhs) const;    
 };
 
 // return the distance between two Points
@@ -56,20 +56,20 @@ double cartesian_distance (const Point& p1, const Point& p2);
 // A Cartesian_vector contains an x, y displacement
 struct Cartesian_vector
 {
-	double delta_x;
-	double delta_y;
+    double delta_x;
+    double delta_y;
 
-	Cartesian_vector (double in_delta_x = 0., double in_delta_y = 0.) : 
-		delta_x(in_delta_x), delta_y(in_delta_y)
-	{}
+    Cartesian_vector (double in_delta_x = 0., double in_delta_y = 0.) : 
+        delta_x(in_delta_x), delta_y(in_delta_y)
+    {}
 
-	// construct a Cartesian_vector from two Points,
-	// showing the vector from p1 to p2 
-	// that is, p1 + cv => p2
-	Cartesian_vector(const Point& p1, const Point& p2);
+    // construct a Cartesian_vector from two Points,
+    // showing the vector from p1 to p2 
+    // that is, p1 + cv => p2
+    Cartesian_vector(const Point& p1, const Point& p2);
 
-	// construct a Cartesian_vector from a Polar_vector
-	Cartesian_vector(const Polar_vector& pv);
+    // construct a Cartesian_vector from a Polar_vector
+    Cartesian_vector(const Polar_vector& pv);
 };
 
 
@@ -78,20 +78,20 @@ struct Cartesian_vector
 // with angle in radians
 struct Polar_vector
 {
-	double r;
-	double theta;
+    double r;
+    double theta;
 
-	Polar_vector (double r_ = 0., double theta_ = 0.) : 
-		r(r_), theta(theta_)
-	{}
+    Polar_vector (double r_ = 0., double theta_ = 0.) : 
+        r(r_), theta(theta_)
+    {}
 
-	// construct a Polar_vector from two Points,
-	// showing the vector from p1 to p2 
-	// that is, p1 + pv => p2
-	Polar_vector(const Point& p1, const Point& p2);
+    // construct a Polar_vector from two Points,
+    // showing the vector from p1 to p2 
+    // that is, p1 + pv => p2
+    Polar_vector(const Point& p1, const Point& p2);
 
-	// construct a Polar_vector from a Cartesian_vector
-	Polar_vector(const Cartesian_vector& cv);
+    // construct a Polar_vector from a Cartesian_vector
+    Polar_vector(const Cartesian_vector& cv);
 
 };
 
@@ -104,7 +104,7 @@ Cartesian_vector operator- (const Point& p1, const Point& p2);
 // Add a Point and a Cartesian_vector to get the displaced Point
 Point operator+ (const Point& p, const Cartesian_vector& cv);
 Point operator+ (const Cartesian_vector& cv, const Point& p);
-	
+    
 // Add a Point and a Polar_vector to get the displaced Point
 Point operator+ (const Point& p, const Polar_vector& pv);
 Point operator+ (const Polar_vector& pv, const Point& p);

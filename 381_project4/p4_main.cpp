@@ -14,18 +14,18 @@ using namespace std;
 // View object and attaches it to the Model.
 
 int main ()
-{	
-	// Set output to show two decimal places for floating point numbers
-//	cout << fixed << setprecision(2) << endl;
-	cout.setf(ios::fixed, ios::floatfield);
-	cout.precision(2);
+{    
+    // Set output to show two decimal places for floating point numbers
+//    cout << fixed << setprecision(2) << endl;
+    cout.setf(ios::fixed, ios::floatfield);
+    cout.precision(2);
 
-	// create a Model object;
+    // create a Model object;
     g_Model_ptr = new Model;
-	// create the Controller object and go
-	Controller controller;
+    // create the Controller object and go
+    Controller controller;
 
-	controller.run();
+    controller.run();
     
     delete g_Model_ptr;
 }

@@ -12,17 +12,17 @@ You must delete this comment and all other comments that start with "***".
 */
 
 public:
-	Farm (const std::string& name_, Point location_);
-	
-	~Farm();
-		
-	// returns the specified amount, or the remaining amount, whichever is less,
-	// and deducts that amount from the amount on hand
-	double withdraw(double amount_to_get) override;
+    Farm (const std::string& name_, Point location_);
+    
+    ~Farm();
+        
+    // returns the specified amount, or the remaining amount, whichever is less,
+    // and deducts that amount from the amount on hand
+    double withdraw(double amount_to_get) override;
 
-	//	update adds the production amount to the stored amount
-	void update() override;
+    //    update adds the production amount to the stored amount
+    void update() override;
 
-	// output information about the current state
-	void describe() const override;
-	
+    // output information about the current state
+    void describe() const override;
+    

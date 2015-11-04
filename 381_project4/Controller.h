@@ -11,9 +11,9 @@ You must delete this comment and all other comments that start with "***".
 */
 
 class Controller {
-public:	
-	Controller();
+public:    
+    Controller();
 
-	// create View object, run the program by acccepting user commands, then destroy View object
-	void run();
-	
+    // create View object, run the program by acccepting user commands, then destroy View object
+    void run();
+    

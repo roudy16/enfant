@@ -8,23 +8,23 @@ You must delete this comment and all other comments that start with "***".
 */
 
 public:
-	// *** provide a constructor and destructor
-	// *** first constructor parameter should be the name, specified as a string, the second should be a Point for the location.
-	
-	// *** Make this an abstract class by making the destructor pure virtual
-		
-	// *** declare and define here appropriately
-	Point get_location()
+    // *** provide a constructor and destructor
+    // *** first constructor parameter should be the name, specified as a string, the second should be a Point for the location.
+    
+    // *** Make this an abstract class by making the destructor pure virtual
+        
+    // *** declare and define here appropriately
+    Point get_location()
 
-	// *** declare and define the following functions as specified
-	void update()
+    // *** declare and define the following functions as specified
+    void update()
 
-	// output information about the current state
-	void describe()
+    // output information about the current state
+    void describe()
 
-	// ask model to notify views of current state
+    // ask model to notify views of current state
     void broadcast_current_state()
     
-	// fat interface for derived types	
-	double withdraw(double amount_to_get);
-	void deposit(double amount_to_give);
+    // fat interface for derived types    
+    double withdraw(double amount_to_get);
+    void deposit(double amount_to_give);

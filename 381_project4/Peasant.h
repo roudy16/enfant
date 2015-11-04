@@ -14,23 +14,23 @@ You must delete this comment and all other comments that start with "***".
 */
 
 public:
-	// *** define these in .cpp; initialize with zero amount being carried
-	Peasant(const std::string& name_, Point location_);
+    // *** define these in .cpp; initialize with zero amount being carried
+    Peasant(const std::string& name_, Point location_);
 
-	~Peasant();
+    ~Peasant();
 
-	// implement Peasant behavior
-	void update() override;
-	
-	// overridden to suspend working behavior
+    // implement Peasant behavior
+    void update() override;
+    
+    // overridden to suspend working behavior
     void move_to(Point dest) override;
-	
-	// stop moving and working
-	void stop() override;
+    
+    // stop moving and working
+    void stop() override;
 
-	// starts the working process
-	// Throws an exception if the source is the same as the destination.
-	void start_working(Structure * source_, Structure * destination_) override;
+    // starts the working process
+    // Throws an exception if the source is the same as the destination.
+    void start_working(Structure * source_, Structure * destination_) override;
 
-	// output information about the current state
-	void describe() const override;
+    // output information about the current state
+    void describe() const override;
