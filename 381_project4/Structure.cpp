@@ -1,4 +1,5 @@
 #include "Structure.h"
+#include "Model.h"
 #include <iostream>
 
 using namespace std;
@@ -10,7 +11,7 @@ void Structure::describe() {
 
 // ask model to notify views of current state
 void Structure::broadcast_current_state() {
-
+    g_Model_ptr->notify_location(m_name, m_location);
 }
 
 

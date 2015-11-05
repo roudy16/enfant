@@ -1,6 +1,8 @@
 #ifndef VIEW_H
 #define VIEW_H
 
+#include <string>
+
 /* *** View class ***
 The View class encapsulates the data and functions needed to generate the map
 display, and control its properties. It has a "memory" for the names and locations
@@ -28,6 +30,8 @@ If no protected members are shown, there must be none in your version.
 If any protected or private members are shown here, then your class must also have them and use them as intended.
 You must delete this comment and all other comments that start with "***".
 */
+
+class Point;
 
 class View {
 public:
