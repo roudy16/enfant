@@ -10,26 +10,24 @@
 class Structure : public Sim_object {
 public:
     Structure(std::string name, Point location);
+    // Make this an abstract class
     virtual ~Structure() = 0;
 
-    // *** declare and define here appropriately
-    Point get_location() { return m_location; }
+    Point get_location() const override;
 
-    // *** declare and define the following functions as specified
-    virtual void update() {};
+    void update() override;
 
     // output information about the current state
-    virtual void describe();
+    void describe() const override;
 
     // ask model to notify views of current state
-    virtual void broadcast_current_state();
+    void broadcast_current_state() const override;
 
     // fat interface for derived types
     virtual double withdraw(double amount_to_get);
     virtual void deposit(double amount_to_give);
 
 private:
-    std::string m_name;
     Point m_location;
 };
 

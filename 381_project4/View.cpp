@@ -118,7 +118,7 @@ void View::draw() {
 
         // All subsequent offgrid objects (preceded by commas)
         while (iter != offgrid_objects.end()) {
-            cout << ", " << *iter;
+            cout << ", " << *iter++;
         }
 
         cout << " outside the map\n";

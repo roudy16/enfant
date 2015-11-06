@@ -10,14 +10,7 @@ by the production rate amount.
 Food can be withdrawn, but no provision is made for depositing any.
 */
 
-/* 
-*** This skeleton file shows the required public interface for the class, which you may not modify. 
-If no protected members are shown, there must be none in your version. 
-If any protected or private members are shown here, then your class must also have them and use them as intended.
-You must delete this comment and all other comments that start with "***".
-*/
-
-class Point;
+struct Point;
 
 class Farm : public Structure {
 public:
@@ -35,6 +28,9 @@ public:
     // output information about the current state
     void describe() const override;
 
+private:
+    double m_food_amount;
+    double m_production_rate;
 };
 
 #endif // FARM_H
