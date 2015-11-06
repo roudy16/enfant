@@ -39,7 +39,7 @@ struct Point
 {
     double x;
     double y;
-    
+
     Point (double in_x = 0., double in_y = 0.) :
         x(in_x), y(in_y)
         {}

@@ -1,7 +1,10 @@
 #ifndef VIEW_H
 #define VIEW_H
 
+#include "Geometry.h"
+#include <vector>
 #include <string>
+#include <map>
 
 /* *** View class ***
 The View class encapsulates the data and functions needed to generate the map
@@ -24,14 +27,6 @@ information, immediately calling the draw function will print out a map showing 
 using the new settings.
 */
 
-/* 
-*** This skeleton file shows the required public interface for the class, which you may not modify. 
-If no protected members are shown, there must be none in your version. 
-If any protected or private members are shown here, then your class must also have them and use them as intended.
-You must delete this comment and all other comments that start with "***".
-*/
-
-class Point;
 
 class View {
 public:
@@ -64,6 +59,20 @@ public:
 
     // set the parameters to the default values
     void set_defaults();
+
+private:
+    using Objects_t = std::map<std::string, Point>;
+    using Grid_t = std::vector<std::vector<std::vector<char>>> ;
+
+    bool get_subscripts(int &ix, int &iy, Point location);
+
+    void print_grid_helper(const Grid_t &grid);
+
+    Objects_t m_grid_objects;
+    Point m_origin;
+    double m_scale;
+    int m_size;
+
 };
 
 #endif // VIEW_H

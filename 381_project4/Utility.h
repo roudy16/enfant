@@ -4,6 +4,13 @@
 #include <string>
 #include <exception>
 
+// Hack for developing in Visual Studio versions that don't support noexcept
+#ifdef _MSC_VER
+    #if (_MSC_VER < 1900)
+    #define noexcept 
+    #endif
+#endif
+
 /* Utility declarations, functions, and classes used by other modules */
 
 // a simple class for error exceptions that inherits from std::exception
