@@ -24,9 +24,4 @@ private:
     const std::string msg;
 };
 
-/* *** add any additional declarations used by more than one of your modules here. 
-Do not include anything used by only one module.
-You must delete this comment. */
-
-#endif
-
+#endif // UTILITY_H

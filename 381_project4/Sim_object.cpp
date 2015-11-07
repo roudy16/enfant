@@ -13,7 +13,3 @@ Sim_object::~Sim_object()
 {
     cout << "Sim_object " << m_name << " destructed" << endl;
 }
-
-const string& Sim_object::get_name() const {
-    return m_name;
-}

@@ -85,9 +85,7 @@ public:
     void notify_gone(const std::string& name);
     
 private:
-    // *** declare an int member variable to store the simulated time
     int m_time;
-
 
     // disallow copy/move construction or assignment
     Model(const Model&) = delete;

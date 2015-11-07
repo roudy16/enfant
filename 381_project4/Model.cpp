@@ -21,4 +21,3 @@ Model::Model() {
     create_agent("Zug", "Soldier", Point(20., 30.));
     create_agent("Bug", "Soldier", Point(15., 20.));
 }
-

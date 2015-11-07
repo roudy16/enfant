@@ -15,10 +15,6 @@ Structure::~Structure() {
     cout << "Structure " << get_name() << " destructed" << endl;
 }
 
-Point Structure::get_location() const {
-    return m_location;
-}
-
 // output information about the current state
 void Structure::describe() const {
     cout << get_name() << " at " << m_location << endl;
@@ -36,4 +32,3 @@ double Structure::withdraw(double amount_to_get) {
 void Structure::deposit(double amount_to_give)
 {
 }
-

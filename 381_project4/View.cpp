@@ -168,8 +168,6 @@ void View::set_defaults() {
 }
 
 
-/* *** Use this function to calculate the subscripts for the cell. */
-
 // Calculate the cell subscripts corresponding to the supplied location parameter, 
 // using the current size, scale, and origin of the display. 
 // This function assumes that origin is a  member variable of type Point, 
@@ -193,4 +191,3 @@ bool View::get_subscripts(int &ix, int &iy, Point location)
         return true;
     }
 }
-

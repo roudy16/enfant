@@ -1,6 +1,9 @@
 #ifndef AGENT_H
 #define AGENT_H
 
+#include "Moving_object.h"
+#include "Sim_object.h"
+
 /*
 Agents are a kind of Sim_object, and privately inherit from Moving_object.
 Agents can be commanded to move to a destination. Agents have a health, which
@@ -22,16 +25,14 @@ class Structure;
 // *** declare as inheriting from Sim_object and Moving_object, as specified
 class Agent : public Sim_object, private Moving_object {
 public:
+    ~Agent();
 
-    // *** declare destructor so that a message can be output in the destructor definition
-
-    // *** provide the definition of the following reader functions here in the class declaration
     // return true if this agent is Alive or Disappearing
-    bool is_alive() const
-        bool is_disappearing() const
+    bool is_alive() const { return m_alive_state == Alive_State::ALIVE; }
+    bool is_disappearing() const { return m_alive_state == Alive_State::DISAPPEARING; }
 
-        // return this Agent's location
-        Point get_location() const override;
+    // return this Agent's location
+    Point get_location() const override;
 
     // return true if this Agent is in motion
     bool is_moving() const;
@@ -65,13 +66,17 @@ public:
     virtual void start_attacking(Agent *);
 
 protected:
-    // *** Make this an abstract class by making the constructor protected to prevent direct creation.
-    // *** create with initial health is 5, speed is 5, state is Alive
     Agent(const std::string& name_, Point location_);
 
     // calculate loss of health due to hit.
     // if health decreases to zero or negative, Agent state becomes Dying, and any movement is stopped.
     void lose_health(int attack_strength);
+
+private:
+    enum class Alive_State { ALIVE, DYING, DEAD, DISAPPEARING };
+
+    int m_health;
+    Alive_State m_alive_state;
 };
 
 #endif // AGENT_H

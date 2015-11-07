@@ -60,5 +60,3 @@ void Moving_object::compute_delta()
 {
     delta = (destination - location) * (speed / cartesian_distance(destination, location));
 }
-
-

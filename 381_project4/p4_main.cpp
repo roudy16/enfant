@@ -26,7 +26,7 @@ int main ()
     Controller controller;
 
     controller.run();
-    
+
     delete g_Model_ptr;
 }
 

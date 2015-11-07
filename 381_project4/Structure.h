@@ -13,7 +13,7 @@ public:
     // Make this an abstract class
     virtual ~Structure() = 0;
 
-    Point get_location() const override;
+    Point get_location() const override { return m_location; }
 
     void update() override;
 
