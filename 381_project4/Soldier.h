@@ -2,6 +2,7 @@
 #define SOLDIER_H
 
 #include "Agent.h"
+#include <string>
 
 /*
 A Soldier is an Agent that has attack and defense behaviors. It can be commanded
@@ -9,18 +10,9 @@ to start attacking another Agent and will continue the attack as long as
 it is alive and the target is alive and in range. If attacked, the Soldier will
 start attacking its attacker.
 */
-    
-/* 
-*** This skeleton file shows the required public interface for the class, which you may not modify. 
-If no protected members are shown, there must be none in your version. 
-If any protected or private members are shown here, then your class must also have them and use them as intended.
-You must delete this comment and all other comments that start with "***".
-*/
 
 class Soldier : public Agent {
 public:
-
-    // *** define as specified
     Soldier(const std::string& name_, Point location_);
 
     ~Soldier();
@@ -41,6 +33,21 @@ public:
 
     // output information about the current state
     void describe() const override;
+
+private:
+    enum class Soldier_State { NOT_ATTACKING, ATTACKING };
+
+    // stop attacking and forget target
+    void stop_attacking();
+
+    // set new target and engage, outputs attacking message
+    void engage_new_target(Agent* new_target);
+
+    Agent* m_target;
+    double m_attack_range;
+    int m_attack_strength;
+    Soldier_State m_soldier_state;
+
 };
 
 #endif // SOLDIER_H

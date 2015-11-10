@@ -21,19 +21,12 @@ Notice how only the Standard Library headers need to be included - reduced coupl
 
 */
 
-/* 
-*** This skeleton file shows the required public interface for the class, which you may not modify. 
-If no protected members are shown, there must be none in your version. 
-If any protected or private members are shown here, then your class must also have them and use them as intended.
-You must delete this comment and all other comments that start with "***".
-*/
-
 // Forward declarations
 class Model;
 class View;
-class Point;
 class Structure;
 class Agent;
+struct Point;
 
 // global pointer to the Model
 extern Model* g_Model_ptr;

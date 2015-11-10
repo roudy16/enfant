@@ -22,7 +22,6 @@ You must delete this comment and all other comments that start with "***".
 
 class Structure;
 
-// *** declare as inheriting from Sim_object and Moving_object, as specified
 class Agent : public Sim_object, private Moving_object {
 public:
     ~Agent();

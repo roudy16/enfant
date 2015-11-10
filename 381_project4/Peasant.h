@@ -12,13 +12,6 @@ and tries again on the next update.
 If commanded to move_to somewhere, it stops working, and goes there.
 */
 
-/* 
-*** This skeleton file shows the required public interface for the class, which you may not modify. 
-If no protected members are shown, there must be none in your version. 
-If any protected or private members are shown here, then your class must also have them and use them as intended.
-You must delete this comment and all other comments that start with "***".
-*/
-
 // Forward declaration of Structure
 class Structure;
 
