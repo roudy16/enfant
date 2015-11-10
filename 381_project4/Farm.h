@@ -22,7 +22,7 @@ public:
     // and deducts that amount from the amount on hand
     double withdraw(double amount_to_get) override;
 
-    //    update adds the production amount to the stored amount
+    // update adds the production amount to the stored amount
     void update() override;
 
     // output information about the current state

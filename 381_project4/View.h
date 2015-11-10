@@ -72,7 +72,6 @@ private:
     Point m_origin;
     double m_scale;
     int m_size;
-
 };
 
 #endif // VIEW_H

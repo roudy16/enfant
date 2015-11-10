@@ -1,7 +1,13 @@
 #ifndef MODEL_H
 #define MODEL_H
 
+#include "Sim_object.h"
+#include "Agent.h"
+#include "Structure.h"
 #include <string>
+#include <map>
+#include <set>
+#include <vector>
 
 /*
 Model is part of a simplified Model-View-Controller pattern.
@@ -78,6 +84,18 @@ public:
     void notify_gone(const std::string& name);
     
 private:
+    // Comparator for sorting containers
+    template<typename T>
+    struct Obj_ptr_comp {
+        bool operator()(const T lhs, const T rhs) {
+            return lhs->get_name() < rhs->get_name();
+        }
+    };
+
+    std::set<Sim_object*, Obj_ptr_comp<Sim_object*>> m_sim_objs;
+    std::map<const std::string, Agent*> m_agents;
+    std::map<const std::string, Structure*> m_structures;
+    std::vector<View*> m_views;
     int m_time;
 
     // disallow copy/move construction or assignment
