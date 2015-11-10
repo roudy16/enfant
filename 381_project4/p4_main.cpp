@@ -14,7 +14,7 @@ using namespace std;
 // View object and attaches it to the Model.
 
 int main ()
-{    
+{
     // Set output to show two decimal places for floating point numbers
 //    cout << fixed << setprecision(2) << endl;
     cout.setf(ios::fixed, ios::floatfield);
