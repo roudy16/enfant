@@ -2,15 +2,17 @@
 #include "Model.h"
 #include "View.h"
 #include "Utility.h"
+#include "Geometry.h"
 #include <iostream>
 #include <exception>
 #include <algorithm>
 #include <utility>
 #include <ctype.h>
+#include <cassert>
 
 using namespace std;
 
-Controller::Controller() : mp_current_agent(nullptr)
+Controller::Controller() : mp_view(nullptr), mp_current_agent(nullptr)
 {
 }
 
@@ -113,16 +115,18 @@ Controller::Controller_fp_t Controller::get_view_program_command(const string& c
 }
 
 void Controller::run() {
+    // setup up View
     View view;
-    g_Model_ptr->attach(&view);
+    mp_view = &view;
+    g_Model_ptr->attach(mp_view);
 
+    // Fill command containers
     init_commands();
 
     string first_word;
-
     Controller_fp_t command_ptr = nullptr;
 
-    // main program loop, exitted when user enters "quit" command
+    // main program loop, exited when user enters "quit" command
     while (true) {
         try {
             cout << "\nTime " << g_Model_ptr->get_time() << ": Enter command: ";
@@ -179,42 +183,72 @@ void Controller::run() {
         }
     }
 
-    g_Model_ptr->detach(&view);
+    // Tear down View
+    g_Model_ptr->detach(mp_view);
+    mp_view = nullptr;
 
     cout << "Done" << endl;
 }
 
 // View commands from spec
 void Controller::view_default_command() {
-
+    assert(mp_view);
+    mp_view->set_defaults();
 }
 
 void Controller::view_size_command() {
-
+    assert(mp_view);
+    int new_size = read_int();
+    mp_view->set_size(new_size);
 }
 
 void Controller::view_zoom_command() {
+    assert(mp_view);
+    double new_scale = read_double();
+    mp_view->set_scale(new_scale);
+}
 
+static Point read_point() {
+    double new_x = read_double();
+    double new_y = read_double();
+    return Point(new_x, new_y);
 }
 
 void Controller::view_pan_command() {
-
+    assert(mp_view);
+    Point new_origin = read_point();
+    mp_view->set_origin(new_origin);
 }
 
 // Agent commands from spec
 void Controller::agent_move_command() {
-
+    assert(mp_current_agent);
+    Point move_pt = read_point();
+    mp_current_agent->move_to(move_pt);
 }
 
 void Controller::agent_work_command() {
+    assert(mp_current_agent);
 
+    // Read in names of source and destination structures
+    string source_name, destination_name;
+    cin >> source_name >> destination_name;
+
+    // Find these Structures, throws Error if either is not found
+    Structure* source_ptr = g_Model_ptr->get_structure_ptr(source_name);
+    Structure* destination_ptr = g_Model_ptr->get_structure_ptr(destination_name);
+
+    // Tell Agent to work, throws Error if Agent cannot work
+    mp_current_agent->start_working(source_ptr, destination_ptr);
 }
 
 void Controller::agent_attack_command() {
+    assert(mp_current_agent);
 
 }
 
 void Controller::agent_stop_command() {
+    assert(mp_current_agent);
 
 }
 

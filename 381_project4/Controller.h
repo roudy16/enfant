@@ -5,6 +5,7 @@
 #include <string>
 
 class Agent;
+class View;
 
 /* Controller
 This class is responsible for controlling the Model and View according to interactions
@@ -55,6 +56,8 @@ private:
     Command_map_t m_agent_commands;
     Command_map_t m_program_commands;
 
+    // Allow access to current View and Agent from within command functions
+    View* mp_view;
     Agent* mp_current_agent;
 };
 
