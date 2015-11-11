@@ -3,6 +3,8 @@
 #include "View.h"
 #include "Utility.h"
 #include "Geometry.h"
+#include "Structure_factory.h"
+#include "Agent_factory.h"
 #include <iostream>
 #include <exception>
 #include <algorithm>
@@ -46,7 +48,7 @@ static bool string_is_alnum(const string& str) {
     return iter == str.end();
 }
 
-static string read_name() {
+static string&& read_name() {
     string name;
     cin >> name;
 
@@ -237,6 +239,8 @@ void Controller::agent_work_command() {
     // Find these Structures, throws Error if either is not found
     Structure* source_ptr = g_Model_ptr->get_structure_ptr(source_name);
     Structure* destination_ptr = g_Model_ptr->get_structure_ptr(destination_name);
+    assert(source_ptr);
+    assert(destination_ptr);
 
     // Tell Agent to work, throws Error if Agent cannot work
     mp_current_agent->start_working(source_ptr, destination_ptr);
@@ -245,30 +249,76 @@ void Controller::agent_work_command() {
 void Controller::agent_attack_command() {
     assert(mp_current_agent);
 
+    // read name for target to attack
+    string target_name;
+    cin >> target_name;
+
+    // Find target Agent, throws Error if Agent not found
+    Agent* target_ptr = g_Model_ptr->get_agent_ptr(target_name);
+    assert(target_ptr);
+
+    // Attack target if possible, throws Error if Agent cannot attack
+    mp_current_agent->start_attacking(target_ptr);
 }
 
 void Controller::agent_stop_command() {
     assert(mp_current_agent);
-
+    mp_current_agent->stop();
 }
 
 // Whole-program commands from spec
 void Controller::status_command() {
-
+    g_Model_ptr->describe();
 }
 
 void Controller::show_command() {
-
+    assert(mp_view);
+    mp_view->draw();
 }
 
 void Controller::go_command() {
+    g_Model_ptr->update();
+}
 
+// Data for creating a new Sim_object
+struct New_obj_info {
+    string name;
+    string type;
+    Point start_pt;
+};
+
+// Read data for creating new Sim_object from input
+static void read_new_obj_info(New_obj_info& info) {
+    // read in and validate name
+    info.name = read_name();
+
+    // read in type of Structure to create, no validation yet
+    cin >> info.type;
+
+    // read in start point
+    info.start_pt = read_point();
 }
 
 void Controller::build_command() {
+    New_obj_info info;
+    read_new_obj_info(info);
 
+    // create new Structure if information read in is valid
+    Structure* new_structure = create_structure(info.name,
+                                                info.type,
+                                                info.start_pt);
+
+    // Add new Structure to Model
+    g_Model_ptr->add_structure(new_structure);
 }
 
 void Controller::train_command() {
+    New_obj_info info;
+    read_new_obj_info(info);
 
+    // create new Structure if information read in is valid
+    Agent* new_agent = create_agent(info.name, info.type, info.start_pt);
+
+    // Add new Structure to Model
+    g_Model_ptr->add_agent(new_agent);
 }
