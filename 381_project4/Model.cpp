@@ -13,7 +13,10 @@ using namespace std;
 
 Model* g_Model_ptr = nullptr;
 
-Model::Model() {
+Model::Model() : m_time(0) 
+{
+    g_Model_ptr = this;
+
     add_structure(create_structure("Rivendale", "Farm", Point(10., 10.)));
     add_structure(create_structure("Sunnybrook", "Farm", Point(0., 30.)));
     add_structure(create_structure("Shire", "Town_Hall", Point(20., 20.)));

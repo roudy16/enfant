@@ -4,6 +4,8 @@
 #include <map>
 #include <string>
 
+class Agent;
+
 /* Controller
 This class is responsible for controlling the Model and View according to interactions
 with the user.
@@ -17,6 +19,9 @@ public:
     void run();
 
 private:
+    using Controller_fp_t = void(Controller::*)();
+    using Command_map_t = std::map<std::string, Controller_fp_t>;
+
     // View commands from spec
     void view_default_command();
     void view_size_command();
@@ -38,9 +43,19 @@ private:
 
     void init_commands();
 
-    std::map<std::string, void(Controller::*)()> m_view_commands;
-    std::map<std::string, void(Controller::*)()> m_agent_commands;
-    std::map<std::string, void(Controller::*)()> m_program_commands;
+    // Returns function pointer to associated command if it exists, 
+    // returns nullptr otherwise
+    Controller_fp_t get_view_program_command(const std::string& command);
+    // get_agent_command additionally reads in a string
+    Controller_fp_t get_agent_command();
+    Controller_fp_t get_command_helper(Command_map_t& commands,
+                                       const std::string& command);
+
+    Command_map_t m_view_commands;
+    Command_map_t m_agent_commands;
+    Command_map_t m_program_commands;
+
+    Agent* mp_current_agent;
 };
 
 #endif // CONTROLLER_H

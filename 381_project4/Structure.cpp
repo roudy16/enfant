@@ -15,6 +15,10 @@ Structure::~Structure() {
     cout << "Structure " << get_name() << " destructed" << endl;
 }
 
+void Structure::update()
+{
+}
+
 // output information about the current state
 void Structure::describe() const {
     cout << get_name() << " at " << m_location << endl;
