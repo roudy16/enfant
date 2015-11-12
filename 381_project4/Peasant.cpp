@@ -165,6 +165,9 @@ void Peasant::describe() const {
     case Peasant_State::DEPOSITING:
         cout << "   Depositing at destination " << m_destination->get_name() << endl;
         break;
+    case Peasant_State::NOT_WORKING:
+        // Say nothing further
+        break;
     default:
         throw Error("Unrecognized state in Peasant::describe");
     }

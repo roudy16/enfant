@@ -48,20 +48,6 @@ static bool string_is_alnum(const string& str) {
     return iter == str.end();
 }
 
-static string&& read_name() {
-    string name;
-    cin >> name;
-
-    // Check if input name is a valid object name
-    if (name.length() < 2 || !string_is_alnum(name) ||
-        g_Model_ptr->is_name_in_use(name))
-    {
-        throw Error("Invalid name for new object!");
-    }
-
-    return move(name);
-}
-
 void Controller::init_commands() {
     m_view_commands["default"] = &Controller::view_default_command;
     m_view_commands["size"] = &Controller::view_size_command;
@@ -101,7 +87,15 @@ Controller::Controller_fp_t Controller::get_agent_command() {
     string command;
     cin >> command;
 
-    return get_command_helper(m_agent_commands, command);
+    // Try to find Agent command function
+    Controller_fp_t command_ptr = get_command_helper(m_agent_commands, command);
+
+    // if none found, throw error
+    if (!command_ptr) {
+        throw Error("Unrecognized command!");
+    }
+
+    return command_ptr;
 }
 
 Controller::Controller_fp_t Controller::get_view_program_command(const string& command) {
@@ -111,6 +105,11 @@ Controller::Controller_fp_t Controller::get_view_program_command(const string& c
     // if program command not found, try to find view command
     if (!command_ptr) {
         command_ptr = get_command_helper(m_view_commands, command);
+    }
+
+    // if none found, throw error
+    if (!command_ptr) {
+        throw Error("Unrecognized command!");
     }
 
     return command_ptr;
@@ -148,29 +147,18 @@ void Controller::run() {
                     throw Error("Agent is not alive!");
                 }
 
-                // check if valid Agent command found
+                // Find Agent command, throws Error if none found
                 command_ptr = get_agent_command();
-                if (!command_ptr) {
-                    throw Error("Unrecognized command!");
-                }
-
-                // Execute Agent command
-                (this->*(command_ptr))();
             }
             // Otherwise check if user input a different command and execute it
             else {
-                // Try to find a view or program-wide command
+                // Try to find a view or program-wide command, Error thrown
+                // if first_word is not a valid command
                 command_ptr = get_view_program_command(first_word);
-
-                // if none found, throw error
-                if (!command_ptr) {
-                    throw Error("Unrecognized command!");
-                }
-
-                // Execute Agent command
-                (this->*(command_ptr))();
             }
 
+            // Execute command
+            (this->*(command_ptr))();
         }
         catch (exception& e) {
             cout << e.what() << endl;
@@ -222,23 +210,28 @@ void Controller::view_pan_command() {
     mp_view->set_origin(new_origin);
 }
 
-// Agent commands from spec
 void Controller::agent_move_command() {
     assert(mp_current_agent);
     Point move_pt = read_point();
     mp_current_agent->move_to(move_pt);
 }
 
+// Attempts to get a Structure from a name read from input
+// throws an Error if no Structure with the name is found
+static Structure* read_structure_from_input() {
+    // Read and find Structure, throws Error if not found
+    string structure_name;
+    cin >> structure_name;
+    return g_Model_ptr->get_structure_ptr(structure_name);
+}
+
 void Controller::agent_work_command() {
     assert(mp_current_agent);
 
-    // Read in names of source and destination structures
-    string source_name, destination_name;
-    cin >> source_name >> destination_name;
+    // Read and find these Structures, throws Error if either is not found
+    Structure* source_ptr = read_structure_from_input();
+    Structure* destination_ptr = read_structure_from_input();
 
-    // Find these Structures, throws Error if either is not found
-    Structure* source_ptr = g_Model_ptr->get_structure_ptr(source_name);
-    Structure* destination_ptr = g_Model_ptr->get_structure_ptr(destination_name);
     assert(source_ptr);
     assert(destination_ptr);
 
@@ -266,7 +259,6 @@ void Controller::agent_stop_command() {
     mp_current_agent->stop();
 }
 
-// Whole-program commands from spec
 void Controller::status_command() {
     g_Model_ptr->describe();
 }
@@ -280,6 +272,17 @@ void Controller::go_command() {
     g_Model_ptr->update();
 }
 
+static void read_name(string& name) {
+    cin >> name;
+
+    // Check if input name is a valid object name
+    if (name.length() < 2 || !string_is_alnum(name) ||
+        g_Model_ptr->is_name_in_use(name))
+    {
+        throw Error("Invalid name for new object!");
+    }
+}
+
 // Data for creating a new Sim_object
 struct New_obj_info {
     string name;
@@ -290,7 +293,7 @@ struct New_obj_info {
 // Read data for creating new Sim_object from input
 static void read_new_obj_info(New_obj_info& info) {
     // read in and validate name
-    info.name = read_name();
+    read_name(info.name);
 
     // read in type of Structure to create, no validation yet
     cin >> info.type;

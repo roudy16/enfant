@@ -40,7 +40,7 @@ void View::update_remove(const std::string& name) {
 
 void View::print_grid_helper(const Grid_t &grid) {
     // Print doubles with no decimal points
-    cout << setprecision(0);
+    cout.precision(0);
 
     // Print Grid
     for (int i = m_size - 1; i >= 0; i--) {
@@ -64,14 +64,15 @@ void View::print_grid_helper(const Grid_t &grid) {
 
     // X-axis labels
     for (int i = 0; i < m_size; i = i + 3) {
-        cout << setw(6) << m_origin.x + m_scale * static_cast<double>(i);
+        cout << "  " << setw(4) << m_origin.x + m_scale * static_cast<double>(i);
     }
     cout << endl;
 }
 
 void View::draw() {
     // Save previous output settings
-    auto form_flags = cout.flags();
+    ios::fmtflags form_flags(cout.flags());
+    streamsize old_precision = cout.precision();
 
     // Create an empty grid with dimensions m_size by m_size and each cell holds
     // ". " to indicate it is empty
@@ -129,6 +130,7 @@ void View::draw() {
     print_grid_helper(grid);
 
     // Restore previous output settings
+    cout.precision(old_precision);
     cout.flags(form_flags);
 }
 
@@ -150,7 +152,7 @@ void View::set_size(int size_) {
 
 void View::set_scale(double scale_) {
     // Ensure scale is positive
-    if (scale_ < 0.0) {
+    if (scale_ <= 0.0) {
         throw Error("New map scale must be positive!");
     }
 

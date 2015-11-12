@@ -7,7 +7,7 @@
 // Hack for developing in Visual Studio versions that don't support noexcept
 #ifdef _MSC_VER
     #if (_MSC_VER < 1900)
-    #define noexcept 
+        #define noexcept 
     #endif
 #endif
 
