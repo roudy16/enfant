@@ -52,10 +52,10 @@ Soldier.o: Soldier.cpp Soldier.h Agent.h Moving_object.h Sim_object.h Geometry.h
 Moving_object.o: Moving_object.cpp Moving_object.h Geometry.h Utility.h
 	$(CC) $(CFLAGS) Moving_object.cpp
 
-Agent_factory.o: Agent_factory.cpp Agent_factory.h Geometry.h Utility.h
+Agent_factory.o: Agent_factory.cpp Agent_factory.h Peasant.h Soldier.h Agent.h Geometry.h Utility.h
 	$(CC) $(CFLAGS) Agent_factory.cpp
 
-Structure_factory.o: Structure_factory.cpp Structure_factory.h Geometry.h Utility.h
+Structure_factory.o: Structure_factory.cpp Structure_factory.h Farm.h Town_Hall.h Structure.h Geometry.h Utility.h
 	$(CC) $(CFLAGS) Structure_factory.cpp
 
 Geometry.o: Geometry.cpp Geometry.h
