@@ -17,7 +17,6 @@ class Structure;
 
 class Peasant : public Agent {
 public:
-    // *** define these in .cpp; initialize with zero amount being carried
     Peasant(const std::string& name_, Point location_);
 
     ~Peasant();
@@ -54,6 +53,13 @@ private:
     Structure* m_destination;
     double m_amount;
     Peasant_State m_peasant_state;
+
+    // disallow copy/move construction or assignment and default ctor
+    Peasant() = delete;
+    Peasant(const Peasant&) = delete;
+    Peasant& operator= (const Peasant&)  = delete;
+    Peasant(Peasant&&) = delete;
+    Peasant& operator= (Peasant&&) = delete;
 };
 
 #endif // PEASANT_H

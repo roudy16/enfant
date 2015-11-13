@@ -8,10 +8,11 @@
 Structure * create_structure(const std::string& name, const std::string& type, Point location) {
     Structure* new_structure_ptr = nullptr;
 
-    if (type.compare("Farm") == 0) {
+    // Determine what type of Structure to create, throw Error if no such type
+    if (type == "Farm") {
         new_structure_ptr = new Farm(name, location);
     }
-    else if (type.compare("Town_Hall") == 0) {
+    else if (type == "Town_Hall") {
         new_structure_ptr = new Town_Hall(name, location);
     }
     else {

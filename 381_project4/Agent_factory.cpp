@@ -8,10 +8,11 @@
 Agent * create_agent(const std::string& name, const std::string& type, Point location) {
     Agent* new_agent_ptr = nullptr;
 
-    if (type.compare("Peasant") == 0) {
+    // Determine what type of Agent to create, throw Error if no such type
+    if (type == "Peasant") {
         new_agent_ptr = new Peasant(name, location);
     }
-    else if (type.compare("Soldier") == 0) {
+    else if (type == "Soldier") {
         new_agent_ptr = new Soldier(name, location);
     }
     else {

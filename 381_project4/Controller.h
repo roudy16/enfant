@@ -42,6 +42,8 @@ private:
     void build_command();
     void train_command();
 
+    // helper to initialize command containers with string to 
+    // function pointer mappings
     void init_commands();
 
     // Returns function pointer to associated command if it exists, 
@@ -52,6 +54,7 @@ private:
     Controller_fp_t get_command_helper(Command_map_t& commands,
                                        const std::string& command);
 
+    // Containers for user command function pointers
     Command_map_t m_view_commands;
     Command_map_t m_agent_commands;
     Command_map_t m_program_commands;
@@ -59,6 +62,12 @@ private:
     // Allow access to current View and Agent from within command functions
     View* mp_view;
     Agent* mp_current_agent;
+
+    // disallow copy/move construction or assignment
+    Controller(const Controller&) = delete;
+    Controller& operator= (const Controller&)  = delete;
+    Controller(Controller&&) = delete;
+    Controller& operator= (Controller&&) = delete;
 };
 
 #endif // CONTROLLER_H

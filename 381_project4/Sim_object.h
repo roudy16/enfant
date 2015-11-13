@@ -23,6 +23,13 @@ public:
 
 private:
     std::string m_name;
+
+    // disallow copy/move construction or assignment and default ctor
+    Sim_object() = delete;
+    Sim_object(const Sim_object&) = delete;
+    Sim_object& operator= (const Sim_object&)  = delete;
+    Sim_object(Sim_object&&) = delete;
+    Sim_object& operator= (Sim_object&&) = delete;
 };
 
 #endif // SIM_OBJECT_H

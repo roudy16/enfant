@@ -3,6 +3,8 @@
 #include "Agent_factory.h"
 #include "Geometry.h"
 #include "Sim_object.h"
+#include "Structure.h"
+#include "Agent.h"
 #include "Utility.h"
 #include "View.h"
 #include <vector>
@@ -30,8 +32,8 @@ Model::Model() : m_time(0)
 
 Model::~Model() {
     // destroy all objects
-    for (Sim_object* p : m_sim_objs) {
-        delete p;
+    for (auto& pair : m_sim_objs) {
+        delete pair.second;
     }
 }
 
@@ -44,16 +46,22 @@ bool Model::is_name_in_use(const string& name) const {
 
 bool Model::is_structure_present(const string& name) const {
     auto iter = m_structures.find(name);
+
+    // return false if structure with name not found, return true otherwise
     if (iter == m_structures.end()) {
         return false;
     }
-
-    return true;
+    else {
+        return true;
+    }
 }
 
 // add a new structure; assumes none with the same name
 void Model::add_structure(Structure* new_structure_ptr) {
-    m_sim_objs.insert(static_cast<Sim_object*>(new_structure_ptr));
+    // Add Structure to Sim_objects container as a Sim_object*
+    m_sim_objs[new_structure_ptr->get_name()] = static_cast<Sim_object*>(new_structure_ptr);
+
+    // Add Structure to Structures container as a Structure*
     m_structures[new_structure_ptr->get_name()] = new_structure_ptr;
     new_structure_ptr->broadcast_current_state();
 }
@@ -71,21 +79,26 @@ Structure* Model::get_structure_ptr(const string& name) const {
 
 bool Model::is_agent_present(const string& name) const {
     auto iter = m_agents.find(name);
+
+    // return false if agent with name not found, return true otherwise
     if (iter == m_agents.end()) {
         return false;
     }
-
-    return true;
+    else {
+        return true;
+    }
 }
 
 // add a new agent; assumes none with the same name
 void Model::add_agent(Agent* new_agent_ptr) {
-    m_sim_objs.insert(static_cast<Sim_object*>(new_agent_ptr));
+    // Add Agent to Sim_objects container as a Sim_object*
+    m_sim_objs[new_agent_ptr->get_name()] = static_cast<Sim_object*>(new_agent_ptr);
+
+    // Add Agent to Structures container as an Agent*
     m_agents[new_agent_ptr->get_name()] = new_agent_ptr;
     new_agent_ptr->broadcast_current_state();
 }
 
-// will throw Error("Agent not found!") if no agent of that name
 Agent* Model::get_agent_ptr(const string& name) const {
     auto iter = m_agents.find(name);
 
@@ -99,8 +112,8 @@ Agent* Model::get_agent_ptr(const string& name) const {
 
 // tell all objects to describe themselves to the console
 void Model::describe() const {
-    for (Sim_object* p : m_sim_objs) {
-        p->describe();
+    for (auto& pair : m_sim_objs) {
+        pair.second->describe();
     }
 }
 
@@ -109,8 +122,8 @@ void Model::update() {
     m_time++;
 
     // update all objects
-    for (Sim_object* p : m_sim_objs) {
-        p->update();
+    for (auto& pair : m_sim_objs) {
+        pair.second->update();
     }
 
     // collect disappearing agents
@@ -127,10 +140,11 @@ void Model::update() {
 
         // remove agent from Model containers
         m_agents.erase(agent_name);
-        auto sim_obj_iter = m_sim_objs.find(static_cast<Sim_object*>(agent_p));
+        auto sim_obj_iter = m_sim_objs.find(agent_p->get_name());
         assert(sim_obj_iter != m_sim_objs.end());
         m_sim_objs.erase(sim_obj_iter);
 
+        // deallocate agent
         delete agent_p;
     }
 }
@@ -142,8 +156,8 @@ void Model::update() {
 void Model::attach(View* view_ptr) {
     m_views.push_back(view_ptr);
 
-    for (Sim_object* p : m_sim_objs) {
-        view_ptr->update_location(p->get_name(), p->get_location());
+    for (auto& p : m_sim_objs) {
+        view_ptr->update_location(p.second->get_name(), p.second->get_location());
     }
 }
 

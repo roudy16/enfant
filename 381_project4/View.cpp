@@ -1,7 +1,6 @@
 #include "View.h"
 #include "Geometry.h"
 #include "Utility.h"
-#include <list>
 #include <vector>
 #include <iostream>
 #include <iomanip>
@@ -9,13 +8,40 @@
 
 using namespace std;
 
+// default View settings
 const double kDEFAULT_VIEW_SCALE = 2.0;
 const double kDEFAULT_VIEW_ORIGINX = -10.0;
 const double kDEFAULT_VIEW_ORIGINY = -10.0;
 const int kDEFAULT_VIEW_SIZE = 25;
+
+// min, max View sizes (inclusive)
 const int kMAX_VIEW_SIZE = 30;
 const int kMIN_VIEW_SIZE = 7;
 
+// Prints objects that are not visible on the grid, offgrid objects must be in
+// passed in container before function is called
+static void print_offgrid_helper(const vector<const string*>& offgrid_objects);
+
+namespace {
+    // Object to save and restore cout settings
+    // Settings saved when object is created then restored when object destroyed
+    class Cout_settings_saver {
+    public:
+        // Save settings
+        Cout_settings_saver() : m_form_flags(cout.flags()), m_old_precision(cout.precision())
+        {}
+
+        // Restore settings
+        ~Cout_settings_saver() {
+            cout.flags(m_form_flags);
+            cout.precision(m_old_precision);
+        }
+
+    private:
+        ios::fmtflags m_form_flags;
+        streamsize m_old_precision;
+    };
+}
 
 View::View() : m_origin(kDEFAULT_VIEW_ORIGINX, kDEFAULT_VIEW_ORIGINY),
                m_scale(kDEFAULT_VIEW_SCALE), m_size(kDEFAULT_VIEW_SIZE) 
@@ -46,7 +72,7 @@ void View::print_grid_helper(const Grid_t &grid) {
     for (int i = m_size - 1; i >= 0; i--) {
         // Y-axis labels every 3 lines
         if (i % 3 != 0) {
-            cout << "    ";
+            cout << "    "; // leading spaces when no axis label
         }
         else {
             cout << setw(4) << m_origin.y + m_scale * static_cast<double>(i);
@@ -69,42 +95,59 @@ void View::print_grid_helper(const Grid_t &grid) {
     cout << endl;
 }
 
+static void print_offgrid_helper(const vector<const string*> &offgrid_objects) {
+    auto iter = offgrid_objects.begin();
+
+    // First offgrid object (no comma in front)
+    cout << **iter;
+    iter++;
+
+    // All subsequent offgrid objects (preceded by commas)
+    while (iter != offgrid_objects.end()) {
+        cout << ", " << *(*iter++);
+    }
+
+    cout << " outside the map\n";
+}
+
 void View::draw() {
     // Save previous output settings
-    ios::fmtflags form_flags(cout.flags());
-    streamsize old_precision = cout.precision();
+    Cout_settings_saver css;
 
     // Create an empty grid with dimensions m_size by m_size and each cell holds
     // ". " to indicate it is empty
     Grid_t grid(m_size, vector<vector<char>>(m_size, vector<char>{'.', ' '}));
 
+    // Display doubles with exactly 2 digits after the decimal point
     cout << fixed;
     cout << setprecision(2);
+
+    // Print current View settings
     cout << "Display size: " << m_size << ", scale: " << m_scale << ", origin: " << m_origin << endl;
 
-    // Holds any objects found to be off the grid, starts empty
-    list<string> offgrid_objects;
+    // Holds any objects found to be off the grid
+    vector<const string*> offgrid_objects;
 
-    // Add objects to the grid
+    // Add objects to the grid to be drawn
     for (auto& pair : m_grid_objects) {
         // row and column of the cell
         int row, col;
         bool is_on_grid = get_subscripts(col, row, pair.second);
 
-        // If offgrid, add to offgrid container
+        // If offgrid, add to offgrid container then continue to next object
         if (!is_on_grid) {
-            offgrid_objects.push_back(pair.first);
+            offgrid_objects.push_back(&pair.first);
             continue;
         }
 
-        // check if cell is empty
+        // check if cell is empty, empty cell indicated by '.' in first position
         if (grid[row][col][0] == '.') {
             // cell is empty, add the object
             grid[row][col][0] = pair.first[0];
             grid[row][col][1] = pair.first[1];
         }
         else {
-            // cell is occupied, indicate multiple objects in cell
+            // cell is already occupied, indicate multiple objects in cell
             grid[row][col][0] = '*';
             grid[row][col][1] = ' ';
         }
@@ -112,26 +155,13 @@ void View::draw() {
 
     // Print offgrid objects message if any
     if (!offgrid_objects.empty()) {
-        auto iter = offgrid_objects.begin();
-
-        // First offgrid object (no comma in front)
-        cout << *iter;
-        iter++;
-
-        // All subsequent offgrid objects (preceded by commas)
-        while (iter != offgrid_objects.end()) {
-            cout << ", " << *iter++;
-        }
-
-        cout << " outside the map\n";
+        print_offgrid_helper(offgrid_objects);
     }
 
     // Print the objects that are on the grid
     print_grid_helper(grid);
 
-    // Restore previous output settings
-    cout.precision(old_precision);
-    cout.flags(form_flags);
+    // Restore previous output settings when function ends
 }
 
 void View::clear() {

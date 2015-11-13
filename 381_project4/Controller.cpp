@@ -5,6 +5,7 @@
 #include "Geometry.h"
 #include "Structure_factory.h"
 #include "Agent_factory.h"
+#include "Agent.h"
 #include <iostream>
 #include <exception>
 #include <algorithm>
@@ -13,6 +14,29 @@
 #include <cassert>
 
 using namespace std;
+
+namespace {
+    // Data for creating a new Sim_object
+    struct New_obj_info {
+        string name;
+        string type;
+        Point start_pt;
+    };
+}
+
+// Read two doubles in from input then return Point created from those
+// throws Error if doubles cannot be read
+static Point read_point();
+
+// Read and find Structure, throws Error if not found
+static Structure* read_structure_from_input();
+
+// Read a new object name from input, throws Error if name is too short,
+// is not alphanumeric or another object already is using that name
+static void read_name(string& name);
+
+// Read data for creating new Sim_object from input
+static void read_new_obj_info(New_obj_info& info);
 
 Controller::Controller() : mp_view(nullptr), mp_current_agent(nullptr)
 {
@@ -121,8 +145,7 @@ void Controller::run() {
     mp_view = &view;
     g_Model_ptr->attach(mp_view);
 
-    // Fill command containers
-    init_commands();
+    init_commands(); // Fill command containers
 
     string first_word;
     Controller_fp_t command_ptr = nullptr;
@@ -131,11 +154,10 @@ void Controller::run() {
     while (true) {
         try {
             cout << "\nTime " << g_Model_ptr->get_time() << ": Enter command: ";
-
             cin >> first_word;
 
             // Check if user wants to quit
-            if (first_word.compare("quit") == 0) {
+            if (first_word == "quit") {
                 break; // break out of main program loop
             }
 
@@ -171,7 +193,7 @@ void Controller::run() {
         catch (...) {
             cout << "Unknown exception caught!" << endl;
         }
-    }
+    } // End main program loop
 
     // Tear down View
     g_Model_ptr->detach(mp_view);
@@ -216,10 +238,7 @@ void Controller::agent_move_command() {
     mp_current_agent->move_to(move_pt);
 }
 
-// Attempts to get a Structure from a name read from input
-// throws an Error if no Structure with the name is found
 static Structure* read_structure_from_input() {
-    // Read and find Structure, throws Error if not found
     string structure_name;
     cin >> structure_name;
     return g_Model_ptr->get_structure_ptr(structure_name);
@@ -283,14 +302,6 @@ static void read_name(string& name) {
     }
 }
 
-// Data for creating a new Sim_object
-struct New_obj_info {
-    string name;
-    string type;
-    Point start_pt;
-};
-
-// Read data for creating new Sim_object from input
 static void read_new_obj_info(New_obj_info& info) {
     // read in and validate name
     read_name(info.name);

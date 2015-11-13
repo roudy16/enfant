@@ -31,6 +31,13 @@ public:
 private:
     double m_food_amount;
     double m_tax_rate;
+
+    // disallow copy/move construction or assignment and default ctor
+    Town_Hall() = delete;
+    Town_Hall(const Town_Hall&) = delete;
+    Town_Hall& operator= (const Town_Hall&)  = delete;
+    Town_Hall(Town_Hall&&) = delete;
+    Town_Hall& operator= (Town_Hall&&) = delete;
 };
 
 #endif // TOWN_HALL_H

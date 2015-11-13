@@ -66,12 +66,17 @@ private:
 
     bool get_subscripts(int &ix, int &iy, Point location);
 
+    // prints grid with axis labels
     void print_grid_helper(const Grid_t &grid);
 
     Objects_t m_grid_objects;
     Point m_origin;
     double m_scale;
     int m_size;
+
+    // disallow move construction or assignment
+    View(View&&) = delete;
+    View& operator= (View&&) = delete;
 };
 
 #endif // VIEW_H

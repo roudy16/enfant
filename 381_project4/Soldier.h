@@ -48,6 +48,12 @@ private:
     int m_attack_strength;
     Soldier_State m_soldier_state;
 
+    // disallow copy/move construction or assignment and default ctor
+    Soldier() = delete;
+    Soldier(const Soldier&) = delete;
+    Soldier& operator= (const Soldier&)  = delete;
+    Soldier(Soldier&&) = delete;
+    Soldier& operator= (Soldier&&) = delete;
 };
 
 #endif // SOLDIER_H

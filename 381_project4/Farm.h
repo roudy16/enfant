@@ -31,6 +31,13 @@ public:
 private:
     double m_food_amount;
     double m_production_rate;
+
+    // disallow copy/move construction or assignment and default ctor
+    Farm() = delete;
+    Farm(const Farm&) = delete;
+    Farm& operator= (const Farm&)  = delete;
+    Farm(Farm&&) = delete;
+    Farm& operator= (Farm&&) = delete;
 };
 
 #endif // FARM_H

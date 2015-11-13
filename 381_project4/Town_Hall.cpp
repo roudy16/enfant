@@ -8,6 +8,7 @@ using namespace std;
 
 const double kTOWNHALL_INITIAL_FOOD_AMOUNT = 0.0;
 const double kTOWNHALL_INITIAL_TAX_RATE = 0.1;
+const double kTOWNHALL_MIN_WITHDRAW = 1.0;
 
 Town_Hall::Town_Hall(const std::string& name_, Point location_)
     : Structure(name_, location_),
@@ -33,8 +34,8 @@ double Town_Hall::withdraw(double amount_to_obtain) {
     double return_amount = fmin(amount_to_obtain,
                                 m_food_amount - m_food_amount * m_tax_rate);
 
-    // Don't return amounts less than 1.0
-    if (return_amount < 1.0) {
+    // Don't return amounts less than kTOWNHALL_MIN_WITHDRAW
+    if (return_amount < kTOWNHALL_MIN_WITHDRAW) {
         return_amount = 0.0;
     }
 
@@ -47,6 +48,5 @@ double Town_Hall::withdraw(double amount_to_obtain) {
 void Town_Hall::describe() const {
     cout << "Town_Hall ";
     Structure::describe();
-
     cout << "   Contains " << m_food_amount << endl;
 }

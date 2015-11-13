@@ -1,12 +1,8 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include "Sim_object.h"
-#include "Agent.h"
-#include "Structure.h"
 #include <string>
 #include <map>
-#include <set>
 #include <vector>
 
 /*
@@ -30,6 +26,7 @@ Notice how only the Standard Library headers need to be included - reduced coupl
 // Forward declarations
 class Model;
 class View;
+class Sim_object;
 class Structure;
 class Agent;
 struct Point;
@@ -92,7 +89,7 @@ private:
         }
     };
 
-    std::set<Sim_object*, Obj_ptr_comp<Sim_object*>> m_sim_objs;
+    std::map<const std::string, Sim_object*> m_sim_objs;
     std::map<const std::string, Agent*> m_agents;
     std::map<const std::string, Structure*> m_structures;
     std::vector<View*> m_views;

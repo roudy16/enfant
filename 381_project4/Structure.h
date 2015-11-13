@@ -29,6 +29,13 @@ public:
 
 private:
     Point m_location;
+
+    // disallow copy/move construction or assignment and default ctor
+    Structure() = delete;
+    Structure(const Structure&) = delete;
+    Structure& operator= (const Structure&)  = delete;
+    Structure(Structure&&) = delete;
+    Structure& operator= (Structure&&) = delete;
 };
 
 #endif // STRUCTURE_H

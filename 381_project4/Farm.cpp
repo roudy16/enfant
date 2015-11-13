@@ -41,6 +41,5 @@ void Farm::update() {
 void Farm::describe() const {
     cout << "Farm ";
     Structure::describe();
-
     cout << "   Food available: " << m_food_amount << endl;
 }

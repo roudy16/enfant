@@ -12,13 +12,6 @@ If its heath <= 0, it starts dying, then on subsequent updates,
 it becomes dead, and finally disappearing.
 */
 
-/* 
-*** This skeleton file shows the required public interface for the class, which you may not modify. 
-If no protected members are shown, there must be none in your version. 
-If any protected or private members are shown here, then your class must also have them and use them as intended.
-You must delete this comment and all other comments that start with "***".
-*/
-
 
 class Structure;
 
@@ -76,6 +69,13 @@ private:
 
     int m_health;
     Alive_State m_alive_state;
+
+    // disallow copy/move construction or assignment and default ctor
+    Agent() = delete;
+    Agent(const Agent&) = delete;
+    Agent& operator= (const Agent&)  = delete;
+    Agent(Agent&&) = delete;
+    Agent& operator= (Agent&&) = delete;
 };
 
 #endif // AGENT_H
