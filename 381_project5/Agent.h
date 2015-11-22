@@ -15,7 +15,7 @@ it becomes dead, and finally disappearing.
 
 class Structure;
 
-class Agent : public Sim_object, private Moving_object {
+class Agent : public Sim_object{
 public:
     ~Agent();
 
@@ -67,6 +67,7 @@ protected:
 private:
     enum class Alive_State { ALIVE, DYING, DEAD, DISAPPEARING };
 
+    Moving_object m_moving_obj;
     int m_health;
     Alive_State m_alive_state;
 

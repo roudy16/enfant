@@ -9,7 +9,7 @@ const double kAGENT_INITIAL_SPEED = 5.0;
 const int kAGENT_INITIAL_HEALTH = 5;
 
 Agent::Agent(const std::string& name_, Point location_)
-    : Sim_object(name_), Moving_object(location_, kAGENT_INITIAL_SPEED),
+    : Sim_object(name_), m_moving_obj(location_, kAGENT_INITIAL_SPEED),
     m_health(kAGENT_INITIAL_HEALTH), m_alive_state(Alive_State::ALIVE)
 {
     cout << "Agent " << get_name() << " constructed" << endl;
@@ -20,17 +20,17 @@ Agent::~Agent() {
 }
 
 Point Agent::get_location() const {
-    return get_current_location();
+    return m_moving_obj.get_current_location();
 }
 
 bool Agent::is_moving() const {
-    return is_currently_moving();
+    return m_moving_obj.is_currently_moving();
 }
 
 void Agent::move_to(Point destination_) {
-    start_moving(destination_);
+    m_moving_obj.start_moving(destination_);
 
-    if (is_currently_moving()) {
+    if (m_moving_obj.is_currently_moving()) {
         cout << get_name() << ": I'm on the way" << endl;
     }
     else {
@@ -40,12 +40,12 @@ void Agent::move_to(Point destination_) {
 
 void Agent::stop() {
     // if already stopped, do nothing
-    if (!is_currently_moving()) {
+    if (!m_moving_obj.is_currently_moving()) {
         return;
     }
 
     // otherwise, stop moving and print message
-    stop_moving();
+    m_moving_obj.stop_moving();
     cout << get_name() << ": I'm stopped" << endl;
 }
 
@@ -57,10 +57,10 @@ void Agent::take_hit(int attack_strength, Agent *attacker_ptr) {
 void Agent::update() {
     switch (m_alive_state) {
     case Alive_State::ALIVE:
-        if (is_currently_moving()) {
+        if (m_moving_obj.is_currently_moving()) {
             // update position and have Model notify View
-            bool has_arrived = update_location();
-            g_Model_ptr->notify_location(get_name(), get_current_location());
+            bool has_arrived = m_moving_obj.update_location();
+            Model::get_instance()->notify_location(get_name(), m_moving_obj.get_current_location());
 
             if (has_arrived) {
                 cout << get_name() << ": I'm there!" << endl;
@@ -73,7 +73,7 @@ void Agent::update() {
     case Alive_State::DYING:
         m_alive_state = Alive_State::DEAD;
         // Tell Model to notify View to remove agent
-        g_Model_ptr->notify_gone(get_name());
+        Model::get_instance()->notify_gone(get_name());
         break;
     case Alive_State::DEAD:
         m_alive_state = Alive_State::DISAPPEARING;
@@ -88,14 +88,14 @@ void Agent::update() {
 
 // output information about the current state
 void Agent::describe() const {
-    cout << get_name() << " at " << get_current_location() << endl;
+    cout << get_name() << " at " << m_moving_obj.get_current_location() << endl;
 
     switch (m_alive_state) {
     case Alive_State::ALIVE:
         cout << "   Health is " << m_health << endl;
-        if (is_currently_moving()) {
-            cout << "   Moving at speed " << get_current_speed() 
-                 << " to " << get_current_destination() << endl;
+        if (m_moving_obj.is_currently_moving()) {
+            cout << "   Moving at speed " << m_moving_obj.get_current_speed() 
+                 << " to " << m_moving_obj.get_current_destination() << endl;
         }
         else {
             cout << "   Stopped" << endl;
@@ -119,12 +119,12 @@ void Agent::describe() const {
 void Agent::broadcast_current_state() const {
     // remove agents that aren't ALIVE
     if (m_alive_state != Alive_State::ALIVE) {
-        g_Model_ptr->notify_gone(get_name());
+        Model::get_instance()->notify_gone(get_name());
         return;
     }
 
     // Tell View where ALIVE agents are
-    g_Model_ptr->notify_location(get_name(), get_current_location());
+    Model::get_instance()->notify_location(get_name(), m_moving_obj.get_current_location());
 }
 
 /* Fat Interface for derived classes */
@@ -146,7 +146,7 @@ void Agent::lose_health(int attack_strength) {
     // Check if agent received fatal wound
     if (m_health <= 0) {
         m_alive_state = Alive_State::DYING;
-        stop_moving();
+        m_moving_obj.stop_moving();
         cout << get_name() << ": Arrggh!" << endl;
     }
     else {

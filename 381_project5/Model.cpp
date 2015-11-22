@@ -13,12 +13,39 @@
 
 using namespace std;
 
-Model* g_Model_ptr = nullptr;
+// class used to deallocate Model
+class Model_destroyer {
+public:
+    ~Model_destroyer() {
+        delete Model::mp_instance;
+    }
+};
+
+// global object that deallocates Model singleton memory when program finishes
+static Model_destroyer the_destroyer;
+
+Model* Model::mp_instance = nullptr;
+
+Model* Model::get_instance() {
+    if (!mp_instance) {
+        mp_instance = new Model();
+        mp_instance->init();
+    }
+    return mp_instance;
+}
 
 Model::Model() : m_time(0) 
 {
-    g_Model_ptr = this;
+}
 
+Model::~Model() {
+    // destroy all objects
+    for (auto& pair : m_sim_objs) {
+        delete pair.second;
+    }
+}
+
+void Model::init() {
     add_structure(create_structure("Rivendale", "Farm", Point(10., 10.)));
     add_structure(create_structure("Sunnybrook", "Farm", Point(0., 30.)));
     add_structure(create_structure("Shire", "Town_Hall", Point(20., 20.)));
@@ -29,14 +56,6 @@ Model::Model() : m_time(0)
     add_agent(create_agent("Zug", "Soldier", Point(20., 30.)));
     add_agent(create_agent("Bug", "Soldier", Point(15., 20.)));
 }
-
-Model::~Model() {
-    // destroy all objects
-    for (auto& pair : m_sim_objs) {
-        delete pair.second;
-    }
-}
-
 
 // is name already in use for either agent or structure?
 // return true if the name matches the name of an existing agent or structure

@@ -143,7 +143,7 @@ void Controller::run() {
     // setup up View
     View view;
     mp_view = &view;
-    g_Model_ptr->attach(mp_view);
+    Model::get_instance()->attach(mp_view);
 
     init_commands(); // Fill command containers
 
@@ -153,7 +153,7 @@ void Controller::run() {
     // main program loop, exited when user enters "quit" command
     while (true) {
         try {
-            cout << "\nTime " << g_Model_ptr->get_time() << ": Enter command: ";
+            cout << "\nTime " << Model::get_instance()->get_time() << ": Enter command: ";
             cin >> first_word;
 
             // Check if user wants to quit
@@ -163,8 +163,8 @@ void Controller::run() {
 
             // Check if first word is name of an Agent and set the Agent ptr
             // then execute an Agent command
-            if (g_Model_ptr->is_agent_present(first_word)) {
-                mp_current_agent = g_Model_ptr->get_agent_ptr(first_word);
+            if (Model::get_instance()->is_agent_present(first_word)) {
+                mp_current_agent = Model::get_instance()->get_agent_ptr(first_word);
                 if (!mp_current_agent->is_alive()) {
                     throw Error("Agent is not alive!");
                 }
@@ -196,7 +196,7 @@ void Controller::run() {
     } // End main program loop
 
     // Tear down View
-    g_Model_ptr->detach(mp_view);
+    Model::get_instance()->detach(mp_view);
     mp_view = nullptr;
 
     cout << "Done" << endl;
@@ -241,7 +241,7 @@ void Controller::agent_move_command() {
 static Structure* read_structure_from_input() {
     string structure_name;
     cin >> structure_name;
-    return g_Model_ptr->get_structure_ptr(structure_name);
+    return Model::get_instance()->get_structure_ptr(structure_name);
 }
 
 void Controller::agent_work_command() {
@@ -266,7 +266,7 @@ void Controller::agent_attack_command() {
     cin >> target_name;
 
     // Find target Agent, throws Error if Agent not found
-    Agent* target_ptr = g_Model_ptr->get_agent_ptr(target_name);
+    Agent* target_ptr = Model::get_instance()->get_agent_ptr(target_name);
     assert(target_ptr);
 
     // Attack target if possible, throws Error if Agent cannot attack
@@ -279,7 +279,7 @@ void Controller::agent_stop_command() {
 }
 
 void Controller::status_command() {
-    g_Model_ptr->describe();
+    Model::get_instance()->describe();
 }
 
 void Controller::show_command() {
@@ -288,7 +288,7 @@ void Controller::show_command() {
 }
 
 void Controller::go_command() {
-    g_Model_ptr->update();
+    Model::get_instance()->update();
 }
 
 static void read_name(string& name) {
@@ -296,7 +296,7 @@ static void read_name(string& name) {
 
     // Check if input name is a valid object name
     if (name.length() < 2 || !string_is_alnum(name) ||
-        g_Model_ptr->is_name_in_use(name))
+        Model::get_instance()->is_name_in_use(name))
     {
         throw Error("Invalid name for new object!");
     }
@@ -323,7 +323,7 @@ void Controller::build_command() {
                                                 info.start_pt);
 
     // Add new Structure to Model
-    g_Model_ptr->add_structure(new_structure);
+    Model::get_instance()->add_structure(new_structure);
 }
 
 void Controller::train_command() {
@@ -334,5 +334,5 @@ void Controller::train_command() {
     Agent* new_agent = create_agent(info.name, info.type, info.start_pt);
 
     // Add new Structure to Model
-    g_Model_ptr->add_agent(new_agent);
+    Model::get_instance()->add_agent(new_agent);
 }

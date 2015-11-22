@@ -4,6 +4,15 @@
 #include <string>
 #include <map>
 #include <vector>
+#include <memory>
+
+// Forward declarations
+class Model;
+class View;
+class Sim_object;
+class Structure;
+class Agent;
+struct Point;
 
 /*
 Model is part of a simplified Model-View-Controller pattern.
@@ -21,27 +30,15 @@ Model also provides facilities for looking up objects given their name.
 
 Notice how only the Standard Library headers need to be included - reduced coupling!
 
+Implemented as a Singleton
 */
 
-// Forward declarations
-class Model;
-class View;
-class Sim_object;
-class Structure;
-class Agent;
-struct Point;
-
-// global pointer to the Model
-extern Model* g_Model_ptr;
  
 class Model {
 public:
-    // create the initial objects
-    Model();
+	// return pointer to the Model object
+	static Model* get_instance();
     
-    // destroy all objects
-    ~Model();
-
     // return the current time
     int get_time() {return m_time;}
 
@@ -80,7 +77,23 @@ public:
     // notify the views that an object is now gone
     void notify_gone(const std::string& name);
     
+    // class used to deallocate Model
+    friend class Model_destroyer;
+
+    // disallow copy/move construction or assignment
+    Model(const Model&) = delete;
+    Model& operator= (const Model&) = delete;
+    Model(Model&&) = delete;
+    Model& operator= (Model&&) = delete;
+
 private:
+    // create the initial objects
+    Model();
+    // destroy all objects
+    ~Model();
+    // Initialize the Model, not called in ctor to prevent recursive initialization
+    void init();
+
     // Comparator for sorting containers
     template<typename T>
     struct Obj_ptr_comp {
@@ -89,17 +102,13 @@ private:
         }
     };
 
-    std::map<const std::string, Sim_object*> m_sim_objs;
-    std::map<const std::string, Agent*> m_agents;
-    std::map<const std::string, Structure*> m_structures;
+    static Model* mp_instance; // pointer to single instance of Model
+
+    std::map<const std::string, std::shared_ptr<Sim_object>> m_sim_objs;
+    std::map<const std::string, std::shared_ptr<Agent>> m_agents;
+    std::map<const std::string, std::shared_ptr<Structure>> m_structures;
     std::vector<View*> m_views;
     int m_time;
-
-    // disallow copy/move construction or assignment
-    Model(const Model&) = delete;
-    Model& operator= (const Model&)  = delete;
-    Model(Model&&) = delete;
-    Model& operator= (Model&&) = delete;
 };
 
 #endif // MODEL_H

@@ -26,7 +26,7 @@ void Structure::describe() const {
 
 // ask model to notify views of current state
 void Structure::broadcast_current_state() const {
-    g_Model_ptr->notify_location(get_name(), m_location);
+    Model::get_instance()->notify_location(get_name(), m_location);
 }
 
 double Structure::withdraw(double amount_to_get) {
