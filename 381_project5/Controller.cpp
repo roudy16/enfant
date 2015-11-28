@@ -6,14 +6,17 @@
 #include "Structure_factory.h"
 #include "Agent_factory.h"
 #include "Agent.h"
+#include "Structure.h"
 #include <iostream>
 #include <exception>
 #include <algorithm>
+#include <functional>
 #include <utility>
 #include <ctype.h>
 #include <cassert>
 
 using namespace std;
+using namespace std::placeholders;
 
 namespace {
     // Data for creating a new Sim_object
@@ -29,7 +32,7 @@ namespace {
 static Point read_point();
 
 // Read and find Structure, throws Error if not found
-static Structure* read_structure_from_input();
+static shared_ptr<Structure> read_structure_from_input();
 
 // Read a new object name from input, throws Error if name is too short,
 // is not alphanumeric or another object already is using that name
@@ -38,7 +41,7 @@ static void read_name(string& name);
 // Read data for creating new Sim_object from input
 static void read_new_obj_info(New_obj_info& info);
 
-Controller::Controller() : mp_view(nullptr), mp_current_agent(nullptr)
+Controller::Controller()
 {
 }
 
@@ -95,8 +98,8 @@ static void discard_rest_of_line(std::istream& is) {
     is.ignore(numeric_limits<streamsize>::max(), '\n');
 }
 
-Controller::Controller_fp_t Controller::get_command_helper(Command_map_t& commands,
-                                                           const string& command)
+Controller::Agent_command_map_t::mapped_type Controller::get_command_helper(Agent_command_map_t& commands,
+    const std::string& command)
 {
     auto iter = commands.find(command);
 
@@ -107,12 +110,24 @@ Controller::Controller_fp_t Controller::get_command_helper(Command_map_t& comman
     return iter->second;
 }
 
-Controller::Controller_fp_t Controller::get_agent_command() {
+Controller::Command_map_t::mapped_type Controller::get_command_helper(Command_map_t& commands,
+    const std::string& command)
+{
+    auto iter = commands.find(command);
+
+    if (iter == commands.end()) {
+        return nullptr;
+    }
+
+    return iter->second;
+}
+
+Controller::Controller_agent_fp_t Controller::get_agent_command() {
     string command;
     cin >> command;
 
     // Try to find Agent command function
-    Controller_fp_t command_ptr = get_command_helper(m_agent_commands, command);
+    Controller_agent_fp_t command_ptr = get_command_helper(m_agent_commands, command);
 
     // if none found, throw error
     if (!command_ptr) {
@@ -126,7 +141,7 @@ Controller::Controller_fp_t Controller::get_view_program_command(const string& c
     // try to find program command
     Controller_fp_t command_ptr = get_command_helper(m_program_commands, command);
 
-    // if program command not found, try to find view command
+    // if none found, try to find view command
     if (!command_ptr) {
         command_ptr = get_command_helper(m_view_commands, command);
     }
@@ -141,14 +156,12 @@ Controller::Controller_fp_t Controller::get_view_program_command(const string& c
 
 void Controller::run() {
     // setup up View
-    View view;
-    mp_view = &view;
-    Model::get_instance()->attach(mp_view);
+    shared_ptr<View> view = make_shared<View>();
+    Model::get_instance()->attach(view);
 
     init_commands(); // Fill command containers
 
     string first_word;
-    Controller_fp_t command_ptr = nullptr;
 
     // main program loop, exited when user enters "quit" command
     while (true) {
@@ -164,24 +177,26 @@ void Controller::run() {
             // Check if first word is name of an Agent and set the Agent ptr
             // then execute an Agent command
             if (Model::get_instance()->is_agent_present(first_word)) {
-                mp_current_agent = Model::get_instance()->get_agent_ptr(first_word);
-                if (!mp_current_agent->is_alive()) {
+                shared_ptr<Agent> agent_ptr = Model::get_instance()->get_agent_ptr(first_word);
+                if (!agent_ptr->is_alive()) {
                     throw Error("Agent is not alive!");
                 }
 
                 // Find Agent command, throws Error if none found
-                command_ptr = get_agent_command();
+                Controller_agent_fp_t agent_command_ptr = get_agent_command();
+                // Execute Agent command
+                (this->*(agent_command_ptr))(agent_ptr);
             }
             // Otherwise check if user input a different command and execute it
             else {
                 // Try to find a view or program-wide command, Error thrown
                 // if first_word is not a valid command
-                command_ptr = get_view_program_command(first_word);
+                Controller_fp_t command_ptr = get_view_program_command(first_word);
+                // Execute command
+                (this->*(command_ptr))();
             }
 
-            // Execute command
-            (this->*(command_ptr))();
-        }
+        } // End try-block
         catch (exception& e) {
             cout << e.what() << endl;
 
@@ -196,28 +211,36 @@ void Controller::run() {
     } // End main program loop
 
     // Tear down View
-    Model::get_instance()->detach(mp_view);
-    mp_view = nullptr;
+    Model::get_instance()->detach(view);
 
     cout << "Done" << endl;
 }
 
 // View commands from spec
 void Controller::view_default_command() {
-    assert(mp_view);
-    mp_view->set_defaults();
+    Model::get_instance()->apply_to_all_views([](View& v) { v.set_defaults(); });
+}
+
+void set_view_size_helper(int new_size, View& view) {
+    view.set_size(new_size);
+}
+
+void set_view_scale_helper(double new_scale, View& view) {
+    view.set_scale(new_scale);
+}
+
+void set_view_origin_helper(Point new_origin, View& view) {
+    view.set_origin(new_origin);
 }
 
 void Controller::view_size_command() {
-    assert(mp_view);
     int new_size = read_int();
-    mp_view->set_size(new_size);
+    Model::get_instance()->apply_to_all_views_arg(new_size, &set_view_size_helper);
 }
 
 void Controller::view_zoom_command() {
-    assert(mp_view);
     double new_scale = read_double();
-    mp_view->set_scale(new_scale);
+    Model::get_instance()->apply_to_all_views_arg(new_scale, &set_view_scale_helper);
 }
 
 static Point read_point() {
@@ -227,55 +250,48 @@ static Point read_point() {
 }
 
 void Controller::view_pan_command() {
-    assert(mp_view);
     Point new_origin = read_point();
-    mp_view->set_origin(new_origin);
+    Model::get_instance()->apply_to_all_views_arg(new_origin, &set_view_origin_helper);
 }
 
-void Controller::agent_move_command() {
-    assert(mp_current_agent);
+void Controller::agent_move_command(shared_ptr<Agent> agent_ptr) {
     Point move_pt = read_point();
-    mp_current_agent->move_to(move_pt);
+    agent_ptr->move_to(move_pt);
 }
 
-static Structure* read_structure_from_input() {
+static shared_ptr<Structure> read_structure_from_input() {
     string structure_name;
     cin >> structure_name;
     return Model::get_instance()->get_structure_ptr(structure_name);
 }
 
-void Controller::agent_work_command() {
-    assert(mp_current_agent);
-
+void Controller::agent_work_command(shared_ptr<Agent> agent_ptr) {
     // Read and find these Structures, throws Error if either is not found
-    Structure* source_ptr = read_structure_from_input();
-    Structure* destination_ptr = read_structure_from_input();
+    shared_ptr<Structure> source_ptr = read_structure_from_input();
+    shared_ptr<Structure> destination_ptr = read_structure_from_input();
 
     assert(source_ptr);
     assert(destination_ptr);
 
     // Tell Agent to work, throws Error if Agent cannot work
-    mp_current_agent->start_working(source_ptr, destination_ptr);
+    agent_ptr->start_working(source_ptr, destination_ptr);
 }
 
-void Controller::agent_attack_command() {
-    assert(mp_current_agent);
-
+void Controller::agent_attack_command(shared_ptr<Agent> agent_ptr) {
     // read name for target to attack
     string target_name;
     cin >> target_name;
 
     // Find target Agent, throws Error if Agent not found
-    Agent* target_ptr = Model::get_instance()->get_agent_ptr(target_name);
+    shared_ptr<Agent> target_ptr = Model::get_instance()->get_agent_ptr(target_name);
     assert(target_ptr);
 
     // Attack target if possible, throws Error if Agent cannot attack
-    mp_current_agent->start_attacking(target_ptr);
+    agent_ptr->start_attacking(target_ptr);
 }
 
-void Controller::agent_stop_command() {
-    assert(mp_current_agent);
-    mp_current_agent->stop();
+void Controller::agent_stop_command(shared_ptr<Agent> agent_ptr) {
+    agent_ptr->stop();
 }
 
 void Controller::status_command() {
@@ -283,8 +299,7 @@ void Controller::status_command() {
 }
 
 void Controller::show_command() {
-    assert(mp_view);
-    mp_view->draw();
+    Model::get_instance()->apply_to_all_views([](View& v) { v.draw(); });
 }
 
 void Controller::go_command() {
@@ -318,7 +333,7 @@ void Controller::build_command() {
     read_new_obj_info(info);
 
     // create new Structure if information read in is valid
-    Structure* new_structure = create_structure(info.name,
+    shared_ptr<Structure> new_structure = create_structure(info.name,
                                                 info.type,
                                                 info.start_pt);
 
@@ -331,7 +346,7 @@ void Controller::train_command() {
     read_new_obj_info(info);
 
     // create new Structure if information read in is valid
-    Agent* new_agent = create_agent(info.name, info.type, info.start_pt);
+    shared_ptr<Agent> new_agent = create_agent(info.name, info.type, info.start_pt);
 
     // Add new Structure to Model
     Model::get_instance()->add_agent(new_agent);

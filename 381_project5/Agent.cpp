@@ -2,6 +2,7 @@
 #include "Model.h"
 #include "Utility.h"
 #include <iostream>
+#include <cassert>
 
 using namespace std;
 
@@ -49,7 +50,7 @@ void Agent::stop() {
     cout << get_name() << ": I'm stopped" << endl;
 }
 
-void Agent::take_hit(int attack_strength, Agent *attacker_ptr) {
+void Agent::take_hit(int attack_strength, shared_ptr<Agent> attacker_ptr) {
     lose_health(attack_strength);
 }
 
@@ -70,17 +71,8 @@ void Agent::update() {
             }
         }
         break;
-    case Alive_State::DYING:
-        m_alive_state = Alive_State::DEAD;
-        // Tell Model to notify View to remove agent
-        Model::get_instance()->notify_gone(get_name());
-        break;
     case Alive_State::DEAD:
-        m_alive_state = Alive_State::DISAPPEARING;
-        break;
-    case Alive_State::DISAPPEARING:
         // Do nothing
-        break;
     default:
         throw Error("Unrecognized state in Agent::update");
     }
@@ -101,14 +93,8 @@ void Agent::describe() const {
             cout << "   Stopped" << endl;
         }
         break;
-    case Alive_State::DYING:
-        cout << "   Is dying" << endl;
-        break;
     case Alive_State::DEAD:
         cout << "   Is dead" << endl;
-        break;
-    case Alive_State::DISAPPEARING:
-        cout << "   Is disappearing" << endl; // not expected to be visible in this project
         break;
     default:
         throw Error("Unrecognized state in Agent::describe");
@@ -117,24 +103,19 @@ void Agent::describe() const {
 
 // ask Model to broadcast our current state to all Views
 void Agent::broadcast_current_state() const {
-    // remove agents that aren't ALIVE
-    if (m_alive_state != Alive_State::ALIVE) {
-        Model::get_instance()->notify_gone(get_name());
-        return;
-    }
-
-    // Tell View where ALIVE agents are
+    assert(m_alive_state == Alive_State::ALIVE);
+    // Tell View where agents are
     Model::get_instance()->notify_location(get_name(), m_moving_obj.get_current_location());
 }
 
 /* Fat Interface for derived classes */
 // Throws exception that an Agent cannot work.
-void Agent::start_working(Structure *, Structure *) {
+void Agent::start_working(shared_ptr<Structure> dst, shared_ptr<Structure> src) {
     throw Error(get_name() + ": Sorry, I can't work!");
 }
 
 // Throws exception that an Agent cannot attack.
-void Agent::start_attacking(Agent *) {
+void Agent::start_attacking(shared_ptr<Agent> target) {
     throw Error(get_name() + ": Sorry, I can't attack!");
 }
 
@@ -145,9 +126,11 @@ void Agent::lose_health(int attack_strength) {
 
     // Check if agent received fatal wound
     if (m_health <= 0) {
-        m_alive_state = Alive_State::DYING;
+        m_alive_state = Alive_State::DEAD;
         m_moving_obj.stop_moving();
+        Model::get_instance()->notify_gone(get_name());
         cout << get_name() << ": Arrggh!" << endl;
+        Model::get_instance()->remove_agent(shared_from_this());
     }
     else {
         cout << get_name() << ": Ouch!" << endl;

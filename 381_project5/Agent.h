@@ -1,6 +1,7 @@
 #ifndef AGENT_H
 #define AGENT_H
 
+#include <memory>
 #include "Moving_object.h"
 #include "Sim_object.h"
 
@@ -15,13 +16,19 @@ it becomes dead, and finally disappearing.
 
 class Structure;
 
-class Agent : public Sim_object{
+class Agent : public Sim_object, public std::enable_shared_from_this<Agent> {
 public:
+    // disallow copy/move construction or assignment and default ctor
+    Agent() = delete;
+    Agent(const Agent&) = delete;
+    Agent& operator= (const Agent&) = delete;
+    Agent(Agent&&) = delete;
+    Agent& operator= (Agent&&) = delete;
+
     ~Agent();
 
     // return true if this agent is Alive or Disappearing
     bool is_alive() const { return m_alive_state == Alive_State::ALIVE; }
-    bool is_disappearing() const { return m_alive_state == Alive_State::DISAPPEARING; }
 
     // return this Agent's location
     Point get_location() const override;
@@ -39,7 +46,7 @@ public:
     // The attacking Agent identifies itself with its this pointer.
     // A derived class can override this function.
     // The function lose_health is called to handle the effect of the attack.
-    virtual void take_hit(int attack_strength, Agent *attacker_ptr);
+    virtual void take_hit(int attack_strength, std::shared_ptr<Agent> attacker_ptr);
 
     // update the moving state and Agent state of this object.
     void update() override;
@@ -52,10 +59,10 @@ public:
 
     /* Fat Interface for derived classes */
     // Throws exception that an Agent cannot work.
-    virtual void start_working(Structure *, Structure *);
+    virtual void start_working(std::shared_ptr<Structure>, std::shared_ptr<Structure>);
 
     // Throws exception that an Agent cannot attack.
-    virtual void start_attacking(Agent *);
+    virtual void start_attacking(std::shared_ptr<Agent>);
 
 protected:
     Agent(const std::string& name_, Point location_);
@@ -65,18 +72,12 @@ protected:
     void lose_health(int attack_strength);
 
 private:
-    enum class Alive_State { ALIVE, DYING, DEAD, DISAPPEARING };
+    enum class Alive_State { ALIVE, DEAD};
 
     Moving_object m_moving_obj;
     int m_health;
     Alive_State m_alive_state;
 
-    // disallow copy/move construction or assignment and default ctor
-    Agent() = delete;
-    Agent(const Agent&) = delete;
-    Agent& operator= (const Agent&)  = delete;
-    Agent(Agent&&) = delete;
-    Agent& operator= (Agent&&) = delete;
 };
 
 #endif // AGENT_H

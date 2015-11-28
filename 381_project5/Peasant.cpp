@@ -9,7 +9,7 @@ using namespace std;
 const double kPEASANT_INITIAL_AMOUNT = 0.0;
 const double kPEASANT_MAX_AMOUNT = 35.0;
 
-Peasant::Peasant(const std::string& name_, Point location_)
+Peasant::Peasant(const string& name_, Point location_)
     : Agent(name_, location_), m_source(nullptr),
     m_destination(nullptr), m_amount(kPEASANT_INITIAL_AMOUNT),
     m_peasant_state(Peasant_State::NOT_WORKING)
@@ -110,7 +110,7 @@ void Peasant::stop() {
 
 // starts the working process
 // Throws an exception if the source is the same as the destination.
-void Peasant::start_working(Structure * source_, Structure * destination_) {
+void Peasant::start_working(shared_ptr<Structure> source_, shared_ptr<Structure> destination_) {
     Agent::stop();
     forget_work();
 

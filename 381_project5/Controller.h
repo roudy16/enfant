@@ -3,6 +3,7 @@
 
 #include <map>
 #include <string>
+#include <memory>
 
 class Agent;
 class View;
@@ -21,7 +22,9 @@ public:
 
 private:
     using Controller_fp_t = void(Controller::*)();
+    using Controller_agent_fp_t = void(Controller::*)(std::shared_ptr<Agent>);
     using Command_map_t = std::map<std::string, Controller_fp_t>;
+    using Agent_command_map_t = std::map<std::string, Controller_agent_fp_t>;
 
     // View commands from spec
     void view_default_command();
@@ -30,10 +33,10 @@ private:
     void view_pan_command();
 
     // Agent commands from spec
-    void agent_move_command();
-    void agent_work_command();
-    void agent_attack_command();
-    void agent_stop_command();
+    void agent_move_command(std::shared_ptr<Agent>);
+    void agent_work_command(std::shared_ptr<Agent>);
+    void agent_attack_command(std::shared_ptr<Agent>);
+    void agent_stop_command(std::shared_ptr<Agent>);
 
     // Whole-program commands from spec
     void status_command();
@@ -50,18 +53,17 @@ private:
     // returns nullptr otherwise
     Controller_fp_t get_view_program_command(const std::string& command);
     // get_agent_command additionally reads in a string
-    Controller_fp_t get_agent_command();
-    Controller_fp_t get_command_helper(Command_map_t& commands,
-                                       const std::string& command);
+    Controller_agent_fp_t get_agent_command();
 
     // Containers for user command function pointers
+    Agent_command_map_t m_agent_commands;
     Command_map_t m_view_commands;
-    Command_map_t m_agent_commands;
     Command_map_t m_program_commands;
 
-    // Allow access to current View and Agent from within command functions
-    View* mp_view;
-    Agent* mp_current_agent;
+    //template<typename C>
+    //C::mapped_type get_command_helper(C& commands, const std::string& command);
+    Agent_command_map_t::mapped_type get_command_helper(Agent_command_map_t&, const std::string&);
+    Command_map_t::mapped_type get_command_helper(Command_map_t&, const std::string&);
 
     // disallow copy/move construction or assignment
     Controller(const Controller&) = delete;
@@ -69,5 +71,16 @@ private:
     Controller(Controller&&) = delete;
     Controller& operator= (Controller&&) = delete;
 };
+
+//template<typename C>
+//C::mapped_type Controller::get_command_helper(C& commands, const std::string& command) {
+    //auto iter = commands.find(command);
+
+    //if (iter == commands.end()) {
+        //return nullptr;
+    //}
+
+    //return iter->second;
+//}
 
 #endif // CONTROLLER_H

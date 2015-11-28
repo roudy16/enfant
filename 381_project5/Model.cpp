@@ -39,10 +39,6 @@ Model::Model() : m_time(0)
 }
 
 Model::~Model() {
-    // destroy all objects
-    for (auto& pair : m_sim_objs) {
-        delete pair.second;
-    }
 }
 
 void Model::init() {
@@ -76,16 +72,16 @@ bool Model::is_structure_present(const string& name) const {
 }
 
 // add a new structure; assumes none with the same name
-void Model::add_structure(Structure* new_structure_ptr) {
+void Model::add_structure(shared_ptr<Structure> new_structure_ptr) {
     // Add Structure to Sim_objects container as a Sim_object*
-    m_sim_objs[new_structure_ptr->get_name()] = static_cast<Sim_object*>(new_structure_ptr);
+    m_sim_objs[new_structure_ptr->get_name()] = static_pointer_cast<Sim_object>(new_structure_ptr);
 
-    // Add Structure to Structures container as a Structure*
+    // Add Structure to Structures container as a shared_ptr<Structure>
     m_structures[new_structure_ptr->get_name()] = new_structure_ptr;
     new_structure_ptr->broadcast_current_state();
 }
 
-Structure* Model::get_structure_ptr(const string& name) const {
+shared_ptr<Structure> Model::get_structure_ptr(const string& name) const {
     auto iter = m_structures.find(name);
 
     // throw Error if structure not found
@@ -109,16 +105,28 @@ bool Model::is_agent_present(const string& name) const {
 }
 
 // add a new agent; assumes none with the same name
-void Model::add_agent(Agent* new_agent_ptr) {
-    // Add Agent to Sim_objects container as a Sim_object*
-    m_sim_objs[new_agent_ptr->get_name()] = static_cast<Sim_object*>(new_agent_ptr);
+void Model::add_agent(shared_ptr<Agent> new_agent_ptr) {
+    // Add Agent to Sim_objects container as a shared_ptr<Sim_object>
+    m_sim_objs[new_agent_ptr->get_name()] = static_pointer_cast<Sim_object>(new_agent_ptr);
 
-    // Add Agent to Structures container as an Agent*
+    // Add Agent to Structures container as an shared_ptr<Agent>
     m_agents[new_agent_ptr->get_name()] = new_agent_ptr;
     new_agent_ptr->broadcast_current_state();
 }
 
-Agent* Model::get_agent_ptr(const string& name) const {
+void Model::remove_agent(std::shared_ptr<Agent> agent_ptr) {
+    assert(agent_ptr); // assert agent_ptr not nullptr
+
+    auto agent_iter = m_agents.find(agent_ptr->get_name());
+    assert(agent_iter != m_agents.end());
+    m_agents.erase(agent_iter);
+
+    auto sim_obj_iter = m_sim_objs.find(agent_ptr->get_name());
+    assert(sim_obj_iter != m_sim_objs.end());
+    m_sim_objs.erase(sim_obj_iter);
+}
+
+shared_ptr<Agent> Model::get_agent_ptr(const string& name) const {
     auto iter = m_agents.find(name);
 
     // throw Error if structure not found
@@ -144,35 +152,13 @@ void Model::update() {
     for (auto& pair : m_sim_objs) {
         pair.second->update();
     }
-
-    // collect disappearing agents
-    vector<Agent*> disappearing_agents;
-    for (auto& pair : m_agents) {
-        if (pair.second->is_disappearing()) {
-            disappearing_agents.push_back(pair.second);
-        }
-    }
-
-    // remove disappearing agents from simulation
-    for (Agent* agent_p : disappearing_agents) {
-        const string& agent_name = agent_p->get_name();
-
-        // remove agent from Model containers
-        m_agents.erase(agent_name);
-        auto sim_obj_iter = m_sim_objs.find(agent_p->get_name());
-        assert(sim_obj_iter != m_sim_objs.end());
-        m_sim_objs.erase(sim_obj_iter);
-
-        // deallocate agent
-        delete agent_p;
-    }
 }
 
 /* View services */
 
 // Attaching a View adds it to the container and causes it to be updated
 // with all current objects'location (or other state information.
-void Model::attach(View* view_ptr) {
+void Model::attach(shared_ptr<View> view_ptr) {
     m_views.push_back(view_ptr);
 
     for (auto& p : m_sim_objs) {
@@ -182,7 +168,7 @@ void Model::attach(View* view_ptr) {
 
 // Detach the View by discarding the supplied pointer from the container of Views
 // - no updates sent to it thereafter.
-void Model::detach(View* view_ptr) {
+void Model::detach(shared_ptr<View> view_ptr) {
     auto iter = find(m_views.begin(), m_views.end(), view_ptr);
     assert(iter != m_views.end());
     m_views.erase(iter);
@@ -190,14 +176,21 @@ void Model::detach(View* view_ptr) {
 
 // notify the views about an object's location
 void Model::notify_location(const std::string& name, Point location) {
-    for (View* p : m_views) {
+    for (shared_ptr<View>& p : m_views) {
         p->update_location(name, location);
     }
 }
 
 // notify the views that an object is now gone
 void Model::notify_gone(const std::string& name) {
-    for (View* p : m_views) {
+    for (shared_ptr<View>& p : m_views) {
         p->update_remove(name);
     }
 }
+
+void Model::apply_to_all_views(void(*func)(View&)) {
+    for (shared_ptr<View> &view_ptr : m_views) {
+        func(*view_ptr);
+    }
+}
+
