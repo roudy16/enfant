@@ -86,6 +86,8 @@ void Controller::init_commands() {
     m_agent_commands["attack"] = &Controller::agent_attack_command;
     m_agent_commands["stop"] = &Controller::agent_stop_command;
 
+    m_program_commands["open"] = &Controller::open_command;
+    m_program_commands["close"] = &Controller::close_command;
     m_program_commands["status"] = &Controller::status_command;
     m_program_commands["show"] = &Controller::show_command;
     m_program_commands["go"] = &Controller::go_command;
@@ -96,30 +98,6 @@ void Controller::init_commands() {
 static void discard_rest_of_line(std::istream& is) {
     is.clear();
     is.ignore(numeric_limits<streamsize>::max(), '\n');
-}
-
-Controller::Agent_command_map_t::mapped_type Controller::get_command_helper(Agent_command_map_t& commands,
-    const std::string& command)
-{
-    auto iter = commands.find(command);
-
-    if (iter == commands.end()) {
-        return nullptr;
-    }
-
-    return iter->second;
-}
-
-Controller::Command_map_t::mapped_type Controller::get_command_helper(Command_map_t& commands,
-    const std::string& command)
-{
-    auto iter = commands.find(command);
-
-    if (iter == commands.end()) {
-        return nullptr;
-    }
-
-    return iter->second;
 }
 
 Controller::Controller_agent_fp_t Controller::get_agent_command() {
@@ -156,7 +134,8 @@ Controller::Controller_fp_t Controller::get_view_program_command(const string& c
 
 void Controller::run() {
     // setup up View
-    shared_ptr<View> view = make_shared<View>();
+    // TODO initially no Views are open
+    shared_ptr<View> view = make_shared<View>("map");
     Model::get_instance()->attach(view);
 
     init_commands(); // Fill command containers
@@ -216,31 +195,29 @@ void Controller::run() {
     cout << "Done" << endl;
 }
 
+shared_ptr<View> Controller::get_map_view() {
+    if (mp_map_view.expired()) {
+        throw Error("No map view is open!");
+    }
+
+    return mp_map_view.lock();
+}
+
 // View commands from spec
 void Controller::view_default_command() {
-    Model::get_instance()->apply_to_all_views([](View& v) { v.set_defaults(); });
-}
-
-void set_view_size_helper(int new_size, View& view) {
-    view.set_size(new_size);
-}
-
-void set_view_scale_helper(double new_scale, View& view) {
-    view.set_scale(new_scale);
-}
-
-void set_view_origin_helper(Point new_origin, View& view) {
-    view.set_origin(new_origin);
+    get_map_view()->set_defaults();
 }
 
 void Controller::view_size_command() {
+    shared_ptr<View> map_view_ptr = get_map_view();
     int new_size = read_int();
-    Model::get_instance()->apply_to_all_views_arg(new_size, &set_view_size_helper);
+    map_view_ptr->set_size(new_size);
 }
 
 void Controller::view_zoom_command() {
+    shared_ptr<View> map_view_ptr = get_map_view();
     double new_scale = read_double();
-    Model::get_instance()->apply_to_all_views_arg(new_scale, &set_view_scale_helper);
+    map_view_ptr->set_scale(new_scale);
 }
 
 static Point read_point() {
@@ -250,8 +227,9 @@ static Point read_point() {
 }
 
 void Controller::view_pan_command() {
+    shared_ptr<View> map_view_ptr = get_map_view();
     Point new_origin = read_point();
-    Model::get_instance()->apply_to_all_views_arg(new_origin, &set_view_origin_helper);
+    map_view_ptr->set_origin(new_origin);
 }
 
 void Controller::agent_move_command(shared_ptr<Agent> agent_ptr) {
@@ -298,8 +276,34 @@ void Controller::status_command() {
     Model::get_instance()->describe();
 }
 
+static shared_ptr<View> read_and_find_view() {
+    string view_name;
+    cin >> view_name;
+    // TODO error handling
+
+    return Model::get_instance()->find_view(view_name);
+}
+
+void Controller::open_command() {
+    shared_ptr<View> view_ptr = read_and_find_view();
+    if (view_ptr) {
+        throw Error("View of that name already open!");
+    }
+
+    // TODO create new view, dont forget map view weak_ptr
+}
+
+void Controller::close_command() {
+    shared_ptr<View> view_ptr = read_and_find_view();
+    if (!view_ptr) {
+        throw Error("No view of that name is open!");
+    }
+
+    Model::get_instance()->detach(view_ptr);
+}
+
 void Controller::show_command() {
-    Model::get_instance()->apply_to_all_views([](View& v) { v.draw(); });
+    Model::get_instance()->notify_draw();
 }
 
 void Controller::go_command() {

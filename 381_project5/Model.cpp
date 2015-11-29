@@ -188,9 +188,23 @@ void Model::notify_gone(const std::string& name) {
     }
 }
 
-void Model::apply_to_all_views(void(*func)(View&)) {
-    for (shared_ptr<View> &view_ptr : m_views) {
-        func(*view_ptr);
+void Model::notify_draw() {
+    for (shared_ptr<View>& p : m_views) {
+        p->draw();
     }
 }
 
+shared_ptr<View> Model::find_view(const string& name) {
+    auto iter = m_views.begin();
+    for (; iter != m_views.end(); iter++) {
+        if ((*iter)->get_name() == name) {
+            break;
+        }
+    }
+
+    if (iter == m_views.end()) {
+        return shared_ptr<View>();
+    }
+
+    return *iter;
+}

@@ -31,7 +31,7 @@ using the new settings.
 class View {
 public:
     // default constructor sets the default size, scale, and origin
-    View();
+    View(const std::string& name);
 
     // Save the supplied name and location for future use in a draw() call
     // If the name is already present,the new location replaces the previous one.
@@ -45,6 +45,8 @@ public:
 
     // Discard the saved information - drawing will show only a empty pattern
     void clear();
+
+    const std::string& get_name();
 
     // modify the display parameters
     // if the size is out of bounds will throw Error("New map size is too big!")
@@ -60,6 +62,11 @@ public:
     // set the parameters to the default values
     void set_defaults();
 
+    View() = delete;
+    View(const View&) = delete;
+    // disallow move construction or assignment
+    View(View&&) = delete;
+    View& operator= (View&&) = delete;
 private:
     using Objects_t = std::map<std::string, Point>;
     using Grid_t = std::vector<std::vector<std::vector<char>>> ;
@@ -69,14 +76,12 @@ private:
     // prints grid with axis labels
     void print_grid_helper(const Grid_t &grid);
 
+    std::string m_name;
     Objects_t m_grid_objects;
     Point m_origin;
     double m_scale;
     int m_size;
 
-    // disallow move construction or assignment
-    View(View&&) = delete;
-    View& operator= (View&&) = delete;
 };
 
 #endif // VIEW_H

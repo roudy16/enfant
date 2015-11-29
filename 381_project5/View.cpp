@@ -43,8 +43,9 @@ namespace {
     };
 }
 
-View::View() : m_origin(kDEFAULT_VIEW_ORIGINX, kDEFAULT_VIEW_ORIGINY),
-               m_scale(kDEFAULT_VIEW_SCALE), m_size(kDEFAULT_VIEW_SIZE) 
+View::View(const string& name)
+    : m_name(name), m_origin(kDEFAULT_VIEW_ORIGINX, kDEFAULT_VIEW_ORIGINY),
+      m_scale(kDEFAULT_VIEW_SCALE), m_size(kDEFAULT_VIEW_SIZE) 
 {
 }
 
@@ -166,6 +167,10 @@ void View::draw() {
 
 void View::clear() {
     m_grid_objects.clear();
+}
+
+const string& View::get_name() {
+    return m_name;
 }
 
 void View::set_size(int size_) {

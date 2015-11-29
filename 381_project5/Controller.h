@@ -39,6 +39,8 @@ private:
     void agent_stop_command(std::shared_ptr<Agent>);
 
     // Whole-program commands from spec
+    void open_command();
+    void close_command();
     void status_command();
     void show_command();
     void go_command();
@@ -46,7 +48,7 @@ private:
     void train_command();
 
     // helper to initialize command containers with string to 
-    // function pointer mappings
+    // function pointer mappingsn
     void init_commands();
 
     // Returns function pointer to associated command if it exists, 
@@ -55,15 +57,18 @@ private:
     // get_agent_command additionally reads in a string
     Controller_agent_fp_t get_agent_command();
 
+    // Returns shared_ptr to the map view if one exists, otherwise
+    // throws an Error
+    std::shared_ptr<View> get_map_view();
+
     // Containers for user command function pointers
     Agent_command_map_t m_agent_commands;
     Command_map_t m_view_commands;
     Command_map_t m_program_commands;
+    std::weak_ptr<View> mp_map_view;
 
-    //template<typename C>
-    //C::mapped_type get_command_helper(C& commands, const std::string& command);
-    Agent_command_map_t::mapped_type get_command_helper(Agent_command_map_t&, const std::string&);
-    Command_map_t::mapped_type get_command_helper(Command_map_t&, const std::string&);
+    template<typename C, typename MT = C::mapped_type>
+    MT get_command_helper(C& commands, const std::string& command);
 
     // disallow copy/move construction or assignment
     Controller(const Controller&) = delete;
@@ -72,15 +77,15 @@ private:
     Controller& operator= (Controller&&) = delete;
 };
 
-//template<typename C>
-//C::mapped_type Controller::get_command_helper(C& commands, const std::string& command) {
-    //auto iter = commands.find(command);
+template<typename C, typename MT>
+MT Controller::get_command_helper(C& commands, const std::string& command) {
+    C::iterator iter = commands.find(command);
 
-    //if (iter == commands.end()) {
-        //return nullptr;
-    //}
+    if (iter == commands.end()) {
+        return nullptr;
+    }
 
-    //return iter->second;
-//}
+    return iter->second;
+}
 
 #endif // CONTROLLER_H

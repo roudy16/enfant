@@ -35,6 +35,7 @@ Implemented as a Singleton
 
 
 class Model {
+
 public:
     // disallow copy/move construction or assignment
     Model(const Model&) = delete;
@@ -84,16 +85,17 @@ public:
     void notify_location(const std::string& name, Point location);
     // notify the views that an object is now gone
     void notify_gone(const std::string& name);
-
-    void apply_to_all_views(void(*func)(View&));
-
-    template<typename T>
-    void apply_to_all_views_arg(T arg, void(*func)(T, View&));
+    // notify the views to draw themselves
+    void notify_draw();
+    // Returns shared_ptr to View with name, returns empty ptr otherwise
+    std::shared_ptr<View> find_view(const std::string& name);
 
     // class used to deallocate Model
     friend class Model_destroyer;
 
 private:
+    using Views_t = std::vector<std::shared_ptr<View>>;
+
     // create the initial objects
     Model();
     // destroy all objects
@@ -114,15 +116,8 @@ private:
     std::map<const std::string, std::shared_ptr<Sim_object>> m_sim_objs;
     std::map<const std::string, std::shared_ptr<Agent>> m_agents;
     std::map<const std::string, std::shared_ptr<Structure>> m_structures;
-    std::vector<std::shared_ptr<View>> m_views;
+    Views_t m_views;
     int m_time;
 };
-
-template<typename T>
-void Model::apply_to_all_views_arg(T arg, void(*func)(T, View&)) {
-    for (auto view_ptr : m_views) {
-        func(arg, *view_ptr);
-    }
-}
 
 #endif // MODEL_H
