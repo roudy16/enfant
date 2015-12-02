@@ -29,6 +29,8 @@ using the new settings.
 */
 
 
+// Map is an abstract base class for Views that draw a visual representation 
+// of some area of the world
 class Map : public View {
 public:
     // Save the supplied name and location for future use in a draw() call
@@ -41,12 +43,6 @@ public:
     // Discard the saved information - drawing will show only a empty pattern
     void clear() override;
 
-    Map() = delete;
-    Map(const Map&) = delete;
-    Map& operator= (const Map&) = delete;
-    Map(Map&&) = delete;
-    Map& operator= (Map&&) = delete;
-
 protected:
     using Grid_t = std::vector<std::vector<std::vector<char>>> ;
     using Offgrid_objs_t = std::vector<const std::string*>;
@@ -57,20 +53,30 @@ protected:
     };
 
     // Constructor sets the name and default size, scale, and origin
-    Map(const std::string& name, const Point& origin, double scale, int size);
+    Map(const std::string& name, const Point& origin);
 
+    // returns reference to Map's origin Point
+    const Point& get_origin() const;
+
+    // any values are legal for the origin
+    void set_origin(const Point& origin);
+
+    virtual double get_scale() const = 0;
+
+    virtual int get_size() const = 0;
+
+    // Populates a grid that represents an area of the world with representations
+    // of objects 
     Grid_info generate_grid_info();
-    void print_grid_helper(const Grid_t &grid);
 
-    Point m_origin;
-    double m_scale;
-    int m_size;
+    void print_grid_helper(const Grid_t &grid);
 
 private:
     using Objects_t = std::map<std::string, Point>;
 
     bool get_subscripts(int &ix, int &iy, Point location);
 
+    Point m_origin;
     Objects_t m_grid_objects;
 };
 
@@ -87,9 +93,6 @@ public:
     // If scale is not postive, will throw Error("New map scale must be positive!");
     void set_scale(double scale_);
 
-    // any values are legal for the origin
-    void set_origin(Point origin_);
-
     // set the parameters to the default values
     void set_defaults();
 
@@ -100,6 +103,13 @@ public:
     World_map& operator= (const World_map&) = delete;
     World_map(World_map&&) = delete;
     World_map& operator= (World_map&&) = delete;
+
+private:
+    double get_scale() const override;
+    int get_size() const override;
+
+    double m_scale;
+    int m_size;
 };
 
 class Local_map : public Map {
@@ -115,6 +125,10 @@ public:
     Local_map& operator= (const Local_map&) = delete;
     Local_map(Local_map&&) = delete;
     Local_map& operator= (Local_map&&) = delete;
+
+private:
+    double get_scale() const override;
+    int get_size() const override;
 };
 
 #endif // VIEWS_H

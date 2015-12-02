@@ -1,0 +1,7 @@
+NOTES TO SELF FOR PROJECT 5:
+
+- use try blocks when doing stuff than can throw an exception, missed this in P4.
+- Ensure functions are defined in order.
+- See course materials on EOF
+- Don't add flexibility that isn't needed...how to know if it's needed?
+- Review comments and ensure they are still relevant.

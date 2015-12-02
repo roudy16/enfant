@@ -42,6 +42,10 @@ void View::update_amount(const string& name, double amount)
 {
 }
 
+void View::update_remove(const string& name)
+{
+}
+
 void View::clear()
 {
 }

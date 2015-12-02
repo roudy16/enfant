@@ -48,8 +48,8 @@ namespace {
     };
 }
 
-Map::Map(const std::string& name, const Point& origin, double scale, int size)
-    : View(name), m_origin(origin), m_scale(scale), m_size(size) 
+Map::Map(const std::string& name, const Point& origin)
+    : View(name), m_origin(origin)
 {
 }
 
@@ -71,7 +71,7 @@ void Map::update_remove(const std::string& name) {
 
 Map::Grid_info Map::generate_grid_info() {
     // Holds any objects found to be off the grid
-    Grid_info grid_info{ Grid_t(m_size, vector<vector<char>>(m_size, vector<char> {'.', ' '})),
+    Grid_info grid_info{ Grid_t(get_size(), vector<vector<char>>(get_size(), vector<char> {'.', ' '})),
                          Offgrid_objs_t() };
 
     // Add objects to the grid to be drawn
@@ -107,19 +107,19 @@ void Map::print_grid_helper(const Grid_t &grid) {
     cout.precision(0);
 
     // Print Grid
-    for (int i = m_size - 1; i >= 0; i--) {
+    for (int i = get_size() - 1; i >= 0; i--) {
         // Y-axis labels every 3 lines
         if (i % 3 != 0) {
             cout << "    "; // leading spaces when no axis label
         }
         else {
-            cout << setw(4) << m_origin.y + m_scale * static_cast<double>(i);
+            cout << setw(4) << m_origin.y + get_scale() * static_cast<double>(i);
         }
 
         cout << ' '; // One space between label and grid items
 
         // Print current grid row
-        for (int j = 0; j < m_size; j++) {
+        for (int j = 0; j < get_size(); j++) {
             cout << grid[i][j][0] << grid[i][j][1];
         }
 
@@ -127,8 +127,8 @@ void Map::print_grid_helper(const Grid_t &grid) {
     }
 
     // X-axis labels
-    for (int i = 0; i < m_size; i = i + 3) {
-        cout << "  " << setw(4) << m_origin.x + m_scale * static_cast<double>(i);
+    for (int i = 0; i < get_size(); i = i + 3) {
+        cout << "  " << setw(4) << m_origin.x + get_scale() * static_cast<double>(i);
     }
     cout << endl;
 }
@@ -152,6 +152,14 @@ void Map::clear() {
     m_grid_objects.clear();
 }
 
+const Point& Map::get_origin() const {
+    return m_origin;
+}
+
+void Map::set_origin(const Point& origin) {
+    m_origin = origin;
+}
+
 
 // Calculate the cell subscripts corresponding to the supplied location parameter, 
 // using the current size, scale, and origin of the display. 
@@ -162,14 +170,14 @@ void Map::clear() {
 bool Map::get_subscripts(int &ix, int &iy, Point location)
 {
     // adjust with origin and scale
-    Cartesian_vector subscripts = (location - m_origin) / m_scale;
+    Cartesian_vector subscripts = (location - m_origin) / get_scale();
     // truncate coordinates to integer after taking the floor
     // floor function will return the largest integer smaller than the supplied value
     // even for negative values, so -0.05 => -1., which will be outside the array.
     ix = int(floor(subscripts.delta_x));
     iy = int(floor(subscripts.delta_y));
     // if out of range, return false
-    if ((ix < 0) || (ix >= m_size) || (iy < 0) || (iy >= m_size)) {
+    if ((ix < 0) || (ix >= get_size()) || (iy < 0) || (iy >= get_size())) {
         return false;
     }
     else {
@@ -178,8 +186,8 @@ bool Map::get_subscripts(int &ix, int &iy, Point location)
 }
 
 World_map::World_map(const string& name) 
-    : Map(name, Point(kDEFAULT_MAP_ORIGINX, kDEFAULT_MAP_ORIGINY),
-          kDEFAULT_MAP_SCALE, kDEFAULT_MAP_SIZE)
+    : Map(name, Point(kDEFAULT_MAP_ORIGINX, kDEFAULT_MAP_ORIGINY)),
+      m_scale(kDEFAULT_MAP_SCALE), m_size(kDEFAULT_MAP_SIZE)
 {
 }
 
@@ -192,7 +200,7 @@ void World_map::draw() {
     cout << setprecision(2);
 
     // Print current Map settings
-    cout << "Display size: " << m_size << ", scale: " << m_scale << ", origin: " << m_origin << endl;
+    cout << "Display size: " << m_size << ", scale: " << m_scale << ", origin: " << get_origin() << endl;
 
     Grid_info grid_info = generate_grid_info();
 
@@ -228,20 +236,22 @@ void World_map::set_scale(double scale_) {
     m_scale = scale_;
 }
 
-void World_map::set_origin(Point origin_) {
-    m_origin = origin_;
-}
-
 void World_map::set_defaults() {
-    m_origin.x = kDEFAULT_MAP_ORIGINX;
-    m_origin.y = kDEFAULT_MAP_ORIGINY;
+    set_origin(Point(kDEFAULT_MAP_ORIGINX, kDEFAULT_MAP_ORIGINY));
     m_scale = kDEFAULT_MAP_SCALE;
     m_size = kDEFAULT_MAP_SIZE;
 }
 
+double World_map::get_scale() const {
+    return m_scale;
+}
+
+int World_map::get_size() const {
+    return m_size;
+}
+
 Local_map::Local_map(const string& name) 
-    : Map(name, Point(kDEFAULT_MAP_ORIGINX, kDEFAULT_MAP_ORIGINY),
-          kDEFAULT_MAP_SCALE, kDEFAULT_MAP_SIZE)
+    : Map(name, Point(kDEFAULT_MAP_ORIGINX, kDEFAULT_MAP_ORIGINY))
 {
 }
 
@@ -254,7 +264,9 @@ void Local_map::draw() {
     cout << setprecision(2);
 
     // Print current Map settings
-    cout << "Display size: " << m_size << ", scale: " << m_scale << ", origin: " << m_origin << endl;
+    cout << "Display size: " << get_size()
+         << ", scale: " << get_scale()
+         << ", origin: " << get_origin() << endl;
 
     Grid_info grid_info = generate_grid_info();
 
@@ -268,8 +280,19 @@ void Local_map::update_location(const string& name, Point location) {
     Map::update_location(name, location);
 
     // if the name of the updated object is the same as the focus of this
-    // map then update this map's origin to the focus's new location
+    // map then update this map's origin to the focus's new location plus
+    // the displacement from the origin to the center of the map
     if (get_name() == name) {
-        m_origin = location;
+        const Cartesian_vector displacement = -(get_size() / 2.0) * get_scale();
+        set_origin(location + displacement);
     }
 }
+
+double Local_map::get_scale() const {
+    return kDEFAULT_LOCALMAP_SCALE;
+}
+
+int Local_map::get_size() const {
+    return kDEFAULT_LOCALMAP_SIZE;
+}
+
