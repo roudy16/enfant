@@ -6,7 +6,7 @@ LFLAGS = -g
 OBJS = p5_main.o Model.o View.o Controller.o Views.o
 OBJS += Sim_object.o Structure.o Moving_object.o Agent.o
 OBJS += Farm.o Town_Hall.o
-OBJS += Peasant.o Soldier.o
+OBJS += Peasant.o Warriors.o
 OBJS += Agent_factory.o Structure_factory.o
 OBJS += Geometry.o Utility.o
 PROG = proj5exe
@@ -49,13 +49,13 @@ Agent.o: Agent.cpp Agent.h Model.h Moving_object.h Sim_object.h Geometry.h Utili
 Peasant.o: Peasant.cpp Peasant.h Agent.h Moving_object.h Sim_object.h Geometry.h Utility.h
 	$(CC) $(CFLAGS) Peasant.cpp
 
-Soldier.o: Soldier.cpp Soldier.h Agent.h Moving_object.h Sim_object.h Geometry.h Utility.h
-	$(CC) $(CFLAGS) Soldier.cpp
+Warriors.o: Warriors.cpp Warriors.h Agent.h Moving_object.h Sim_object.h Geometry.h Utility.h
+	$(CC) $(CFLAGS) Warriors.cpp
 
 Moving_object.o: Moving_object.cpp Moving_object.h Geometry.h Utility.h
 	$(CC) $(CFLAGS) Moving_object.cpp
 
-Agent_factory.o: Agent_factory.cpp Agent_factory.h Peasant.h Soldier.h Agent.h Geometry.h Utility.h
+Agent_factory.o: Agent_factory.cpp Agent_factory.h Peasant.h Warriors.h Agent.h Geometry.h Utility.h
 	$(CC) $(CFLAGS) Agent_factory.cpp
 
 Structure_factory.o: Structure_factory.cpp Structure_factory.h Farm.h Town_Hall.h Structure.h Geometry.h Utility.h
