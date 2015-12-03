@@ -30,14 +30,23 @@ public:
     // return true if this agent is Alive or Disappearing
     bool is_alive() const { return m_alive_state == Alive_State::ALIVE; }
 
-    // return this Agent's location
-    Point get_location() const override;
-
     // return Agent's health
     int get_health() const;
 
     // return true if this Agent is in motion
     bool is_moving() const;
+
+    // return this Agent's location
+    Point get_location() const override;
+
+    // update the moving state and Agent state of this object.
+    void update() override;
+
+    // output information about the current state
+    void describe() const override;
+
+    // ask Model to broadcast our current state to all Views
+    void broadcast_current_state() const override;
 
     // tell this Agent to start moving to location destination_
     virtual void move_to(Point destination_);
@@ -50,15 +59,6 @@ public:
     // A derived class can override this function.
     // The function lose_health is called to handle the effect of the attack.
     virtual void take_hit(int attack_strength, std::shared_ptr<Agent> &attacker_ptr);
-
-    // update the moving state and Agent state of this object.
-    void update() override;
-
-    // output information about the current state
-    void describe() const override;
-
-    // ask Model to broadcast our current state to all Views
-    void broadcast_current_state() const override;
 
     /* Fat Interface for derived classes */
     // Throws exception that an Agent cannot work.
@@ -80,7 +80,6 @@ private:
     Moving_object m_moving_obj;
     int m_health;
     Alive_State m_alive_state;
-
 };
 
 #endif // AGENT_H

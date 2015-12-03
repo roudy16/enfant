@@ -18,17 +18,17 @@ public:
 
     ~Farm() override;
 
-    // returns the specified amount, or the remaining amount, whichever is less,
-    // and deducts that amount from the amount on hand
-    double withdraw(double amount_to_get) override;
-
-    double get_amount() const override;
-
     // update adds the production amount to the stored amount
     void update() override;
 
     // output information about the current state
     void describe() const override;
+
+    // returns the specified amount, or the remaining amount, whichever is less,
+    // and deducts that amount from the amount on hand
+    double withdraw(double amount_to_get) override;
+
+    double get_amount() const override;
 
     // disallow copy/move construction or assignment and default ctor
     Farm() = delete;

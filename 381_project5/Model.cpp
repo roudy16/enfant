@@ -148,6 +148,10 @@ shared_ptr<Agent> Model::get_agent_ptr(const string& name) const {
     return iter->second;
 }
 
+shared_ptr<Agent> Model::get_closest_agent_to_obj(shared_ptr<Sim_object>&) {
+
+}
+
 // tell all objects to describe themselves to the console
 void Model::describe() const {
     for (auto& pair : m_sim_objs) {

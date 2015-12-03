@@ -22,8 +22,14 @@ public:
 
     ~Peasant();
 
+    // ask Model to broadcast our current state to all Views
+    void broadcast_current_state() const override;
+
     // implement Peasant behavior
     void update() override;
+
+    // output information about the current state
+    void describe() const override;
 
     // overridden to suspend working behavior
     void move_to(Point dest) override;
@@ -35,12 +41,6 @@ public:
     // Throws an exception if the source is the same as the destination.
     void start_working(std::shared_ptr<Structure>& source_, 
                        std::shared_ptr<Structure>& destination_) override;
-
-    // ask Model to broadcast our current state to all Views
-    void broadcast_current_state() const override;
-
-    // output information about the current state
-    void describe() const override;
 
 private:
     enum class Peasant_State { NOT_WORKING, DEPOSITING, COLLECTING, INBOUND, OUTBOUND };

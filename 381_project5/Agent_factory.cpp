@@ -1,6 +1,6 @@
 #include "Agent_factory.h"
 #include "Agent.h"
-#include "Soldier.h"
+#include "Warriors.h"
 #include "Peasant.h"
 #include "Geometry.h"
 #include "Utility.h"

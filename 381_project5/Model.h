@@ -61,6 +61,8 @@ public:
     void add_structure(std::shared_ptr<Structure>);
     // will throw Error("Structure not found!") if no structure of that name
     std::shared_ptr<Structure> get_structure_ptr(const std::string& name) const;
+    // returns pointer to closest Structure to passed in object, empty pointer otherwise
+    std::shared_ptr<Structure> get_closest_structure_to_obj(std::shared_ptr<Sim_object>&);
 
     // is there an agent with this name?
     bool is_agent_present(const std::string& name) const;
@@ -70,7 +72,9 @@ public:
     void remove_agent(std::shared_ptr<Agent> agent_ptr);
     // will throw Error("Agent not found!") if no agent of that name
     std::shared_ptr<Agent> get_agent_ptr(const std::string& name) const;
-    
+    // returns pointer to closest Agent to passed in object, empty pointer otherwise
+    std::shared_ptr<Agent> get_closest_agent_to_obj(std::shared_ptr<Sim_object>&);
+
     // tell all objects to describe themselves to the console
     void describe() const;
     // increment the time, and tell all objects to update themselves

@@ -1,0 +1,172 @@
+<diagram program="umletino" version="14.0"><zoom_level>10</zoom_level><element><id>UMLClass</id><coordinates><x>1161</x><y>0</y><w>270</w><h>200</h></coordinates><panel_attributes>/View/
+--
+string m_name
+--
+/+ virtual update_location()/
+/+ virtual update_health()/
+/+ virtual update_amount()/
+/+ virtual update_remove()/
+/+ virtual clear()/
++ draw()
++ string get_name()
+/# virtual draw_header()/
+/# virtual draw_body() = 0/
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1311</x><y>190</y><w>30</w><h>80</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;60</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1501</x><y>280</y><w>280</w><h>240</h></coordinates><panel_attributes>/Map/
+--
+Point m_origin
+Map_objects_t m_grid_objects
+--
+/+ update_location() override/
+/+ update_remove() override/
+/+ clear() override/
+/# draw_header() override/
+# get_origin() const
+/# virtual set_origin()/
+/# virtual get_scale() = 0/
+/# virtual get_size() = 0/
+# generate_grid_info()
+# print_grid_helper()
+- get_subscripts()
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1311</x><y>240</y><w>270</w><h>30</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>250;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1551</x><y>240</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1711</x><y>580</y><w>270</w><h>180</h></coordinates><panel_attributes>World_map
+--
+double m_scale
+int m_size
+--
+/+ set_origin() override/
++ set_size()
++ set_scale()
++ set_defaults()
+/- draw_body() override/
+/- get_scale() override/
+/- get_size() override/</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1631</x><y>510</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>Relation</id><coordinates><x>1631</x><y>550</y><w>230</w><h>30</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>210;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1831</x><y>550</y><w>30</w><h>50</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;30;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1401</x><y>580</y><w>270</w><h>120</h></coordinates><panel_attributes>Local_map
+--
+/no member variables/
+--
+/+ update_location() override/
+/- draw_body() override/
+/- get_scale() override/
+/- get_size() override/</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1551</x><y>550</y><w>110</w><h>30</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>90;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1551</x><y>550</y><w>30</w><h>50</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;30;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>781</x><y>290</y><w>280</w><h>130</h></coordinates><panel_attributes>/Status/
+--
+Status_objects_t m_objects
+--
+/+ update_remove() override/
+/+ clear() override/
+# update_status()
+/- draw_body() override/
+group=2</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>981</x><y>560</y><w>270</w><h>90</h></coordinates><panel_attributes>Health_status
+--
+/no member variables/
+--
+/+ update_health() override/
+/- draw_header() override/
+group=2</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>661</x><y>560</y><w>270</w><h>90</h></coordinates><panel_attributes>Amount_status
+--
+/no member variables/
+--
+/+ update_amount() override/
+/- draw_header() override/
+group=2</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>941</x><y>410</y><w>30</w><h>110</h></coordinates><panel_attributes>lt=&lt;&lt;-
+group=2</panel_attributes><additional_attributes>10;10;10;90</additional_attributes></element><element><id>Relation</id><coordinates><x>851</x><y>490</y><w>210</w><h>30</h></coordinates><panel_attributes>lt=-
+group=2</panel_attributes><additional_attributes>190;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1031</x><y>490</y><w>30</w><h>90</h></coordinates><panel_attributes>lt=-
+group=2</panel_attributes><additional_attributes>10;70;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>851</x><y>490</y><w>30</w><h>90</h></coordinates><panel_attributes>lt=-
+group=2</panel_attributes><additional_attributes>10;70;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>991</x><y>240</y><w>350</w><h>30</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>330;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>991</x><y>240</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=-
+group=2</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1161</x><y>770</y><w>290</w><h>130</h></coordinates><panel_attributes>/Sim_object/
+--
+string m_name
+--
++ get_name()
+/+ virtual broadcast_current_state() const = 0/
+/+ virtual get_location() const = 0/
+/+ virtual describe() const = 0/
+/+ virtual update() = 0/
+
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1411</x><y>960</y><w>290</w><h>160</h></coordinates><panel_attributes>/Structure/
+--
+Point m_location
+--
+/+ get_location() const override/
+/+ update() override/
+/+ describe() const override/
+/+ broadcast_current_state() const override/
+/+ virtual withdraw()/
+/+ virtual deposit()/
+/+ virtual get_amount() const/</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>911</x><y>960</y><w>290</w><h>280</h></coordinates><panel_attributes>/Agent/
+--
+Moving_object m_moving_obj
+int m_health
+Alive_state m_alive_state
+--
++ is_alive() const
++ get_health()
++ is_moving()
+/+ get_location() const override/
+/+ update() override/
+/+ describe() const override/
+/+ broadcast_current_state() const override/
+/+ virtual move_to()/
+/+ virtual stop()/
+/+ virtual take_hit()/
+/+ virtual start_working()/
+/+ virtual start_attacking()/
+# lose_health()
+
+</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1301</x><y>890</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;40</additional_attributes></element><element><id>Relation</id><coordinates><x>1301</x><y>920</y><w>220</w><h>30</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;10;200;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1111</x><y>920</y><w>220</w><h>30</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;10;200;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1111</x><y>920</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1491</x><y>920</y><w>30</w><h>60</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;40;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1411</x><y>1320</y><w>290</w><h>160</h></coordinates><panel_attributes>Farm
+--
+double m_food_amount
+double m_production_rate
+--
+/+ update() override/
+/+ describe() const override/
+/+ withdraw() override/
+/+ get_amount() const override/</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>1761</x><y>1320</y><w>290</w><h>160</h></coordinates><panel_attributes>Town_Hall
+--
+double m_food_amount
+double m_tax_rate
+--
+/+ update() override/
+/+ describe() const override/
+/+ deposit() override/</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1641</x><y>1110</y><w>30</w><h>170</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;150</additional_attributes></element><element><id>Relation</id><coordinates><x>1551</x><y>1250</y><w>330</w><h>30</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>310;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1551</x><y>1250</y><w>30</w><h>90</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;70;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1851</x><y>1250</y><w>30</w><h>90</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;70;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>1031</x><y>1320</y><w>290</w><h>280</h></coordinates><panel_attributes>Peasant
+--
+shared_ptr&lt;Structure&gt; m_source
+shared_ptr&lt;Structure&gt; m_source
+double m_amount
+Peasant_State m_peasant_state
+--
+/+ update() override/
+/+ describe() const override/
+/+ broadcast_current_state() const override/
+/+ move_to() override/
+/+ stop() override/
+/+ take_hit() override/
+/+ start_working() override/
+- is_working()
+- forget_word()
+- stop_working()</panel_attributes><additional_attributes></additional_attributes></element><element><id>Relation</id><coordinates><x>1031</x><y>1230</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=&lt;&lt;-</panel_attributes><additional_attributes>10;10;10;50</additional_attributes></element><element><id>Relation</id><coordinates><x>881</x><y>1270</y><w>280</w><h>30</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>260;10;10;10</additional_attributes></element><element><id>Relation</id><coordinates><x>1131</x><y>1270</y><w>30</w><h>70</h></coordinates><panel_attributes>lt=-</panel_attributes><additional_attributes>10;50;10;10</additional_attributes></element><element><id>UMLClass</id><coordinates><x>681</x><y>1320</y><w>290</w><h>280</h></coordinates><panel_attributes>Soldier
+--
+weak_ptr&lt;Agent&gt; m_target
+double m_attack_range
+int m_attack_strength
+Soldier_State m_soldier_state
+--
+/+ update() override/
+/+ describe() const override/
+/+ stop() override/
+/+ take_hit() override/
+/+ start_attacking() override/
+- stop_attacking()
+- engage_new_target()</panel_attributes><additional_attributes></additional_attributes></element><element><id>UMLClass</id><coordinates><x>301</x><y>1160</y><w>290</w><h>280</h></coordinates><panel_attributes>/Infantry/
+--
+weak_ptr&lt;Agent&gt; m_target
+Infantry_State m_infantry_state
+--
+/+ update() override/
+/+ describe() const override/
+/+ stop() override/
+/+ take_hit() override/
+/+ start_attacking() override/
+/+ virtual get_range() const = 0/
+/+ virtual get_attack_strength() const = 0/
+- stop_attacking()
+- engage_new_target()</panel_attributes><additional_attributes></additional_attributes></element></diagram>
