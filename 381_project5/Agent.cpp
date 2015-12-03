@@ -24,6 +24,11 @@ Point Agent::get_location() const {
     return m_moving_obj.get_current_location();
 }
 
+// return Agent's health
+int Agent::get_health() const {
+    return m_health;
+}
+
 bool Agent::is_moving() const {
     return m_moving_obj.is_currently_moving();
 }
@@ -50,7 +55,7 @@ void Agent::stop() {
     cout << get_name() << ": I'm stopped" << endl;
 }
 
-void Agent::take_hit(int attack_strength, shared_ptr<Agent> attacker_ptr) {
+void Agent::take_hit(int attack_strength, shared_ptr<Agent> &attacker_ptr) {
     lose_health(attack_strength);
 }
 
@@ -61,7 +66,8 @@ void Agent::update() {
         if (m_moving_obj.is_currently_moving()) {
             // update position and have Model notify View
             bool has_arrived = m_moving_obj.update_location();
-            Model::get_instance()->notify_location(get_name(), m_moving_obj.get_current_location());
+
+            Model::get_instance()->notify_location(get_name(), get_location());
 
             if (has_arrived) {
                 cout << get_name() << ": I'm there!" << endl;
@@ -105,17 +111,18 @@ void Agent::describe() const {
 void Agent::broadcast_current_state() const {
     assert(m_alive_state == Alive_State::ALIVE);
     // Tell View where agents are
-    Model::get_instance()->notify_location(get_name(), m_moving_obj.get_current_location());
+    Model::get_instance()->notify_location(get_name(), get_location());
+    Model::get_instance()->notify_health(get_name(), static_cast<double>(m_health));
 }
 
 /* Fat Interface for derived classes */
 // Throws exception that an Agent cannot work.
-void Agent::start_working(shared_ptr<Structure> dst, shared_ptr<Structure> src) {
+void Agent::start_working(shared_ptr<Structure>& dst, shared_ptr<Structure>& src) {
     throw Error(get_name() + ": Sorry, I can't work!");
 }
 
 // Throws exception that an Agent cannot attack.
-void Agent::start_attacking(shared_ptr<Agent> target) {
+void Agent::start_attacking(shared_ptr<Agent>& target) {
     throw Error(get_name() + ": Sorry, I can't attack!");
 }
 
@@ -130,9 +137,10 @@ void Agent::lose_health(int attack_strength) {
         m_moving_obj.stop_moving();
         Model::get_instance()->notify_gone(get_name());
         cout << get_name() << ": Arrggh!" << endl;
-        Model::get_instance()->remove_agent(shared_from_this());
+        Model::get_instance()->notify_location(get_name(), get_location());
     }
     else {
+        Model::get_instance()->notify_health(get_name(), static_cast<double>(m_health));
         cout << get_name() << ": Ouch!" << endl;
     }
 }

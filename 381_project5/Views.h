@@ -55,35 +55,39 @@ protected:
     // Constructor sets the name and default size, scale, and origin
     Map(const std::string& name, const Point& origin);
 
+    void draw_header() override;
+    // Populates a grid that represents an area of the world with representations
+    // of objects 
+    Grid_info generate_grid_info();
+    // Prints the grid along with axis label info
+    void print_grid_helper(const Grid_t &grid);
+
     // returns reference to Map's origin Point
     const Point& get_origin() const;
 
     // any values are legal for the origin
-    void set_origin(const Point& origin);
+    virtual void set_origin(const Point& origin);
 
     virtual double get_scale() const = 0;
 
     virtual int get_size() const = 0;
 
-    // Populates a grid that represents an area of the world with representations
-    // of objects 
-    Grid_info generate_grid_info();
-
-    void print_grid_helper(const Grid_t &grid);
-
 private:
-    using Objects_t = std::map<std::string, Point>;
+    using Map_objects_t = std::map<std::string, Point>;
 
     bool get_subscripts(int &ix, int &iy, Point location);
 
     Point m_origin;
-    Objects_t m_grid_objects;
+    Map_objects_t m_grid_objects;
 };
 
 class World_map : public Map {
 public:
     World_map(const std::string& name);
     virtual ~World_map();
+
+    // any values are legal for the origin
+    void set_origin(const Point& origin) override;
 
     // modify the display parameters
     // if the size is out of bounds will throw Error("New map size is too big!")
@@ -96,8 +100,6 @@ public:
     // set the parameters to the default values
     void set_defaults();
 
-    void draw() override;
-
     World_map() = delete;
     World_map(const World_map&) = delete;
     World_map& operator= (const World_map&) = delete;
@@ -105,6 +107,8 @@ public:
     World_map& operator= (World_map&&) = delete;
 
 private:
+    void draw_body() override;
+
     double get_scale() const override;
     int get_size() const override;
 
@@ -118,7 +122,6 @@ public:
     virtual ~Local_map();
 
     void update_location(const std::string& name, Point location) override;
-    void draw() override;
 
     Local_map() = delete;
     Local_map(const Local_map&) = delete;
@@ -127,8 +130,41 @@ public:
     Local_map& operator= (Local_map&&) = delete;
 
 private:
+    void draw_body() override;
     double get_scale() const override;
     int get_size() const override;
+};
+
+class Status : public View {
+public:
+    void update_remove(const std::string& name) override;
+    void clear() override;
+
+protected:
+    void update_status(const std::string& name, double val);
+
+private:
+    using Status_objects_t = std::map<std::string, double>;
+
+    void draw_body() override;
+
+    Status_objects_t m_objects;
+};
+
+class Health_status : public Status {
+public:
+    void update_health(const std::string& name, double health) override;
+
+private:
+    void draw_header() override;
+};
+
+class Amount_status : public Status {
+public:
+    void update_amount(const std::string& name, double amount) override;
+
+private:
+    void draw_header() override;
 };
 
 #endif // VIEWS_H

@@ -2,6 +2,7 @@
 #include "Model.h"
 #include <iostream>
 #include <string>
+#include <memory>
 
 using namespace std;
 
@@ -26,7 +27,8 @@ void Structure::describe() const {
 
 // ask model to notify views of current state
 void Structure::broadcast_current_state() const {
-    Model::get_instance()->notify_location(get_name(), m_location);
+    Model::get_instance()->notify_location(get_name(), get_location());
+    Model::get_instance()->notify_amount(get_name(), get_amount());
 }
 
 double Structure::withdraw(double amount_to_get) {
@@ -35,4 +37,8 @@ double Structure::withdraw(double amount_to_get) {
 
 void Structure::deposit(double amount_to_give)
 {
+}
+
+double Structure::get_amount() const {
+    return 0.0;
 }

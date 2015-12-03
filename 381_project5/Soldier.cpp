@@ -55,7 +55,7 @@ void Soldier::update() {
 
     // target is in range, aim to maim!
     cout << get_name() << ": Clang!" << endl;
-    m_target->take_hit(m_attack_strength, shared_from_this());
+    m_target->take_hit(m_attack_strength, static_pointer_cast<Agent>(shared_from_this()));
 
     // If Soldier killed the target, report it, stop attacking and forget target
     if (!m_target->is_alive()) {
@@ -73,7 +73,7 @@ void Soldier::engage_new_target(shared_ptr<Agent> new_target) {
 // Make this Soldier start attacking the target Agent.
 // Throws an exception if the target is the same as this Agent,
 // is out of range, or is not alive.
-void Soldier::start_attacking(shared_ptr<Agent> target_ptr) {
+void Soldier::start_attacking(shared_ptr<Agent>& target_ptr) {
     assert(target_ptr);
 
     // Ensure soldier does not attack self
@@ -96,7 +96,7 @@ void Soldier::start_attacking(shared_ptr<Agent> target_ptr) {
 }
 
 // Overrides Agent's take_hit to counterattack when attacked.
-void Soldier::take_hit(int attack_strength, shared_ptr<Agent> attacker_ptr) {
+void Soldier::take_hit(int attack_strength, shared_ptr<Agent>& attacker_ptr) {
     Agent::lose_health(attack_strength);
 
     // check if Soldier was just killed and was attacking

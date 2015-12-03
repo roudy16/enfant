@@ -33,8 +33,11 @@ public:
 
     // starts the working process
     // Throws an exception if the source is the same as the destination.
-    void start_working(std::shared_ptr<Structure> source_, 
-                       std::shared_ptr<Structure> destination_) override;
+    void start_working(std::shared_ptr<Structure>& source_, 
+                       std::shared_ptr<Structure>& destination_) override;
+
+    // ask Model to broadcast our current state to all Views
+    void broadcast_current_state() const override;
 
     // output information about the current state
     void describe() const override;

@@ -82,9 +82,13 @@ public:
     // - no updates sent to it thereafter.
     void detach(std::shared_ptr<View>);
     // notify the views about an object's location
-    void notify_location(const std::string& name, Point location);
+    void notify_location(const std::string& name, const Point& location);
     // notify the views that an object is now gone
     void notify_gone(const std::string& name);
+    // notify the views of an Agent's health
+    void notify_health(const std::string& name, double health);
+    // notify the views of a Structure's food amount
+    void notify_amount(const std::string& name, double amount);
     // notify the views to draw themselves
     void notify_draw();
     // Returns shared_ptr to View with name, returns empty ptr otherwise

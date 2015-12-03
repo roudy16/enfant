@@ -1,6 +1,7 @@
 #include "Peasant.h"
 #include "Utility.h"
 #include "Structure.h"
+#include "Model.h"
 #include <string>
 #include <iostream>
 
@@ -54,6 +55,7 @@ void Peasant::update() {
         if (recieved_amount > 0.0) {
             cout << get_name() << ": Collected " << recieved_amount << endl;
             m_amount += recieved_amount;
+            Model::get_instance()->notify_amount(get_name(), m_amount);
             m_peasant_state = Peasant_State::OUTBOUND;
             Agent::move_to(m_destination->get_location());
         }
@@ -73,6 +75,7 @@ void Peasant::update() {
         m_destination->deposit(m_amount);
         cout << get_name() << ": Deposited " << m_amount << endl;
         m_amount = 0.0;
+        Model::get_instance()->notify_amount(get_name(), m_amount);
 
         // Move to the source
         m_peasant_state = Peasant_State::INBOUND;
@@ -110,7 +113,7 @@ void Peasant::stop() {
 
 // starts the working process
 // Throws an exception if the source is the same as the destination.
-void Peasant::start_working(shared_ptr<Structure> source_, shared_ptr<Structure> destination_) {
+void Peasant::start_working(shared_ptr<Structure>& source_, shared_ptr<Structure>& destination_) {
     Agent::stop();
     forget_work();
 
@@ -144,6 +147,13 @@ void Peasant::start_working(shared_ptr<Structure> source_, shared_ptr<Structure>
             m_peasant_state = Peasant_State::OUTBOUND;
         }
     }
+}
+
+// ask Model to broadcast our current state to all Views
+void Peasant::broadcast_current_state() const {
+    // Tell View where agents are
+    Agent::broadcast_current_state();
+    Model::get_instance()->notify_amount(get_name(), m_amount);
 }
 
 // output information about the current state

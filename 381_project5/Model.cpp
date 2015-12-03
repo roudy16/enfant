@@ -175,16 +175,30 @@ void Model::detach(shared_ptr<View> view_ptr) {
 }
 
 // notify the views about an object's location
-void Model::notify_location(const std::string& name, Point location) {
+void Model::notify_location(const string& name, const Point& location) {
     for (shared_ptr<View>& p : m_views) {
         p->update_location(name, location);
     }
 }
 
 // notify the views that an object is now gone
-void Model::notify_gone(const std::string& name) {
+void Model::notify_gone(const string& name) {
     for (shared_ptr<View>& p : m_views) {
         p->update_remove(name);
+    }
+}
+
+// notify the views of an Agent's health
+void Model::notify_health(const string& name, double health) {
+    for (shared_ptr<View>& p : m_views) {
+        p->update_health(name, health);
+    }
+}
+
+// notify the views of a Structure's food amount
+void Model::notify_amount(const string& name, double amount) {
+    for (shared_ptr<View>& p : m_views) {
+        p->update_amount(name, amount);
     }
 }
 

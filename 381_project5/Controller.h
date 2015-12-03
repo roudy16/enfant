@@ -1,6 +1,7 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
+#include "Views.h"
 #include <map>
 #include <string>
 #include <memory>
@@ -59,13 +60,13 @@ private:
 
     // Returns shared_ptr to the map view if one exists, otherwise
     // throws an Error
-    std::shared_ptr<View> get_map_view();
+    std::shared_ptr<World_map> get_map_view();
 
     // Containers for user command function pointers
     Agent_command_map_t m_agent_commands;
     Command_map_t m_view_commands;
     Command_map_t m_program_commands;
-    std::weak_ptr<View> mp_map_view;
+    std::weak_ptr<World_map> mp_map_view;
 
     template<typename C, typename MT = C::mapped_type>
     MT get_command_helper(C& commands, const std::string& command);

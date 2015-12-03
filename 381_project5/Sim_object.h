@@ -3,12 +3,13 @@
 
 #include "Geometry.h"
 #include <string>
+#include <memory>
 
 /* The Sim_object class provides the interface for all of simulation objects. 
 It also stores the object's name, and has pure virtual accessor functions for 
 the object's position and other information. */
 
-class Sim_object {
+class Sim_object : public std::enable_shared_from_this<Sim_object> {
 public:
     Sim_object(const std::string& name_);
     virtual ~Sim_object();

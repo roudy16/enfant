@@ -1,5 +1,6 @@
 #include "Farm.h"
 #include "Geometry.h"
+#include "Model.h"
 #include <string>
 #include <iostream>
 #include <cmath>
@@ -26,14 +27,18 @@ double Farm::withdraw(double amount_to_get) {
     // return the max between the amount requested and the amount on hand
     double return_amount = fmin(amount_to_get, m_food_amount);
 
-    // remove return amount from the amount on hand
+    // remove return amount from the amount on hand and have Model notify Views
     m_food_amount -= return_amount;
+    Model::get_instance()->notify_amount(get_name(), m_food_amount);
+
     return return_amount;
 }
 
-//    update adds the production amount to the stored amount
+// update adds the production amount to the stored amount and tells Model to
+// notify Views
 void Farm::update() {
     m_food_amount += m_production_rate;
+    Model::get_instance()->notify_amount(get_name(), m_food_amount);
     cout << "Farm " << get_name() << " now has " << m_food_amount << endl;
 }
 

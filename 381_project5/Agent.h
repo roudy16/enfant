@@ -16,7 +16,7 @@ it becomes dead, and finally disappearing.
 
 class Structure;
 
-class Agent : public Sim_object, public std::enable_shared_from_this<Agent> {
+class Agent : public Sim_object {
 public:
     // disallow copy/move construction or assignment and default ctor
     Agent() = delete;
@@ -33,6 +33,9 @@ public:
     // return this Agent's location
     Point get_location() const override;
 
+    // return Agent's health
+    int get_health() const;
+
     // return true if this Agent is in motion
     bool is_moving() const;
 
@@ -46,7 +49,7 @@ public:
     // The attacking Agent identifies itself with its this pointer.
     // A derived class can override this function.
     // The function lose_health is called to handle the effect of the attack.
-    virtual void take_hit(int attack_strength, std::shared_ptr<Agent> attacker_ptr);
+    virtual void take_hit(int attack_strength, std::shared_ptr<Agent> &attacker_ptr);
 
     // update the moving state and Agent state of this object.
     void update() override;
@@ -59,10 +62,10 @@ public:
 
     /* Fat Interface for derived classes */
     // Throws exception that an Agent cannot work.
-    virtual void start_working(std::shared_ptr<Structure>, std::shared_ptr<Structure>);
+    virtual void start_working(std::shared_ptr<Structure>&, std::shared_ptr<Structure>&);
 
     // Throws exception that an Agent cannot attack.
-    virtual void start_attacking(std::shared_ptr<Agent>);
+    virtual void start_attacking(std::shared_ptr<Agent>&);
 
 protected:
     Agent(const std::string& name_, Point location_);

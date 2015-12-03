@@ -26,6 +26,7 @@ public:
     // fat interface for derived types
     virtual double withdraw(double amount_to_get);
     virtual void deposit(double amount_to_give);
+    virtual double get_amount() const;
 
 private:
     Point m_location;

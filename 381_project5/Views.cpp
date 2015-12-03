@@ -5,6 +5,7 @@
 #include <iostream>
 #include <iomanip>
 #include <cmath>
+#include <cassert>
 
 using namespace std;
 
@@ -67,6 +68,13 @@ void Map::update_remove(const std::string& name) {
 
     // Remove found object
     m_grid_objects.erase(iter);
+}
+
+void Map::draw_header() {
+    // Print current Map settings
+    cout << "Display size: " << get_size()
+         << ", scale: " << get_scale()
+         << ", origin: " << get_origin() << endl;
 }
 
 Map::Grid_info Map::generate_grid_info() {
@@ -191,17 +199,11 @@ World_map::World_map(const string& name)
 {
 }
 
-void World_map::draw() {
-    // Save previous output settings
-    Cout_settings_saver css;
+World_map::~World_map()
+{
+}
 
-    // Display doubles with exactly 2 digits after the decimal point
-    cout << fixed;
-    cout << setprecision(2);
-
-    // Print current Map settings
-    cout << "Display size: " << m_size << ", scale: " << m_scale << ", origin: " << get_origin() << endl;
-
+void World_map::draw_body() {
     Grid_info grid_info = generate_grid_info();
 
     // Print offgrid objects message if any
@@ -211,8 +213,10 @@ void World_map::draw() {
 
     // Print the objects that are on the grid
     print_grid_helper(grid_info.m_grid);
+}
 
-    // Restore previous output settings when function ends
+void World_map::set_origin(const Point& origin) {
+    Map::set_origin(origin);
 }
 
 void World_map::set_size(int size_) {
@@ -255,25 +259,15 @@ Local_map::Local_map(const string& name)
 {
 }
 
-void Local_map::draw() {
-    // Save previous output settings
-    Cout_settings_saver css;
+Local_map::~Local_map()
+{
+}
 
-    // Display doubles with exactly 2 digits after the decimal point
-    cout << fixed;
-    cout << setprecision(2);
-
-    // Print current Map settings
-    cout << "Display size: " << get_size()
-         << ", scale: " << get_scale()
-         << ", origin: " << get_origin() << endl;
-
+void Local_map::draw_body() {
     Grid_info grid_info = generate_grid_info();
 
     // Print the objects that are on the grid
     print_grid_helper(grid_info.m_grid);
-
-    // Restore previous output settings when function ends
 }
 
 void Local_map::update_location(const string& name, Point location) {
@@ -283,7 +277,8 @@ void Local_map::update_location(const string& name, Point location) {
     // map then update this map's origin to the focus's new location plus
     // the displacement from the origin to the center of the map
     if (get_name() == name) {
-        const Cartesian_vector displacement = -(get_size() / 2.0) * get_scale();
+        const Cartesian_vector displacement = -(kDEFAULT_LOCALMAP_SIZE / 2.0) *
+                                                kDEFAULT_LOCALMAP_SCALE;
         set_origin(location + displacement);
     }
 }
@@ -294,5 +289,53 @@ double Local_map::get_scale() const {
 
 int Local_map::get_size() const {
     return kDEFAULT_LOCALMAP_SIZE;
+}
+
+// TODO could make template for this
+void Status::update_remove(const std::string& name) {
+    auto iter = m_objects.find(name);
+
+    // Do nothing if name not found
+    if (iter == m_objects.end()) {
+        return;
+    }
+
+    // Remove found object
+    m_objects.erase(iter);
+}
+
+void Status::clear() {
+    m_objects.clear();
+}
+
+void Status::draw_body() {
+    for (auto& obj : m_objects) {
+        cout << obj.first << ": " << obj.second << endl;
+    }
+    cout << "--------------" << endl;
+}
+
+void Status::update_status(const string& name, double val) {
+    auto obj_iter = m_objects.find(name);
+
+    assert(obj_iter != m_objects.end());
+
+    obj_iter->second = val;
+}
+
+void Health_status::update_health(const string& name, double health) {
+    update_status(name, health);
+}
+
+void Health_status::draw_header() {
+    cout << "Current Health:\n--------------" << endl;
+}
+
+void Amount_status::update_amount(const string& name, double amount) {
+    update_status(name, amount);
+}
+
+void Amount_status::draw_header() {
+    cout << "Current Amounts:\n--------------" << endl;
 }
 

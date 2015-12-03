@@ -38,20 +38,15 @@ public:
     // Save the supplied name and location for future use in a draw() call
     // If the name is already present,the new location replaces the previous one.
     virtual void update_location(const std::string& name, Point location);
-
     virtual void update_health(const std::string& name, double health);
-
     virtual void update_amount(const std::string& name, double amount);
-
-    // Remove the name and its location; no error if the name is not present.
     virtual void update_remove(const std::string& name);
-
-    // prints out the current map
-    virtual void draw() = 0;
-
-    // Discard the saved information
     virtual void clear();
 
+    // prints out the current map
+    void draw();
+
+    // returns the name of the View
     const std::string& get_name();
 
     View() = delete;
@@ -59,6 +54,12 @@ public:
     View& operator= (const View&) = delete;
     View(View&&) = delete;
     View& operator= (View&&) = delete;
+
+protected:
+    // virtual functions called when 'draw' is called, to be defined
+    // in derived classes. draw_header() does nothing in this base class
+    virtual void draw_header();
+    virtual void draw_body() = 0;
 
 private:
     std::string m_name;

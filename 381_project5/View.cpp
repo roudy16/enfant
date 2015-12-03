@@ -1,6 +1,7 @@
 #include "View.h"
 #include "Geometry.h"
 #include <iostream>
+#include <iomanip>
 
 using namespace std;
 
@@ -30,6 +31,10 @@ View::View(const string& name)
 {
 }
 
+View::~View()
+{
+}
+
 void View::update_location(const string& name, Point location)
 {
 }
@@ -44,6 +49,24 @@ void View::update_amount(const string& name, double amount)
 
 void View::update_remove(const string& name)
 {
+}
+
+void View::draw_header() {
+
+}
+
+void View::draw() {
+    // Save previous output settings
+    Cout_settings_saver css;
+
+    // Display doubles with exactly 2 digits after the decimal point
+    cout << fixed;
+    cout << setprecision(2);
+
+    draw_header();
+    draw_body();
+
+    // Restore previous output settings when function ends
 }
 
 void View::clear()

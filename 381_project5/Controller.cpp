@@ -1,6 +1,7 @@
 #include "Controller.h"
 #include "Model.h"
 #include "View.h"
+#include "Views.h"
 #include "Utility.h"
 #include "Geometry.h"
 #include "Structure_factory.h"
@@ -76,23 +77,28 @@ static bool string_is_alnum(const string& str) {
 }
 
 void Controller::init_commands() {
-    m_view_commands["default"] = &Controller::view_default_command;
-    m_view_commands["size"] = &Controller::view_size_command;
-    m_view_commands["zoom"] = &Controller::view_zoom_command;
-    m_view_commands["pan"] = &Controller::view_pan_command;
+    try {
+        m_view_commands["default"] = &Controller::view_default_command;
+        m_view_commands["size"] = &Controller::view_size_command;
+        m_view_commands["zoom"] = &Controller::view_zoom_command;
+        m_view_commands["pan"] = &Controller::view_pan_command;
 
-    m_agent_commands["move"] = &Controller::agent_move_command;
-    m_agent_commands["work"] = &Controller::agent_work_command;
-    m_agent_commands["attack"] = &Controller::agent_attack_command;
-    m_agent_commands["stop"] = &Controller::agent_stop_command;
+        m_agent_commands["move"] = &Controller::agent_move_command;
+        m_agent_commands["work"] = &Controller::agent_work_command;
+        m_agent_commands["attack"] = &Controller::agent_attack_command;
+        m_agent_commands["stop"] = &Controller::agent_stop_command;
 
-    m_program_commands["open"] = &Controller::open_command;
-    m_program_commands["close"] = &Controller::close_command;
-    m_program_commands["status"] = &Controller::status_command;
-    m_program_commands["show"] = &Controller::show_command;
-    m_program_commands["go"] = &Controller::go_command;
-    m_program_commands["build"] = &Controller::build_command;
-    m_program_commands["train"] = &Controller::train_command;
+        m_program_commands["open"] = &Controller::open_command;
+        m_program_commands["close"] = &Controller::close_command;
+        m_program_commands["status"] = &Controller::status_command;
+        m_program_commands["show"] = &Controller::show_command;
+        m_program_commands["go"] = &Controller::go_command;
+        m_program_commands["build"] = &Controller::build_command;
+        m_program_commands["train"] = &Controller::train_command;
+    }
+    catch (...) {
+        // TODO handle this
+    }
 }
 
 static void discard_rest_of_line(std::istream& is) {
@@ -195,7 +201,7 @@ void Controller::run() {
     cout << "Done" << endl;
 }
 
-shared_ptr<View> Controller::get_map_view() {
+shared_ptr<World_map> Controller::get_map_view() {
     if (mp_map_view.expired()) {
         throw Error("No map view is open!");
     }
@@ -209,13 +215,13 @@ void Controller::view_default_command() {
 }
 
 void Controller::view_size_command() {
-    shared_ptr<View> map_view_ptr = get_map_view();
+    auto map_view_ptr = get_map_view();
     int new_size = read_int();
     map_view_ptr->set_size(new_size);
 }
 
 void Controller::view_zoom_command() {
-    shared_ptr<View> map_view_ptr = get_map_view();
+    auto map_view_ptr = get_map_view();
     double new_scale = read_double();
     map_view_ptr->set_scale(new_scale);
 }
@@ -227,7 +233,7 @@ static Point read_point() {
 }
 
 void Controller::view_pan_command() {
-    shared_ptr<View> map_view_ptr = get_map_view();
+    auto map_view_ptr = get_map_view();
     Point new_origin = read_point();
     map_view_ptr->set_origin(new_origin);
 }
