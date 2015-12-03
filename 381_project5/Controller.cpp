@@ -139,18 +139,12 @@ Controller::Controller_fp_t Controller::get_view_program_command(const string& c
 }
 
 void Controller::run() {
-    // setup up View
-    // TODO initially no Views are open
-    shared_ptr<View> view = static_pointer_cast<View>(make_shared<World_map>("map"));
-    Model::get_instance()->attach(view);
-
     init_commands(); // Fill command containers
-
-    string first_word;
 
     // main program loop, exited when user enters "quit" command
     while (true) {
         try {
+            string first_word;
             cout << "\nTime " << Model::get_instance()->get_time() << ": Enter command: ";
             cin >> first_word;
 
@@ -185,6 +179,7 @@ void Controller::run() {
         catch (exception& e) {
             cout << e.what() << endl;
 
+            // TODO Kieras said this is bad, see code review for P3
             // If we've reached EOF allow program to exit normally
             if (cin.eof()) break;
 
@@ -194,9 +189,6 @@ void Controller::run() {
             cout << "Unknown exception caught!" << endl;
         }
     } // End main program loop
-
-    // Tear down View
-    Model::get_instance()->detach(view);
 
     cout << "Done" << endl;
 }
@@ -282,25 +274,50 @@ void Controller::status_command() {
     Model::get_instance()->describe();
 }
 
-static shared_ptr<View> read_and_find_view() {
+void Controller::open_command() {
     string view_name;
     cin >> view_name;
-    // TODO error handling
+    //TODO error handling
 
-    return Model::get_instance()->find_view(view_name);
-}
-
-void Controller::open_command() {
-    shared_ptr<View> view_ptr = read_and_find_view();
+    shared_ptr<View> view_ptr = Model::get_instance()->find_view(view_name);
     if (view_ptr) {
         throw Error("View of that name already open!");
     }
 
     // TODO create new view, dont forget map view weak_ptr
+
+    if (view_name == "map") {
+        shared_ptr<World_map> world_map_ptr = make_shared<World_map>("map");
+        Model::get_instance()->attach(static_pointer_cast<View>(world_map_ptr));
+        mp_map_view = weak_ptr<World_map>(world_map_ptr);
+    }
+    else if (view_name == "health") {
+        auto health_status_ptr = make_shared<Health_status>();
+        Model::get_instance()->attach(static_pointer_cast<View>(health_status_ptr));
+    }
+    else if (view_name == "amounts") {
+        auto amounts_status_ptr = make_shared<Amount_status>();
+        Model::get_instance()->attach(static_pointer_cast<View>(amounts_status_ptr));
+
+    }
+    else {
+        shared_ptr<Sim_object> obj_ptr = Model::get_instance()->get_obj_ptr(view_name);
+
+        if (!obj_ptr) {
+            throw Error("No object of that name!");
+        }
+
+        auto local_map_ptr = make_shared<Local_map>(obj_ptr->get_name());
+        Model::get_instance()->attach(static_pointer_cast<View>(local_map_ptr));
+    }
 }
 
 void Controller::close_command() {
-    shared_ptr<View> view_ptr = read_and_find_view();
+    string view_name;
+    cin >> view_name;
+    //TODO error handling
+
+    shared_ptr<View> view_ptr = Model::get_instance()->find_view(view_name);
     if (!view_ptr) {
         throw Error("No view of that name is open!");
     }

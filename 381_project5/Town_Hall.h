@@ -15,7 +15,7 @@ class Town_Hall : public Structure {
 public:
     Town_Hall(const std::string& name_, Point location_);
 
-    ~Town_Hall();
+    ~Town_Hall() override;
 
     // deposit adds in the supplied amount
     void deposit(double deposit_amount) override;

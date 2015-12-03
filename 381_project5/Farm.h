@@ -16,11 +16,13 @@ class Farm : public Structure {
 public:
     Farm(const std::string& name_, Point location_);
 
-    ~Farm();
+    ~Farm() override;
 
     // returns the specified amount, or the remaining amount, whichever is less,
     // and deducts that amount from the amount on hand
     double withdraw(double amount_to_get) override;
+
+    double get_amount() const override;
 
     // update adds the production amount to the stored amount
     void update() override;
@@ -28,16 +30,16 @@ public:
     // output information about the current state
     void describe() const override;
 
-private:
-    double m_food_amount;
-    double m_production_rate;
-
     // disallow copy/move construction or assignment and default ctor
     Farm() = delete;
     Farm(const Farm&) = delete;
     Farm& operator= (const Farm&)  = delete;
     Farm(Farm&&) = delete;
     Farm& operator= (Farm&&) = delete;
+
+private:
+    double m_food_amount;
+    double m_production_rate;
 };
 
 #endif // FARM_H

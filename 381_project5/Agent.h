@@ -25,7 +25,7 @@ public:
     Agent(Agent&&) = delete;
     Agent& operator= (Agent&&) = delete;
 
-    ~Agent();
+    virtual ~Agent() = 0;
 
     // return true if this agent is Alive or Disappearing
     bool is_alive() const { return m_alive_state == Alive_State::ALIVE; }

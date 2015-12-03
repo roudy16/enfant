@@ -59,6 +59,17 @@ bool Model::is_name_in_use(const string& name) const {
     return is_structure_present(name) || is_agent_present(name);
 }
 
+shared_ptr<Sim_object> Model::get_obj_ptr(const string& name) const {
+    auto iter = m_sim_objs.find(name);
+
+    // if not found return an empty ptr
+    if (iter == m_sim_objs.end()) {
+        return shared_ptr<Sim_object>();
+    }
+
+    return iter->second;
+}
+
 bool Model::is_structure_present(const string& name) const {
     auto iter = m_structures.find(name);
 
@@ -162,13 +173,13 @@ void Model::attach(shared_ptr<View> view_ptr) {
     m_views.push_back(view_ptr);
 
     for (auto& p : m_sim_objs) {
-        view_ptr->update_location(p.second->get_name(), p.second->get_location());
+        p.second->broadcast_current_state();
     }
 }
 
 // Detach the View by discarding the supplied pointer from the container of Views
 // - no updates sent to it thereafter.
-void Model::detach(shared_ptr<View> view_ptr) {
+void Model::detach(shared_ptr<View>& view_ptr) {
     auto iter = find(m_views.begin(), m_views.end(), view_ptr);
     assert(iter != m_views.end());
     m_views.erase(iter);
@@ -188,26 +199,29 @@ void Model::notify_gone(const string& name) {
     }
 }
 
-// notify the views of an Agent's health
+// notify the views of an objects's health
 void Model::notify_health(const string& name, double health) {
     for (shared_ptr<View>& p : m_views) {
         p->update_health(name, health);
     }
 }
 
-// notify the views of a Structure's food amount
+// notify the views of an object's food amount
 void Model::notify_amount(const string& name, double amount) {
     for (shared_ptr<View>& p : m_views) {
         p->update_amount(name, amount);
     }
 }
 
+// notify the views to draw their information
 void Model::notify_draw() {
     for (shared_ptr<View>& p : m_views) {
         p->draw();
     }
 }
 
+// Returns a pointer to the View that matches name, returns an empty
+// pointer otherwise
 shared_ptr<View> Model::find_view(const string& name) {
     auto iter = m_views.begin();
     for (; iter != m_views.end(); iter++) {

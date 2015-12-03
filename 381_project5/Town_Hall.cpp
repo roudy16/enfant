@@ -1,14 +1,15 @@
 #include "Town_Hall.h"
 #include "Geometry.h"
+#include "Utility.h"
 #include <string>
 #include <cmath>
 #include <iostream>
 
 using namespace std;
 
-const double kTOWNHALL_INITIAL_FOOD_AMOUNT = 0.0;
-const double kTOWNHALL_INITIAL_TAX_RATE = 0.1;
-const double kTOWNHALL_MIN_WITHDRAW = 1.0;
+constexpr double kTOWNHALL_INITIAL_FOOD_AMOUNT = 0.0;
+constexpr double kTOWNHALL_INITIAL_TAX_RATE = 0.1;
+constexpr double kTOWNHALL_MIN_WITHDRAW = 1.0;
 
 Town_Hall::Town_Hall(const std::string& name_, Point location_)
     : Structure(name_, location_),

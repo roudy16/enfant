@@ -78,7 +78,9 @@ void Agent::update() {
         }
         break;
     case Alive_State::DEAD:
-        // Do nothing
+        // Should never update a DEAD Agent
+        assert(true);
+        break;
     default:
         throw Error("Unrecognized state in Agent::update");
     }
@@ -110,7 +112,7 @@ void Agent::describe() const {
 // ask Model to broadcast our current state to all Views
 void Agent::broadcast_current_state() const {
     assert(m_alive_state == Alive_State::ALIVE);
-    // Tell View where agents are
+    // Tell Views where agents are and their health
     Model::get_instance()->notify_location(get_name(), get_location());
     Model::get_instance()->notify_health(get_name(), static_cast<double>(m_health));
 }
@@ -135,9 +137,10 @@ void Agent::lose_health(int attack_strength) {
     if (m_health <= 0) {
         m_alive_state = Alive_State::DEAD;
         m_moving_obj.stop_moving();
-        Model::get_instance()->notify_gone(get_name());
         cout << get_name() << ": Arrggh!" << endl;
-        Model::get_instance()->notify_location(get_name(), get_location());
+        Model::get_instance()->notify_gone(get_name());
+        auto this_ptr = static_pointer_cast<Agent>(shared_from_this());
+        Model::get_instance()->remove_agent(this_ptr);
     }
     else {
         Model::get_instance()->notify_health(get_name(), static_cast<double>(m_health));

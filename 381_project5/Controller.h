@@ -68,7 +68,7 @@ private:
     Command_map_t m_program_commands;
     std::weak_ptr<World_map> mp_map_view;
 
-    template<typename C, typename MT = C::mapped_type>
+    template<typename C, typename MT = typename C::mapped_type>
     MT get_command_helper(C& commands, const std::string& command);
 
     // disallow copy/move construction or assignment
@@ -80,7 +80,7 @@ private:
 
 template<typename C, typename MT>
 MT Controller::get_command_helper(C& commands, const std::string& command) {
-    C::iterator iter = commands.find(command);
+    typename C::iterator iter = commands.find(command);
 
     if (iter == commands.end()) {
         return nullptr;

@@ -44,7 +44,7 @@ private:
     // set new target and engage, outputs attacking message
     void engage_new_target(std::shared_ptr<Agent> new_target);
 
-    std::shared_ptr<Agent> m_target;
+    std::weak_ptr<Agent> m_target;
     double m_attack_range;
     int m_attack_strength;
     Soldier_State m_soldier_state;

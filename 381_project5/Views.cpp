@@ -10,18 +10,18 @@
 using namespace std;
 
 // default World_map settings
-const double kDEFAULT_MAP_SCALE = 2.0;
-const double kDEFAULT_MAP_ORIGINX = -10.0;
-const double kDEFAULT_MAP_ORIGINY = -10.0;
-const int kDEFAULT_MAP_SIZE = 25;
+constexpr double kDEFAULT_MAP_SCALE = 2.0;
+constexpr double kDEFAULT_MAP_ORIGINX = -10.0;
+constexpr double kDEFAULT_MAP_ORIGINY = -10.0;
+constexpr int kDEFAULT_MAP_SIZE = 25;
 
 // min, max World_map sizes (inclusive)
-const int kMAX_MAP_SIZE = 30;
-const int kMIN_MAP_SIZE = 7;
+constexpr int kMAX_MAP_SIZE = 30;
+constexpr int kMIN_MAP_SIZE = 7;
 
 // default Local_map settings
-const double kDEFAULT_LOCALMAP_SCALE = 2.0;
-const int kDEFAULT_LOCALMAP_SIZE = 9;
+constexpr double kDEFAULT_LOCALMAP_SCALE = 2.0;
+constexpr int kDEFAULT_LOCALMAP_SIZE = 9;
 
 
 // Prints objects that are not visible on the grid, offgrid objects must be in
@@ -68,13 +68,6 @@ void Map::update_remove(const std::string& name) {
 
     // Remove found object
     m_grid_objects.erase(iter);
-}
-
-void Map::draw_header() {
-    // Print current Map settings
-    cout << "Display size: " << get_size()
-         << ", scale: " << get_scale()
-         << ", origin: " << get_origin() << endl;
 }
 
 Map::Grid_info Map::generate_grid_info() {
@@ -203,7 +196,14 @@ World_map::~World_map()
 {
 }
 
-void World_map::draw_body() {
+void World_map::do_draw_header() {
+    // Print current Map settings
+    cout << "Display size: " << m_size
+         << ", scale: " << m_scale
+         << ", origin: " << get_origin() << endl;
+}
+
+void World_map::do_draw_body() {
     Grid_info grid_info = generate_grid_info();
 
     // Print offgrid objects message if any
@@ -263,7 +263,11 @@ Local_map::~Local_map()
 {
 }
 
-void Local_map::draw_body() {
+void Local_map::do_draw_header() {
+    cout << "Local view for: " << get_name() << endl;
+}
+
+void Local_map::do_draw_body() {
     Grid_info grid_info = generate_grid_info();
 
     // Print the objects that are on the grid
@@ -277,8 +281,9 @@ void Local_map::update_location(const string& name, Point location) {
     // map then update this map's origin to the focus's new location plus
     // the displacement from the origin to the center of the map
     if (get_name() == name) {
-        const Cartesian_vector displacement = -(kDEFAULT_LOCALMAP_SIZE / 2.0) *
-                                                kDEFAULT_LOCALMAP_SCALE;
+        constexpr double displacement_amount = -(kDEFAULT_LOCALMAP_SIZE / 2.0) *
+                                                 kDEFAULT_LOCALMAP_SCALE;
+        const Cartesian_vector displacement(displacement_amount, displacement_amount);
         set_origin(location + displacement);
     }
 }
@@ -289,6 +294,10 @@ double Local_map::get_scale() const {
 
 int Local_map::get_size() const {
     return kDEFAULT_LOCALMAP_SIZE;
+}
+
+Status::Status(const string& name) : View(name)
+{
 }
 
 // TODO could make template for this
@@ -308,7 +317,7 @@ void Status::clear() {
     m_objects.clear();
 }
 
-void Status::draw_body() {
+void Status::do_draw_body() {
     for (auto& obj : m_objects) {
         cout << obj.first << ": " << obj.second << endl;
     }
@@ -318,24 +327,35 @@ void Status::draw_body() {
 void Status::update_status(const string& name, double val) {
     auto obj_iter = m_objects.find(name);
 
-    assert(obj_iter != m_objects.end());
+    if (obj_iter == m_objects.end()) {
+        m_objects[name] = val;
+    }
+    else {
+        obj_iter->second = val;
+    }
+}
 
-    obj_iter->second = val;
+Health_status::Health_status() : Status("health") 
+{
 }
 
 void Health_status::update_health(const string& name, double health) {
     update_status(name, health);
 }
 
-void Health_status::draw_header() {
+void Health_status::do_draw_header() {
     cout << "Current Health:\n--------------" << endl;
+}
+
+Amount_status::Amount_status() : Status("amounts")
+{
 }
 
 void Amount_status::update_amount(const string& name, double amount) {
     update_status(name, amount);
 }
 
-void Amount_status::draw_header() {
+void Amount_status::do_draw_header() {
     cout << "Current Amounts:\n--------------" << endl;
 }
 

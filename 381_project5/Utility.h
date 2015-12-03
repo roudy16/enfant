@@ -4,10 +4,11 @@
 #include <string>
 #include <exception>
 
-// Hack for developing in Visual Studio versions that don't support noexcept
+// Hack for developing in Visual Studio versions that don't support all C++ features
 #ifdef _MSC_VER
     #if (_MSC_VER < 1900)
         #define noexcept 
+        #define constexpr 
     #endif
 #endif
 

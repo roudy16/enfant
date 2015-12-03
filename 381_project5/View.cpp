@@ -51,8 +51,8 @@ void View::update_remove(const string& name)
 {
 }
 
-void View::draw_header() {
-
+void View::do_draw_header()
+{
 }
 
 void View::draw() {
@@ -63,8 +63,9 @@ void View::draw() {
     cout << fixed;
     cout << setprecision(2);
 
-    draw_header();
-    draw_body();
+    // Hooks for printing View information
+    do_draw_header();
+    do_draw_body();
 
     // Restore previous output settings when function ends
 }

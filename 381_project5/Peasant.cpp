@@ -7,8 +7,8 @@
 
 using namespace std;
 
-const double kPEASANT_INITIAL_AMOUNT = 0.0;
-const double kPEASANT_MAX_AMOUNT = 35.0;
+constexpr double kPEASANT_INITIAL_AMOUNT = 0.0;
+constexpr double kPEASANT_MAX_AMOUNT = 35.0;
 
 Peasant::Peasant(const string& name_, Point location_)
     : Agent(name_, location_), m_source(nullptr),

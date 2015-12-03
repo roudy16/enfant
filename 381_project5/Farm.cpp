@@ -1,14 +1,15 @@
 #include "Farm.h"
 #include "Geometry.h"
 #include "Model.h"
+#include "Utility.h"
 #include <string>
 #include <iostream>
 #include <cmath>
 
 using namespace std;
 
-const double kFARM_INITIAL_FOOD_AMOUNT = 50.0;
-const double kFARM_INITIAL_PRODUCTION_RATE = 2.0;
+constexpr double kFARM_INITIAL_FOOD_AMOUNT = 50.0;
+constexpr double kFARM_INITIAL_PRODUCTION_RATE = 2.0;
 
 Farm::Farm(const std::string& name_, Point location_)
     : Structure(name_, location_), m_food_amount(kFARM_INITIAL_FOOD_AMOUNT),
@@ -32,6 +33,10 @@ double Farm::withdraw(double amount_to_get) {
     Model::get_instance()->notify_amount(get_name(), m_food_amount);
 
     return return_amount;
+}
+
+double Farm::get_amount() const {
+    return m_food_amount;
 }
 
 // update adds the production amount to the stored amount and tells Model to

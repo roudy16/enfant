@@ -55,7 +55,6 @@ protected:
     // Constructor sets the name and default size, scale, and origin
     Map(const std::string& name, const Point& origin);
 
-    void draw_header() override;
     // Populates a grid that represents an area of the world with representations
     // of objects and stores a list of objects that lie outside grid
     Grid_info generate_grid_info();
@@ -107,7 +106,8 @@ public:
     World_map& operator= (World_map&&) = delete;
 
 private:
-    void draw_body() override;
+    void do_draw_header() override;
+    void do_draw_body() override;
 
     double get_scale() const override;
     int get_size() const override;
@@ -130,7 +130,9 @@ public:
     Local_map& operator= (Local_map&&) = delete;
 
 private:
-    void draw_body() override;
+    void do_draw_header() override;
+    void do_draw_body() override;
+
     double get_scale() const override;
     int get_size() const override;
 };
@@ -140,31 +142,53 @@ public:
     void update_remove(const std::string& name) override;
     void clear() override;
 
+    Status() = delete;
+    Status(const Status&) = delete;
+    Status& operator= (const Status&) = delete;
+    Status(Status&&) = delete;
+    Status& operator= (Status&&) = delete;
+
 protected:
+    Status(const std::string& name);
+
     void update_status(const std::string& name, double val);
 
 private:
     using Status_objects_t = std::map<std::string, double>;
 
-    void draw_body() override;
+    void do_draw_body() override;
 
     Status_objects_t m_objects;
 };
 
 class Health_status : public Status {
 public:
+    explicit Health_status();
+
     void update_health(const std::string& name, double health) override;
 
+    Health_status(const Health_status&) = delete;
+    Health_status& operator= (const Health_status&) = delete;
+    Health_status(Health_status&&) = delete;
+    Health_status& operator= (Health_status&&) = delete;
+
 private:
-    void draw_header() override;
+    void do_draw_header() override;
 };
 
 class Amount_status : public Status {
 public:
+    explicit Amount_status();
+
     void update_amount(const std::string& name, double amount) override;
 
+    Amount_status(const Amount_status&) = delete;
+    Amount_status& operator= (const Amount_status&) = delete;
+    Amount_status(Amount_status&&) = delete;
+    Amount_status& operator= (Amount_status&&) = delete;
+
 private:
-    void draw_header() override;
+    void do_draw_header() override;
 };
 
 #endif // VIEWS_H

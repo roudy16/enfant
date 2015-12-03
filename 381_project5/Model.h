@@ -53,6 +53,8 @@ public:
     // return true if the name matches the name of an existing agent or structure
     bool is_name_in_use(const std::string& name) const;
 
+    std::shared_ptr<Sim_object> get_obj_ptr(const std::string& name) const;
+
     // is there a structure with this name?
     bool is_structure_present(const std::string& name) const;
     // add a new structure; assumes none with the same name
@@ -80,7 +82,7 @@ public:
     void attach(std::shared_ptr<View>);
     // Detach the View by discarding the supplied pointer from the container of Views
     // - no updates sent to it thereafter.
-    void detach(std::shared_ptr<View>);
+    void detach(std::shared_ptr<View>&);
     // notify the views about an object's location
     void notify_location(const std::string& name, const Point& location);
     // notify the views that an object is now gone
@@ -107,13 +109,13 @@ private:
     // Initialize the Model, not called in ctor to prevent recursive initialization
     void init();
 
-    // Comparator for sorting containers
+    /*// Comparator for sorting containers
     template<typename T>
     struct Obj_ptr_comp {
         bool operator()(const T lhs, const T rhs) {
             return lhs->get_name() < rhs->get_name();
         }
-    };
+    };*/
 
     static Model* mp_instance; // pointer to single instance of Model
 

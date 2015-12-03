@@ -43,7 +43,7 @@ public:
     virtual void update_remove(const std::string& name);
     virtual void clear();
 
-    // prints out the current map
+    // prints out the View information
     void draw();
 
     // returns the name of the View
@@ -56,10 +56,10 @@ public:
     View& operator= (View&&) = delete;
 
 protected:
-    // virtual functions called when 'draw' is called, to be defined
-    // in derived classes. draw_header() does nothing in this base class
-    virtual void draw_header();
-    virtual void draw_body() = 0;
+    // hooks called when 'draw' is called, to be defined in derived classes.
+    // draw_header() does nothing in this base class
+    virtual void do_draw_header();
+    virtual void do_draw_body() = 0;
 
 private:
     std::string m_name;

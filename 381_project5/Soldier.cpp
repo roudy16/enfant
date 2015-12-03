@@ -7,11 +7,11 @@
 
 using namespace std;
 
-const int kSOLDIER_INITIAL_STRENGTH = 2;
-const double kSOLDIER_INITIAL_RANGE = 2.0;
+constexpr int kSOLDIER_INITIAL_STRENGTH = 2;
+constexpr double kSOLDIER_INITIAL_RANGE = 2.0;
 
 Soldier::Soldier(const std::string& name_, Point location_)
-    : Agent(name_, location_), m_target(nullptr), m_attack_range(kSOLDIER_INITIAL_RANGE),
+    : Agent(name_, location_), m_attack_range(kSOLDIER_INITIAL_RANGE),
     m_attack_strength(kSOLDIER_INITIAL_STRENGTH), m_soldier_state(Soldier_State::NOT_ATTACKING)
 {
     cout << "Soldier " << get_name() << " constructed" << endl;
@@ -23,7 +23,6 @@ Soldier::~Soldier() {
 
 void Soldier::stop_attacking() {
     m_soldier_state = Soldier_State::NOT_ATTACKING;
-    m_target = nullptr;
 }
 
 void Soldier::update() {
@@ -31,15 +30,12 @@ void Soldier::update() {
 
     // Do nothing else if Soldier is not alive or not attacking
     if (!is_alive() || m_soldier_state == Soldier_State::NOT_ATTACKING) {
-        assert(!m_target);
         return;
     }
 
     // Soldier is attacking
-    assert(m_target);
-
     // if target is dead, report it, stop attacking and forget target
-    if (!m_target->is_alive()) {
+    if (m_target.expired()) {
         cout << get_name() << ": Target is dead" << endl;
         stop_attacking();
         return;
@@ -47,7 +43,7 @@ void Soldier::update() {
 
     // target is still alive
     // if target is out of range, report it, stop attacking and forget target
-    if (cartesian_distance(get_location(), m_target->get_location()) > m_attack_range) {
+    if (cartesian_distance(get_location(), m_target.lock()->get_location()) > m_attack_range) {
         cout << get_name() << ": Target is now out of range" << endl;
         stop_attacking();
         return;
@@ -55,10 +51,11 @@ void Soldier::update() {
 
     // target is in range, aim to maim!
     cout << get_name() << ": Clang!" << endl;
-    m_target->take_hit(m_attack_strength, static_pointer_cast<Agent>(shared_from_this()));
+    shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
+    m_target.lock()->take_hit(m_attack_strength, this_ptr);
 
     // If Soldier killed the target, report it, stop attacking and forget target
-    if (!m_target->is_alive()) {
+    if (m_target.expired()) {
         cout << get_name() << ": I triumph!" << endl;
         stop_attacking();
     }
@@ -124,11 +121,14 @@ void Soldier::describe() const {
 
     switch (m_soldier_state) {
     case Soldier_State::ATTACKING:
-        assert(m_target);
-        cout << "   Attacking " << m_target->get_name() << endl;
+        if (m_target.expired()) {
+            cout << "   Attacking dead target" << endl;
+        }
+        else {
+            cout << "   Attacking " << m_target.lock()->get_name() << endl;
+        }
         break;
     case Soldier_State::NOT_ATTACKING:
-        assert(!m_target);
         cout << "   Not attacking" << endl;
         break;
     default:
