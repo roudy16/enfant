@@ -141,7 +141,7 @@ Controller::Controller_fp_t Controller::get_view_program_command(const string& c
 void Controller::run() {
     // setup up View
     // TODO initially no Views are open
-    shared_ptr<View> view = make_shared<View>("map");
+    shared_ptr<View> view = static_pointer_cast<View>(make_shared<World_map>("map"));
     Model::get_instance()->attach(view);
 
     init_commands(); // Fill command containers

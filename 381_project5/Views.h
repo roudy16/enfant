@@ -44,7 +44,7 @@ public:
     void clear() override;
 
 protected:
-    using Grid_t = std::vector<std::vector<std::vector<char>>> ;
+    using Grid_t = std::vector<std::vector<std::vector<char>>>;
     using Offgrid_objs_t = std::vector<const std::string*>;
 
     struct Grid_info {
@@ -57,7 +57,7 @@ protected:
 
     void draw_header() override;
     // Populates a grid that represents an area of the world with representations
-    // of objects 
+    // of objects and stores a list of objects that lie outside grid
     Grid_info generate_grid_info();
     // Prints the grid along with axis label info
     void print_grid_helper(const Grid_t &grid);
