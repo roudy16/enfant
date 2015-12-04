@@ -49,16 +49,16 @@ namespace {
     };
 }
 
-Map::Map(const std::string& name, const Point& origin)
+Map::Map(const string& name, const Point& origin)
     : View(name), m_origin(origin)
 {
 }
 
-void Map::update_location(const std::string& name, Point location) {
+void Map::update_location(const string& name, Point location) {
     m_grid_objects[name] = location;
 }
 
-void Map::update_remove(const std::string& name) {
+void Map::update_remove(const string& name) {
     auto iter = m_grid_objects.find(name);
 
     // Do nothing if name not found
@@ -301,7 +301,7 @@ Status::Status(const string& name) : View(name)
 }
 
 // TODO could make template for this
-void Status::update_remove(const std::string& name) {
+void Status::update_remove(const string& name) {
     auto iter = m_objects.find(name);
 
     // Do nothing if name not found

@@ -81,7 +81,8 @@ void Infantry::start_attacking(shared_ptr<Agent>& target_ptr) {
     }
 
     // Check if target is in range, cannot attack out of range target
-    if (cartesian_distance(get_location(), target_ptr->get_location()) > get_range()) {
+    const double&& distance = cartesian_distance(get_location(), target_ptr->get_location());
+    if (distance > get_range()) {
         throw Error(get_name() + ": Target is out of range!");
     }
 
@@ -89,7 +90,7 @@ void Infantry::start_attacking(shared_ptr<Agent>& target_ptr) {
     engage_new_target(target_ptr);
 }
 
-std::weak_ptr<Agent>& Infantry::get_target() {
+const weak_ptr<Agent>& Infantry::get_target() {
     return m_target;
 }
 
@@ -129,7 +130,8 @@ void Soldier::update() {
 
     // target is still alive
     // if target is out of range, report it, stop attacking and forget target
-    if (cartesian_distance(get_location(), get_target().lock()->get_location()) > get_range()) {
+    const double&& distance = cartesian_distance(get_location(), get_target().lock()->get_location());
+    if (distance > kSOLDIER_INITIAL_RANGE) {
         cout << get_name() << ": Target is now out of range" << endl;
         stop_attacking();
         return;
@@ -138,7 +140,7 @@ void Soldier::update() {
     // target is in range, aim to maim!
     cout << get_name() << ": Clang!" << endl;
     shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
-    get_target().lock()->take_hit(get_strength(), this_ptr);
+    get_target().lock()->take_hit(kSOLDIER_INITIAL_STRENGTH, this_ptr);
 
     // If Infantry killed the target, report it, stop attacking and forget target
     if (get_target().expired()) {
@@ -146,18 +148,14 @@ void Soldier::update() {
         stop_attacking();
     }
 }
+
 // Overrides Agent's take_hit to counterattack when attacked.
 void Soldier::take_hit(int attack_strength, shared_ptr<Agent>& attacker_ptr) {
     Agent::lose_health(attack_strength);
 
-    // check if Soldier was just killed and was attacking
-    if (get_state() == Infantry_state::ATTACKING) {
-        // Soldier is dead, rest in peace warrior
-        stop_attacking();
-    } 
     // Attack the attacker if still alive and not already engaged
-    else if (is_alive() && attacker_ptr->is_alive() &&
-             get_state() == Infantry_state::NOT_ATTACKING)
+    if (is_alive() && attacker_ptr->is_alive() &&
+        get_state() == Infantry_state::NOT_ATTACKING)
     {
         engage_new_target(attacker_ptr);
     }
@@ -165,10 +163,6 @@ void Soldier::take_hit(int attack_strength, shared_ptr<Agent>& attacker_ptr) {
 
 double Soldier::get_range() const {
     return kSOLDIER_INITIAL_RANGE;
-}
-
-int Soldier::get_strength() const {
-    return kSOLDIER_INITIAL_STRENGTH;
 }
 
 const string& Soldier::get_type_string() const {
@@ -196,7 +190,9 @@ void Archer::update() {
             cout << get_name() << ": Target is dead" << endl;
             stop_attacking();
         }
-        else if (cartesian_distance(get_location(), get_target().lock()->get_location()) > get_range()) {
+        else if (cartesian_distance(get_location(), get_target().lock()->get_location())
+                 > kARCHER_INITIAL_RANGE)
+        {
             // if target is out of range, report it, stop attacking and forget target
             cout << get_name() << ": Target is now out of range" << endl;
             stop_attacking();
@@ -205,7 +201,7 @@ void Archer::update() {
         // target is in range, aim to maim!
         cout << get_name() << ": Clang!" << endl;
         shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
-        get_target().lock()->take_hit(get_strength(), this_ptr);
+        get_target().lock()->take_hit(kARCHER_INITIAL_STRENGTH, this_ptr);
 
         // If Archer killed the target, report it, stop attacking and forget target
         if (get_target().expired()) {
@@ -254,10 +250,6 @@ void Archer::take_hit(int attack_strength, shared_ptr<Agent>& attacker) {
 
 double Archer::get_range() const {
     return kARCHER_INITIAL_RANGE;
-}
-
-int Archer::get_strength() const {
-    return kARCHER_INITIAL_STRENGTH;
 }
 
 const string& Archer::get_type_string() const {

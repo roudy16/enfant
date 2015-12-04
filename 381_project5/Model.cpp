@@ -13,6 +13,39 @@
 
 using namespace std;
 
+namespace {
+    class Closest_to_obj {
+    public:
+        Closest_to_obj(std::shared_ptr<Sim_object>& obj_ptr)
+            : m_location(obj_ptr->get_location()), m_name(obj_ptr->get_name())
+        {
+        }
+
+        template <typename T>
+        bool operator()(T& lhs, T& rhs) {
+            if (lhs.second->get_name() == m_name) {
+                return false;
+            }
+            if (rhs.second->get_name() == m_name) {
+                return true;
+            }
+
+            double dist_to_lhs = cartesian_distance(m_location, lhs.second->get_location());
+            double dist_to_rhs = cartesian_distance(m_location, rhs.second->get_location());
+
+            if (dist_to_lhs == dist_to_rhs) {
+                return lhs.second->get_name() < rhs.second->get_name();
+            }
+
+            return dist_to_lhs < dist_to_rhs;
+        }
+
+    private:
+        Point m_location;
+        std::string m_name;
+    };
+}
+
 // class used to deallocate Model
 class Model_destroyer {
 public:
@@ -136,7 +169,7 @@ void Model::add_agent(shared_ptr<Agent> new_agent_ptr) {
     new_agent_ptr->broadcast_current_state();
 }
 
-void Model::remove_agent(std::shared_ptr<Agent> agent_ptr) {
+void Model::remove_agent(shared_ptr<Agent> agent_ptr) {
     assert(agent_ptr); // assert agent_ptr not nullptr
 
     auto agent_iter = m_agents.find(agent_ptr->get_name());

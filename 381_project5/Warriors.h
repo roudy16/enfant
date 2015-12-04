@@ -25,11 +25,9 @@ protected:
 
     Infantry(const std::string& name_, Point location_);
 
-    std::weak_ptr<Agent>& get_target();
+    // Accessors for derived classes to Infantry member variables
+    const std::weak_ptr<Agent>& get_target();
     Infantry_state get_state() const;
-
-    virtual double get_range() const = 0;
-    virtual int get_strength() const = 0;
 
     // stop attacking and forget target
     virtual void stop_attacking();
@@ -37,7 +35,10 @@ protected:
     // set new target and engage, outputs attacking message
     virtual void engage_new_target(std::shared_ptr<Agent> new_target);
 
+    // Accessor hooks derived classes must provide
     virtual const std::string& get_type_string() const = 0;
+    virtual double get_range() const = 0;
+    //virtual int get_strength() const = 0;
 
 private:
     std::weak_ptr<Agent> m_target;
@@ -74,7 +75,7 @@ public:
     double get_range() const override;
 
     // returns Soldier's attack strength
-    int get_strength() const override;
+    //int get_strength() const override;
 
     // disallow copy/move construction or assignment and default ctor
     Soldier() = delete;
@@ -103,7 +104,7 @@ public:
     double get_range() const override;
 
     // returns Archer's attack strength
-    int get_strength() const override;
+    //int get_strength() const override;
 
     // disallow copy/move construction or assignment and default ctor
     Archer() = delete;

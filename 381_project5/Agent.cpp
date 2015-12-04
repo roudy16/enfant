@@ -9,7 +9,7 @@ using namespace std;
 const double kAGENT_INITIAL_SPEED = 5.0;
 const int kAGENT_INITIAL_HEALTH = 5;
 
-Agent::Agent(const std::string& name_, Point location_)
+Agent::Agent(const string& name_, Point location_)
     : Sim_object(name_), m_moving_obj(location_, kAGENT_INITIAL_SPEED),
     m_health(kAGENT_INITIAL_HEALTH), m_alive_state(Alive_State::ALIVE)
 {

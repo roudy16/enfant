@@ -11,7 +11,7 @@ using namespace std;
 constexpr double kFARM_INITIAL_FOOD_AMOUNT = 50.0;
 constexpr double kFARM_INITIAL_PRODUCTION_RATE = 2.0;
 
-Farm::Farm(const std::string& name_, Point location_)
+Farm::Farm(const string& name_, Point location_)
     : Structure(name_, location_), m_food_amount(kFARM_INITIAL_FOOD_AMOUNT),
     m_production_rate(kFARM_INITIAL_PRODUCTION_RATE)
 {
