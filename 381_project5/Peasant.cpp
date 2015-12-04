@@ -15,11 +15,15 @@ Peasant::Peasant(const string& name_, Point location_)
     m_destination(nullptr), m_amount(kPEASANT_INITIAL_AMOUNT),
     m_peasant_state(Peasant_State::NOT_WORKING)
 {
+#ifdef PRINT_CTORS_DTORS
     cout << "Peasant " << get_name() << " constructed" << endl;
+#endif
 }
 
 Peasant::~Peasant() {
+#ifdef PRINT_CTORS_DTORS
     cout << "Peasant " << get_name() << " destructed" << endl;
+#endif
 }
 
 bool Peasant::is_working() {

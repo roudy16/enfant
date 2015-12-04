@@ -19,6 +19,9 @@ shared_ptr<Agent> create_agent(const string& name, const string& type, Point loc
     else if (type == "Soldier") {
         new_agent_ptr = static_pointer_cast<Agent>(make_shared<Soldier>(name, location));
     }
+    else if (type == "Archer") {
+        new_agent_ptr = static_pointer_cast<Agent>(make_shared<Archer>(name, location));
+    }
     else {
         throw Error("Trying to create agent of unknown type!");
     }

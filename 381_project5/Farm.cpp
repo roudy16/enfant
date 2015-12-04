@@ -15,11 +15,15 @@ Farm::Farm(const std::string& name_, Point location_)
     : Structure(name_, location_), m_food_amount(kFARM_INITIAL_FOOD_AMOUNT),
     m_production_rate(kFARM_INITIAL_PRODUCTION_RATE)
 {
+#ifdef PRINT_CTORS_DTORS
     cout << "Farm " << get_name() << " constructed" << endl;
+#endif
 }
 
 Farm::~Farm() {
+#ifdef PRINT_CTORS_DTORS
     cout << "Farm " << get_name() << " destructed" << endl;
+#endif
 }
 
 // returns the specified amount, or the remaining amount, whichever is less,

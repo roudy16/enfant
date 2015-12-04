@@ -14,6 +14,9 @@
     #endif
 #endif
 
+// TODO remove. Causes messages to be printed
+//#define PRINT_CTORS_DTORS
+
 class Sim_object;
 
 /* Utility declarations, functions, and classes used by other modules */

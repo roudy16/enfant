@@ -1,4 +1,6 @@
+#include "Model.h"
 #include "Warriors.h"
+#include "Structure.h"
 #include "Utility.h"
 #include "Geometry.h"
 #include <iostream>
@@ -16,7 +18,9 @@ constexpr double kARCHER_INITIAL_RANGE = 6.0;
 Infantry::Infantry(const string& name, Point location)
     : Agent(name, location), m_infantry_state(Infantry_state::NOT_ATTACKING)
 {
+#ifdef PRINT_CTORS_DTORS
     cout << "Infantry " << get_name() << " constructed" << endl;
+#endif
 }
 
 Infantry::~Infantry()
@@ -96,11 +100,15 @@ Infantry::Infantry_state Infantry::get_state() const {
 Soldier::Soldier(const string& name_, Point location_)
     : Infantry(name_, location_)
 {
+#ifdef PRINT_CTORS_DTORS
     cout << "Soldier " << get_name() << " constructed" << endl;
+#endif
 }
 
 Soldier::~Soldier() {
+#ifdef PRINT_CTORS_DTORS
     cout << "Soldier " << get_name() << " destructed" << endl;
+#endif
 }
 
 void Soldier::update() {
@@ -180,11 +188,76 @@ Archer::~Archer()
 void Archer::update() {
     Agent::update();
 
+    // Do nothing else if Archer is not alive or not attacking
+    if (get_state() == Infantry_state::ATTACKING) {
+        // Archer is attacking
+        // if target is dead, report it, stop attacking and forget target
+        if (get_target().expired()) {
+            cout << get_name() << ": Target is dead" << endl;
+            stop_attacking();
+        }
+        else if (cartesian_distance(get_location(), get_target().lock()->get_location()) > get_range()) {
+            // if target is out of range, report it, stop attacking and forget target
+            cout << get_name() << ": Target is now out of range" << endl;
+            stop_attacking();
+        }
 
+        // target is in range, aim to maim!
+        cout << get_name() << ": Clang!" << endl;
+        shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
+        get_target().lock()->take_hit(get_strength(), this_ptr);
+
+        // If Archer killed the target, report it, stop attacking and forget target
+        if (get_target().expired()) {
+            cout << get_name() << ": I triumph!" << endl;
+            stop_attacking();
+        }
+    }
+
+    if (get_state() == Infantry_state::NOT_ATTACKING) {
+        auto this_ptr = static_pointer_cast<Sim_object>(shared_from_this());
+        auto closest_agent = Model::get_instance()->get_closest_agent_to_obj(this_ptr);
+
+        if (!closest_agent || closest_agent->get_name() == get_name()) {
+            return;
+        }
+
+        double dist_to_agent = cartesian_distance(get_location(), closest_agent->get_location());
+
+        if (dist_to_agent > get_range()) {
+            return;
+        }
+
+        engage_new_target(closest_agent);
+    }
 }
 
-void Archer::stop_attacking() {
+void Archer::take_hit(int attack_strength, shared_ptr<Agent>& attacker) {
+    lose_health(attack_strength);
 
+    // Do nothing else if we died
+    if (!is_alive()) {
+        return;
+    }
+
+    auto this_ptr = static_pointer_cast<Sim_object>(shared_from_this());
+    auto closest_structure = Model::get_instance()->get_closest_structure_to_obj(this_ptr);
+
+    if (!closest_structure) {
+        return;
+    }
+
+    // TODO don't really need Structure interface, could use Sim_object
+    cout << get_name() << ": I'm going to run away to " << closest_structure->get_name() << endl;
+    move_to(closest_structure->get_location());
+}
+
+double Archer::get_range() const {
+    return kARCHER_INITIAL_RANGE;
+}
+
+int Archer::get_strength() const {
+    return kARCHER_INITIAL_STRENGTH;
 }
 
 const string& Archer::get_type_string() const {

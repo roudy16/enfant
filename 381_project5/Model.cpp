@@ -51,6 +51,7 @@ void Model::init() {
     add_agent(create_agent("Merry", "Peasant", Point(0., 25.)));
     add_agent(create_agent("Zug", "Soldier", Point(20., 30.)));
     add_agent(create_agent("Bug", "Soldier", Point(15., 20.)));
+    add_agent(create_agent("Iriel", "Archer", Point(20., 38.)));
 }
 
 // is name already in use for either agent or structure?

@@ -1,4 +1,5 @@
 #include "Structure.h"
+#include "Utility.h"
 #include "Model.h"
 #include <iostream>
 #include <string>
@@ -9,11 +10,15 @@ using namespace std;
 Structure::Structure(string name, Point location) 
     : Sim_object(name), m_location(location)
 {
+#ifdef PRINT_CTORS_DTORS
     cout << "Structure " << get_name() << " constructed" << endl;
+#endif
 }
 
 Structure::~Structure() {
+#ifdef PRINT_CTORS_DTORS
     cout << "Structure " << get_name() << " destructed" << endl;
+#endif
 }
 
 void Structure::update()

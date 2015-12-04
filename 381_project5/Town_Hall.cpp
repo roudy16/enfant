@@ -16,11 +16,15 @@ Town_Hall::Town_Hall(const std::string& name_, Point location_)
     m_food_amount(kTOWNHALL_INITIAL_FOOD_AMOUNT),
     m_tax_rate(kTOWNHALL_INITIAL_TAX_RATE)
 {
+#ifdef PRINT_CTORS_DTORS
     cout << "Town_Hall " << get_name() << " constructed" << endl;
+#endif
 }
 
 Town_Hall::~Town_Hall() {
+#ifdef PRINT_CTORS_DTORS
     cout << "Town_Hall " << get_name() << " destructed" << endl;
+#endif
 }
 
 // deposit adds in the supplied amount

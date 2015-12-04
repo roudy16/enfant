@@ -9,9 +9,6 @@ class Infantry : public Agent {
 public:
     ~Infantry() override;
 
-    // update implements Infantry behavior
-    void update() override;
-
     // output information about the current state
     void describe() const override;
 
@@ -70,19 +67,8 @@ public:
     // update implements Soldier behavior
     void update() override;
 
-    // output information about the current state
-    void describe() const override;
-
-    // Overrides Agent's stop to print a message
-    void stop() override;
-
     // Overrides Agent's take_hit to counterattack when attacked.
     void take_hit(int attack_strength, std::shared_ptr<Agent>& attacker_ptr) override;
-
-    // Make this Soldier start attacking the target Agent.
-    // Throws an exception if the target is the same as this Agent,
-    // is out of range, or is not alive.
-    void start_attacking(std::shared_ptr<Agent>& target_ptr) override;
 
     // returns Soldier's attack range
     double get_range() const override;
@@ -110,19 +96,8 @@ public:
     // update implements Archer behavior
     void update() override;
 
-    // output information about the current state
-    void describe() const override;
-
-    // Overrides Agent's stop to print a message
-    void stop() override;
-
     // Overrides Agent's take_hit to counterattack when attacked.
     void take_hit(int attack_strength, std::shared_ptr<Agent>& attacker_ptr) override;
-
-    // Make this Archer start attacking the target Agent.
-    // Throws an exception if the target is the same as this Agent,
-    // is out of range, or is not alive.
-    void start_attacking(std::shared_ptr<Agent>& target_ptr) override;
 
     // returns Archer's attack range
     double get_range() const override;
@@ -138,7 +113,6 @@ public:
     Archer& operator= (Archer&&) = delete;
 
 private:
-    void stop_attacking() override;
     const std::string& get_type_string() const override;
 };
 

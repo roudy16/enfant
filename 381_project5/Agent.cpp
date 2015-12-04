@@ -13,11 +13,15 @@ Agent::Agent(const std::string& name_, Point location_)
     : Sim_object(name_), m_moving_obj(location_, kAGENT_INITIAL_SPEED),
     m_health(kAGENT_INITIAL_HEALTH), m_alive_state(Alive_State::ALIVE)
 {
+#ifdef PRINT_CTORS_DTORS
     cout << "Agent " << get_name() << " constructed" << endl;
+#endif
 }
 
 Agent::~Agent() {
+#ifdef PRINT_CTORS_DTORS
     cout << "Agent " << get_name() << " destructed" << endl;
+#endif
 }
 
 Point Agent::get_location() const {
