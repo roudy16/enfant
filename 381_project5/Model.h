@@ -104,8 +104,6 @@ public:
     friend class Model_destroyer;
 
 private:
-    using Views_t = std::vector<std::shared_ptr<View>>;
-
     // create the initial objects
     Model();
     // destroy all objects
@@ -113,20 +111,13 @@ private:
     // Initialize the Model, not called in ctor to prevent recursive initialization
     void init();
 
-    /*// Comparator for sorting containers
-    template<typename T>
-    struct Obj_ptr_comp {
-        bool operator()(const T lhs, const T rhs) {
-            return lhs->get_name() < rhs->get_name();
-        }
-    };*/
-
     static Model* mp_instance; // pointer to single instance of Model
 
     std::map<const std::string, std::shared_ptr<Sim_object>> m_sim_objs;
-    std::map<const std::string, std::shared_ptr<Agent>> m_agents;
-    std::map<const std::string, std::shared_ptr<Structure>> m_structures;
-    Views_t m_views;
+    std::map<const std::string, std::shared_ptr<Agent>>      m_agents;
+    std::map<const std::string, std::shared_ptr<Structure>>  m_structures;
+    std::vector<std::shared_ptr<View>>                       m_views;
+
     int m_time;
 };
 

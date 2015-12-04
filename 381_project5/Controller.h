@@ -49,7 +49,7 @@ private:
     void train_command();
 
     // helper to initialize command containers with string to 
-    // function pointer mappingsn
+    // function pointer mappings
     void init_commands();
 
     // Returns function pointer to associated command if it exists, 
@@ -63,13 +63,14 @@ private:
     std::shared_ptr<World_map> get_map_view();
 
     // Containers for user command function pointers
-    Agent_command_map_t m_agent_commands;
-    Command_map_t m_view_commands;
-    Command_map_t m_program_commands;
-    std::weak_ptr<World_map> mp_map_view;
+    Agent_command_map_t       m_agent_commands;
+    Command_map_t             m_view_commands;
+    Command_map_t             m_program_commands;
+    // member that holds ptr to World map view when it is open
+    std::weak_ptr<World_map>  mp_map_view;
 
-    template<typename C, typename MT = typename C::mapped_type>
-    MT get_command_helper(C& commands, const std::string& command);
+    template<typename C>
+    typename C::mapped_type get_command_helper(C& commands, const std::string& command);
 
     // disallow copy/move construction or assignment
     Controller(const Controller&) = delete;
@@ -78,8 +79,8 @@ private:
     Controller& operator= (Controller&&) = delete;
 };
 
-template<typename C, typename MT>
-MT Controller::get_command_helper(C& commands, const std::string& command) {
+template<typename C>
+typename C::mapped_type Controller::get_command_helper(C& commands, const std::string& command) {
     typename C::iterator iter = commands.find(command);
 
     if (iter == commands.end()) {

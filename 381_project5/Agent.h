@@ -30,9 +30,6 @@ public:
     // return true if this agent is Alive or Disappearing
     bool is_alive() const { return m_alive_state == Alive_State::ALIVE; }
 
-    // return Agent's health
-    int get_health() const;
-
     // return true if this Agent is in motion
     bool is_moving() const;
 

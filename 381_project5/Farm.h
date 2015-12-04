@@ -14,7 +14,7 @@ struct Point;
 
 class Farm : public Structure {
 public:
-    Farm(const std::string& name_, Point location_);
+    explicit Farm(const std::string& name_, Point location_);
 
     ~Farm() override;
 

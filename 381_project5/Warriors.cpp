@@ -9,6 +9,7 @@
 
 using namespace std;
 
+// Strength and range values for Soldier and Archer class
 constexpr int kSOLDIER_INITIAL_STRENGTH = 2;
 constexpr double kSOLDIER_INITIAL_RANGE = 2.0;
 constexpr int kARCHER_INITIAL_STRENGTH = 1;
@@ -23,16 +24,12 @@ Infantry::Infantry(const string& name, Point location)
 #endif
 }
 
-Infantry::~Infantry()
-{
-}
-
 void Infantry::stop_attacking() {
     m_infantry_state = Infantry_state::NOT_ATTACKING;
 }
 
 void Infantry::engage_new_target(shared_ptr<Agent> new_target) {
-    m_target = static_cast<weak_ptr<Agent>>(new_target);
+    mp_target = static_cast<weak_ptr<Agent>>(new_target);
     cout << get_name() << ": I'm attacking!" << endl;
     m_infantry_state = Infantry_state::ATTACKING;
 }
@@ -44,11 +41,11 @@ void Infantry::describe() const {
 
     switch (m_infantry_state) {
     case Infantry_state::ATTACKING:
-        if (m_target.expired()) {
+        if (mp_target.expired()) {
             cout << "   Attacking dead target" << endl;
         }
         else {
-            cout << "   Attacking " << m_target.lock()->get_name() << endl;
+            cout << "   Attacking " << mp_target.lock()->get_name() << endl;
         }
         break;
     case Infantry_state::NOT_ATTACKING:
@@ -91,7 +88,7 @@ void Infantry::start_attacking(shared_ptr<Agent>& target_ptr) {
 }
 
 const weak_ptr<Agent>& Infantry::get_target() {
-    return m_target;
+    return mp_target;
 }
 
 Infantry::Infantry_state Infantry::get_state() const {

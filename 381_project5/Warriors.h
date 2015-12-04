@@ -7,7 +7,12 @@
 
 class Infantry : public Agent {
 public:
-    ~Infantry() override;
+    // disallow copy/move construction or assignment and default ctor
+    Infantry() = delete;
+    Infantry(const Infantry&) = delete;
+    Infantry& operator= (const Infantry&)  = delete;
+    Infantry(Infantry&&) = delete;
+    Infantry& operator= (Infantry&&) = delete;
 
     // output information about the current state
     void describe() const override;
@@ -38,18 +43,10 @@ protected:
     // Accessor hooks derived classes must provide
     virtual const std::string& get_type_string() const = 0;
     virtual double get_range() const = 0;
-    //virtual int get_strength() const = 0;
 
 private:
-    std::weak_ptr<Agent> m_target;
+    std::weak_ptr<Agent> mp_target;
     Infantry_state m_infantry_state;
-
-    // disallow copy/move construction or assignment and default ctor
-    Infantry() = delete;
-    Infantry(const Infantry&) = delete;
-    Infantry& operator= (const Infantry&)  = delete;
-    Infantry(Infantry&&) = delete;
-    Infantry& operator= (Infantry&&) = delete;
 };
 
 /*
@@ -63,19 +60,13 @@ class Soldier : public Infantry {
 public:
     explicit Soldier(const std::string& name_, Point location_);
 
-    ~Soldier();
+    ~Soldier() override;
 
     // update implements Soldier behavior
     void update() override;
 
     // Overrides Agent's take_hit to counterattack when attacked.
     void take_hit(int attack_strength, std::shared_ptr<Agent>& attacker_ptr) override;
-
-    // returns Soldier's attack range
-    double get_range() const override;
-
-    // returns Soldier's attack strength
-    //int get_strength() const override;
 
     // disallow copy/move construction or assignment and default ctor
     Soldier() = delete;
@@ -85,6 +76,9 @@ public:
     Soldier& operator= (Soldier&&) = delete;
 
 private:
+    // returns Soldier's attack range
+    double get_range() const override;
+    // returns string "Soldier"
     const std::string& get_type_string() const override;
 };
 
@@ -92,19 +86,13 @@ class Archer : public Infantry {
 public:
     explicit Archer(const std::string& name_, Point location_);
 
-    ~Archer();
+    ~Archer() override;
 
     // update implements Archer behavior
     void update() override;
 
     // Overrides Agent's take_hit to counterattack when attacked.
     void take_hit(int attack_strength, std::shared_ptr<Agent>& attacker_ptr) override;
-
-    // returns Archer's attack range
-    double get_range() const override;
-
-    // returns Archer's attack strength
-    //int get_strength() const override;
 
     // disallow copy/move construction or assignment and default ctor
     Archer() = delete;
@@ -114,6 +102,9 @@ public:
     Archer& operator= (Archer&&) = delete;
 
 private:
+    // returns Archer's attack range
+    double get_range() const override;
+    // return string "Archer"
     const std::string& get_type_string() const override;
 };
 

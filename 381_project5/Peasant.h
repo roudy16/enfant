@@ -18,7 +18,7 @@ class Structure;
 
 class Peasant : public Agent {
 public:
-    Peasant(const std::string& name_, Point location_);
+    explicit Peasant(const std::string& name_, Point location_);
 
     ~Peasant();
 
