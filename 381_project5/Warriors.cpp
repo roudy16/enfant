@@ -33,42 +33,6 @@ void Infantry::engage_new_target(shared_ptr<Agent> new_target) {
     m_infantry_state = Infantry_state::ATTACKING;
 }
 
-void Infantry::update() {
-    Agent::update();
-
-    // Do nothing else if Soldier is not alive or not attacking
-    if (!is_alive() || m_infantry_state == Infantry_state::NOT_ATTACKING) {
-        return;
-    }
-
-    // Soldier is attacking
-    // if target is dead, report it, stop attacking and forget target
-    if (m_target.expired()) {
-        cout << get_name() << ": Target is dead" << endl;
-        stop_attacking();
-        return;
-    }
-
-    // target is still alive
-    // if target is out of range, report it, stop attacking and forget target
-    if (cartesian_distance(get_location(), m_target.lock()->get_location()) > get_range()) {
-        cout << get_name() << ": Target is now out of range" << endl;
-        stop_attacking();
-        return;
-    }
-
-    // target is in range, aim to maim!
-    cout << get_name() << ": " + get_onomatopoeia() << endl;
-    shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
-    m_target.lock()->take_hit(get_strength(), this_ptr);
-
-    // If Infantry killed the target, report it, stop attacking and forget target
-    if (m_target.expired()) {
-        cout << get_name() << ": I triumph!" << endl;
-        stop_attacking();
-    }
-}
-
 // output information about the current state
 void Infantry::describe() const {
     cout << get_type_string() + ' ';
@@ -91,23 +55,6 @@ void Infantry::describe() const {
     }
 }
 
-// Overrides Agent's take_hit to counterattack when attacked.
-void Infantry::take_hit(int attack_strength, shared_ptr<Agent>& attacker_ptr) {
-    Agent::lose_health(attack_strength);
-
-    // check if Soldier was just killed and was attacking
-    if (!is_alive() && m_infantry_state == Infantry_state::ATTACKING) {
-        // Soldier is dead, rest in peace warrior
-        stop_attacking();
-    } 
-    // Attack the attacker if still alive and not already engaged
-    else if (is_alive() && attacker_ptr->is_alive() &&
-             m_infantry_state == Infantry_state::NOT_ATTACKING)
-    {
-        engage_new_target(attacker_ptr);
-    }
-}
-
 // Overrides Agent's stop to print a message
 void Infantry::stop() {
     cout << get_name() << ": Don't bother me" << endl;
@@ -119,7 +66,7 @@ void Infantry::stop() {
 void Infantry::start_attacking(shared_ptr<Agent>& target_ptr) {
     assert(target_ptr);
 
-    // Ensure soldier does not attack self
+    // Ensure infantry does not attack self
     if (target_ptr == shared_from_this()) {
         throw Error(get_name() + ": I cannot attack myself!");
     }
@@ -138,6 +85,14 @@ void Infantry::start_attacking(shared_ptr<Agent>& target_ptr) {
     engage_new_target(target_ptr);
 }
 
+std::weak_ptr<Agent>& Infantry::get_target() {
+    return m_target;
+}
+
+Infantry::Infantry_state Infantry::get_state() const {
+    return m_infantry_state;
+}
+
 Soldier::Soldier(const string& name_, Point location_)
     : Infantry(name_, location_)
 {
@@ -146,6 +101,58 @@ Soldier::Soldier(const string& name_, Point location_)
 
 Soldier::~Soldier() {
     cout << "Soldier " << get_name() << " destructed" << endl;
+}
+
+void Soldier::update() {
+    Agent::update();
+
+    // Do nothing else if Infantry is not alive or not attacking
+    if (get_state() == Infantry_state::NOT_ATTACKING) {
+        return;
+    }
+
+    // Infantry is attacking
+    // if target is dead, report it, stop attacking and forget target
+    if (get_target().expired()) {
+        cout << get_name() << ": Target is dead" << endl;
+        stop_attacking();
+        return;
+    }
+
+    // target is still alive
+    // if target is out of range, report it, stop attacking and forget target
+    if (cartesian_distance(get_location(), get_target().lock()->get_location()) > get_range()) {
+        cout << get_name() << ": Target is now out of range" << endl;
+        stop_attacking();
+        return;
+    }
+
+    // target is in range, aim to maim!
+    cout << get_name() << ": Clang!" << endl;
+    shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
+    get_target().lock()->take_hit(get_strength(), this_ptr);
+
+    // If Infantry killed the target, report it, stop attacking and forget target
+    if (get_target().expired()) {
+        cout << get_name() << ": I triumph!" << endl;
+        stop_attacking();
+    }
+}
+// Overrides Agent's take_hit to counterattack when attacked.
+void Soldier::take_hit(int attack_strength, shared_ptr<Agent>& attacker_ptr) {
+    Agent::lose_health(attack_strength);
+
+    // check if Soldier was just killed and was attacking
+    if (get_state() == Infantry_state::ATTACKING) {
+        // Soldier is dead, rest in peace warrior
+        stop_attacking();
+    } 
+    // Attack the attacker if still alive and not already engaged
+    else if (is_alive() && attacker_ptr->is_alive() &&
+             get_state() == Infantry_state::NOT_ATTACKING)
+    {
+        engage_new_target(attacker_ptr);
+    }
 }
 
 double Soldier::get_range() const {
@@ -157,9 +164,30 @@ int Soldier::get_strength() const {
 }
 
 const string& Soldier::get_type_string() const {
-    return "Soldier";
+    static const string my_type = "Soldier";
+    return my_type;
 }
 
-const string& Soldier::get_onomatopoeia() const {
-    return "Clang!";
+Archer::Archer(const string& name_, Point location_)
+    : Infantry(name_, location_)
+{
+}
+
+Archer::~Archer()
+{
+}
+
+void Archer::update() {
+    Agent::update();
+
+
+}
+
+void Archer::stop_attacking() {
+
+}
+
+const string& Archer::get_type_string() const {
+    static const string my_type = "Archer";
+    return my_type;
 }

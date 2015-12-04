@@ -18,21 +18,21 @@ public:
     // Overrides Agent's stop to print a message
     void stop() override;
 
-    // Overrides Agent's take_hit to counterattack when attacked.
-    void take_hit(int attack_strength, std::shared_ptr<Agent>& attacker_ptr) override;
-
     // Make this Infantry start attacking the target Agent.
     // Throws an exception if the target is the same as this Agent,
     // is out of range, or is not alive.
     void start_attacking(std::shared_ptr<Agent>& target_ptr) override;
 
 protected:
+    enum class Infantry_state { NOT_ATTACKING, ATTACKING };
+
     Infantry(const std::string& name_, Point location_);
+
+    std::weak_ptr<Agent>& get_target();
+    Infantry_state get_state() const;
 
     virtual double get_range() const = 0;
     virtual int get_strength() const = 0;
-    virtual const std::string& get_type_string() const = 0;
-    virtual const std::string& get_onomatopoeia() const = 0;
 
     // stop attacking and forget target
     virtual void stop_attacking();
@@ -40,9 +40,9 @@ protected:
     // set new target and engage, outputs attacking message
     virtual void engage_new_target(std::shared_ptr<Agent> new_target);
 
-private:
-    enum class Infantry_state { NOT_ATTACKING, ATTACKING };
+    virtual const std::string& get_type_string() const = 0;
 
+private:
     std::weak_ptr<Agent> m_target;
     Infantry_state m_infantry_state;
 
@@ -99,8 +99,47 @@ public:
 
 private:
     const std::string& get_type_string() const override;
-    const std::string& get_onomatopoeia() const override;
+};
 
+class Archer : public Infantry {
+public:
+    explicit Archer(const std::string& name_, Point location_);
+
+    ~Archer();
+
+    // update implements Archer behavior
+    void update() override;
+
+    // output information about the current state
+    void describe() const override;
+
+    // Overrides Agent's stop to print a message
+    void stop() override;
+
+    // Overrides Agent's take_hit to counterattack when attacked.
+    void take_hit(int attack_strength, std::shared_ptr<Agent>& attacker_ptr) override;
+
+    // Make this Archer start attacking the target Agent.
+    // Throws an exception if the target is the same as this Agent,
+    // is out of range, or is not alive.
+    void start_attacking(std::shared_ptr<Agent>& target_ptr) override;
+
+    // returns Archer's attack range
+    double get_range() const override;
+
+    // returns Archer's attack strength
+    int get_strength() const override;
+
+    // disallow copy/move construction or assignment and default ctor
+    Archer() = delete;
+    Archer(const Archer&) = delete;
+    Archer& operator= (const Archer&)  = delete;
+    Archer(Archer&&) = delete;
+    Archer& operator= (Archer&&) = delete;
+
+private:
+    void stop_attacking() override;
+    const std::string& get_type_string() const override;
 };
 
 #endif // WARRIORS_H

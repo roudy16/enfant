@@ -103,6 +103,16 @@ shared_ptr<Structure> Model::get_structure_ptr(const string& name) const {
     return iter->second;
 }
 
+shared_ptr<Structure> Model::get_closest_structure_to_obj(shared_ptr<Sim_object>& obj_ptr) {
+    auto iter = min_element(m_structures.begin(), m_structures.end(), Closest_to_obj(obj_ptr));
+
+    if (iter->second->get_name() == obj_ptr->get_name()) {
+        return shared_ptr<Structure>();
+    }
+
+    return iter->second;
+}
+
 bool Model::is_agent_present(const string& name) const {
     auto iter = m_agents.find(name);
 
@@ -148,8 +158,14 @@ shared_ptr<Agent> Model::get_agent_ptr(const string& name) const {
     return iter->second;
 }
 
-shared_ptr<Agent> Model::get_closest_agent_to_obj(shared_ptr<Sim_object>&) {
+shared_ptr<Agent> Model::get_closest_agent_to_obj(shared_ptr<Sim_object>& obj_ptr) {
+    auto iter = min_element(m_agents.begin(), m_agents.end(), Closest_to_obj(obj_ptr));
 
+    if (iter->second->get_name() == obj_ptr->get_name()) {
+        return shared_ptr<Agent>();
+    }
+
+    return iter->second;
 }
 
 // tell all objects to describe themselves to the console
