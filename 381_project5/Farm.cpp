@@ -9,12 +9,13 @@
 using std::string;
 using std::cout; using std::endl;
 
+// Initial Farm food amount
 constexpr double kFARM_INITIAL_FOOD_AMOUNT = 50.0;
-constexpr double kFARM_INITIAL_PRODUCTION_RATE = 2.0;
+// Farm production rate
+constexpr double kFARM_PRODUCTION_RATE = 2.0;
 
 Farm::Farm(const string& name_, Point location_)
-    : Structure(name_, location_), m_food_amount(kFARM_INITIAL_FOOD_AMOUNT),
-    m_production_rate(kFARM_INITIAL_PRODUCTION_RATE)
+    : Structure(name_, location_), m_food_amount(kFARM_INITIAL_FOOD_AMOUNT)
 {
 }
 
@@ -45,7 +46,7 @@ void Farm::broadcast_current_state() const {
 // update adds the production amount to the stored amount and tells Model to
 // notify Views
 void Farm::update() {
-    m_food_amount += m_production_rate;
+    m_food_amount += kFARM_PRODUCTION_RATE;
     Model::get_instance()->notify_amount(get_name(), m_food_amount);
     cout << "Farm " << get_name() << " now has " << m_food_amount << endl;
 }

@@ -40,7 +40,6 @@ public:
 
 private:
     double m_food_amount;
-    double m_production_rate;
 };
 
 #endif // FARM_H

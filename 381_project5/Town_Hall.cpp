@@ -9,15 +9,16 @@
 using std::string;
 using std::cout; using std::endl;
 
-
+// Initial value of Town_Hall food amount
 constexpr double kTOWNHALL_INITIAL_FOOD_AMOUNT = 0.0;
-constexpr double kTOWNHALL_INITIAL_TAX_RATE = 0.1;
+// Default tax rate
+constexpr double kTOWNHALL_TAX_RATE = 0.1;
+// Minimum amount that can be withdrawn from a Town_Hall
 constexpr double kTOWNHALL_MIN_WITHDRAW = 1.0;
 
 Town_Hall::Town_Hall(const std::string& name_, Point location_)
     : Structure(name_, location_),
-    m_food_amount(kTOWNHALL_INITIAL_FOOD_AMOUNT),
-    m_tax_rate(kTOWNHALL_INITIAL_TAX_RATE)
+    m_food_amount(kTOWNHALL_INITIAL_FOOD_AMOUNT)
 {
 }
 
@@ -42,7 +43,7 @@ void Town_Hall::broadcast_current_state() const {
 // update the amount on hand by subtracting the amount returned.
 double Town_Hall::withdraw(double amount_to_obtain) {
     double return_amount = fmin(amount_to_obtain,
-                                m_food_amount - m_food_amount * m_tax_rate);
+                                m_food_amount - m_food_amount * kTOWNHALL_TAX_RATE);
 
     // Don't return amounts less than kTOWNHALL_MIN_WITHDRAW
     if (return_amount < kTOWNHALL_MIN_WITHDRAW) {

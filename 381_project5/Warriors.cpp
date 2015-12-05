@@ -214,12 +214,15 @@ void Archer::update() {
             return;
         }
 
+        // get distance to target
         double dist_to_agent = cartesian_distance(get_location(), closest_agent->get_location());
 
+        // do nothing if target is out of range
         if (dist_to_agent > get_range()) {
             return;
         }
 
+        // target is in range, let loose!
         engage_new_target(closest_agent);
     }
 }
@@ -232,13 +235,16 @@ void Archer::take_hit(int attack_strength, shared_ptr<Agent> attacker) {
         return;
     }
 
+    // Find nearest Structure to flee to if one exists
     auto this_ptr = static_pointer_cast<Sim_object>(shared_from_this());
     auto closest_structure = Model::get_instance()->get_closest_structure_to_obj(this_ptr);
 
+    // Do nothing if no structures exist
     if (!closest_structure) {
         return;
     }
 
+    // Run away!
     cout << get_name() << ": I'm going to run away to " << closest_structure->get_name() << endl;
     move_to(closest_structure->get_location());
 }

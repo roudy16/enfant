@@ -7,29 +7,6 @@
 #include <string>
 #include <map>
 
-// TODO
-/* *** View class ***
-The View class encapsulates the data and functions needed to generate the map
-display, and control its properties. It has a "memory" for the names and locations
-of the to-be-plotted objects.
-
-Usage: 
-1. Call the update_location function with the name and position of each object
-to be plotted. If the object is not already in the View's memory, it will be added
-along with its location. If it is already present, its location will be set to the 
-supplied location. If a single object changes location, its location can be separately
-updated with a call to update_location. 
-2. Call the update_remove function with the name of any object that should no longer
-be plotted. This must be done *after* any call to update_location that 
-has the same object name since update_location will add any object name supplied.
-3. Call the draw function to print out the map. 
-4. As needed, change the origin, scale, or displayed size of the map 
-with the appropriate functions. Since the view "remembers" the previously updated
-information, immediately calling the draw function will print out a map showing the previous objects
-using the new settings.
-*/
-
-
 // Map is an abstract base class for Views that draw a visual representation 
 // of some area of the world
 class Map : public View {
@@ -68,8 +45,8 @@ protected:
     // any values are legal for the origin
     virtual void set_origin(const Point& origin);
 
+    // Hooks used to get the size and scale of a Map derived class
     virtual double get_scale() const = 0;
-
     virtual int get_size() const = 0;
 
 private:
@@ -81,6 +58,12 @@ private:
     Map_objects_t m_grid_objects;
 };
 
+/*
+    A World_map shows a large area of the world. It keeps track of all objects that
+    have reported a location and displays information about the whereabouts of 
+    those objects. Objects outside the visible area of the World_map will be
+    reported as such.
+*/
 class World_map : public Map {
 public:
     World_map(const std::string& name);
@@ -117,6 +100,11 @@ private:
     int m_size;
 };
 
+/*
+    A Local_map shows the immediate area around an object. As that focus object moves
+    so to does the Local_map. The Local_map is similar to the World_map in its display
+    but does not report objects that are outside its visible area.
+*/
 class Local_map : public Map {
 public:
     Local_map(const std::string& name);
@@ -131,6 +119,7 @@ public:
     Local_map& operator= (Local_map&&) = delete;
 
 private:
+    // Hooks for drawing
     void do_draw_header() override;
     void do_draw_body() override;
 
@@ -138,25 +127,31 @@ private:
     int get_size() const override;
 };
 
+/*
+    Status is an abstract base class of Views that can display numerical information
+    related to an object.
+*/
 class Status : public View {
 public:
-    void update_remove(const std::string& name) override;
-    void clear() override;
+    // Make Status an abstract class
+    virtual ~Status() = 0;
 
-    Status() = delete;
-    Status(const Status&) = delete;
-    Status& operator= (const Status&) = delete;
-    Status(Status&&) = delete;
-    Status& operator= (Status&&) = delete;
+    // Remove named object from Status objects container
+    void update_remove(const std::string& name) override;
+    // Remove all objects
+    void clear() override;
 
 protected:
     Status(const std::string& name);
 
+    // Updates an objects status value, adds object name to container if the
+    // object is not already there.
     void update_status(const std::string& name, double val);
 
 private:
     using Status_objects_t = std::map<std::string, double>;
 
+    // Hook for drawing
     void do_draw_body() override;
 
     Status_objects_t m_objects;
@@ -166,6 +161,8 @@ class Health_status : public Status {
 public:
     explicit Health_status();
 
+    // Updates an objects health value, adds object name to container if the
+    // object is not already there.
     void update_health(const std::string& name, double health) override;
 
     Health_status(const Health_status&) = delete;
@@ -174,6 +171,7 @@ public:
     Health_status& operator= (Health_status&&) = delete;
 
 private:
+    // Hook for drawing
     void do_draw_header() override;
 };
 
@@ -181,6 +179,8 @@ class Amount_status : public Status {
 public:
     explicit Amount_status();
 
+    // Updates an objects amount value, adds object name to container if the
+    // object is not already there.
     void update_amount(const std::string& name, double amount) override;
 
     Amount_status(const Amount_status&) = delete;
@@ -189,6 +189,7 @@ public:
     Amount_status& operator= (Amount_status&&) = delete;
 
 private:
+    //Hook for drawing
     void do_draw_header() override;
 };
 

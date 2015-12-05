@@ -42,6 +42,13 @@ public:
     void start_working(std::shared_ptr<Structure> source_, 
                        std::shared_ptr<Structure> destination_) override;
 
+    // disallow copy/move construction or assignment and default ctor
+    Peasant() = delete;
+    Peasant(const Peasant&) = delete;
+    Peasant& operator= (const Peasant&)  = delete;
+    Peasant(Peasant&&) = delete;
+    Peasant& operator= (Peasant&&) = delete;
+
 private:
     enum class Peasant_State { NOT_WORKING, DEPOSITING, COLLECTING, INBOUND, OUTBOUND };
 
@@ -58,13 +65,6 @@ private:
     std::shared_ptr<Structure> m_destination;
     double m_amount;
     Peasant_State m_peasant_state;
-
-    // disallow copy/move construction or assignment and default ctor
-    Peasant() = delete;
-    Peasant(const Peasant&) = delete;
-    Peasant& operator= (const Peasant&)  = delete;
-    Peasant(Peasant&&) = delete;
-    Peasant& operator= (Peasant&&) = delete;
 };
 
 #endif // PEASANT_H

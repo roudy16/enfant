@@ -5,15 +5,10 @@
 #include <string>
 #include <memory>
 
+// Infantry is an abstract base class that represents the basic capabilities
+// of combatants. They can report about themselves and attack other Agents
 class Infantry : public Agent {
 public:
-    // disallow copy/move construction or assignment and default ctor
-    Infantry() = delete;
-    Infantry(const Infantry&) = delete;
-    Infantry& operator= (const Infantry&)  = delete;
-    Infantry(Infantry&&) = delete;
-    Infantry& operator= (Infantry&&) = delete;
-
     // output information about the current state
     void describe() const override;
 

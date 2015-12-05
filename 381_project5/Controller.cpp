@@ -190,6 +190,7 @@ void Controller::run() {
     cout << "Done" << endl;
 }
 
+// Return a shared_ptr to the open map view, throw an Error if no map view open
 shared_ptr<World_map> Controller::get_map_view() {
     if (mp_map_view.expired()) {
         throw Error("No map view is open!");
@@ -262,36 +263,46 @@ void Controller::agent_attack_command(shared_ptr<Agent> agent_ptr) {
 }
 
 void Controller::agent_stop_command(shared_ptr<Agent> agent_ptr) {
+    // Have Agent stop everything it is doing
     agent_ptr->stop();
 }
 
 void Controller::status_command() {
+    // tell all objects to describe themselves to the console
     Model::get_instance()->describe();
 }
 
+// Attempt to open and attach a new View to the Model
 void Controller::open_command() {
     string view_name = read_in_string();
 
+    // Check if there is already a View of this name open
     shared_ptr<View> view_ptr = Model::get_instance()->find_view(view_name);
     if (view_ptr) {
         throw Error("View of that name already open!");
     }
 
+    // Check what type of View user wants
     if (view_name == "map") {
+        // create a World map that shows a large area of the world
         shared_ptr<World_map> world_map_ptr = make_shared<World_map>("map");
         Model::get_instance()->attach(static_pointer_cast<View>(world_map_ptr));
         mp_map_view = weak_ptr<World_map>(world_map_ptr);
     }
     else if (view_name == "health") {
+        // create a health status view that shows the health of Agents
         auto health_status_ptr = make_shared<Health_status>();
         Model::get_instance()->attach(static_pointer_cast<View>(health_status_ptr));
     }
     else if (view_name == "amounts") {
+        // create an amount status view that shows the food amounts of Sim_objects
         auto amounts_status_ptr = make_shared<Amount_status>();
         Model::get_instance()->attach(static_pointer_cast<View>(amounts_status_ptr));
 
     }
     else {
+        // Create a local map view centered on a Sim_object that matches the input view_name,
+        // throw an Error if no such object exists
         shared_ptr<Sim_object> obj_ptr = Model::get_instance()->get_obj_ptr(view_name);
 
         if (!obj_ptr) {
@@ -303,27 +314,25 @@ void Controller::open_command() {
     }
 }
 
+// Attempt to close and detach a View from Model
 void Controller::close_command() {
-    string view_name;
-    cin >> view_name;
-    //TODO error handling
+    string view_name = read_in_string();
 
+    // Check if there is an open View that matches input name
     shared_ptr<View> view_ptr = Model::get_instance()->find_view(view_name);
     if (!view_ptr) {
         throw Error("No view of that name is open!");
     }
 
-    if (view_name == "map") {
-        mp_map_view = weak_ptr<World_map>();
-    }
-
     Model::get_instance()->detach(view_ptr);
 }
 
+// Draw all Views
 void Controller::show_command() {
     Model::get_instance()->notify_draw();
 }
 
+// Update all Sim_objects
 void Controller::go_command() {
     Model::get_instance()->update();
 }

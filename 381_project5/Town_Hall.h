@@ -40,7 +40,6 @@ public:
 
 private:
     double m_food_amount;
-    double m_tax_rate;
 };
 
 #endif // TOWN_HALL_H

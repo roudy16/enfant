@@ -282,7 +282,11 @@ Status::Status(const string& name) : View(name)
 {
 }
 
-// TODO could make template for this
+Status::~Status()
+{
+}
+
+// if it exists, remove the object that has name from this Status 
 void Status::update_remove(const string& name) {
     auto iter = m_objects.find(name);
 
@@ -299,6 +303,7 @@ void Status::clear() {
     m_objects.clear();
 }
 
+// Print object names followed by their associated status value
 void Status::do_draw_body() {
     for (auto& obj : m_objects) {
         cout << obj.first << ": " << obj.second << endl;
@@ -306,6 +311,8 @@ void Status::do_draw_body() {
     cout << "--------------" << endl;
 }
 
+// update the status value of an object, if that object is not currently
+// contained in this Status then add it.
 void Status::update_status(const string& name, double val) {
     auto obj_iter = m_objects.find(name);
 
