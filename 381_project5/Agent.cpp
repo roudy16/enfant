@@ -4,7 +4,9 @@
 #include <iostream>
 #include <cassert>
 
-using namespace std;
+using std::string;
+using std::cout; using std::endl;
+using std::shared_ptr; using std::static_pointer_cast;
 
 const double kAGENT_INITIAL_SPEED = 5.0;
 const int kAGENT_INITIAL_HEALTH = 5;
@@ -79,7 +81,7 @@ void Agent::lose_health(int attack_strength) {
     }
 }
 
-void Agent::take_hit(int attack_strength, shared_ptr<Agent> &attacker_ptr) {
+void Agent::take_hit(int attack_strength, shared_ptr<Agent> attacker_ptr) {
     lose_health(attack_strength);
 }
 
@@ -136,11 +138,11 @@ void Agent::broadcast_current_state() const {
 
 /* Fat Interface for derived classes */
 // Throws exception that an Agent cannot work.
-void Agent::start_working(shared_ptr<Structure>& dst, shared_ptr<Structure>& src) {
+void Agent::start_working(shared_ptr<Structure> dst, shared_ptr<Structure> src) {
     throw Error(get_name() + ": Sorry, I can't work!");
 }
 
 // Throws exception that an Agent cannot attack.
-void Agent::start_attacking(shared_ptr<Agent>& target) {
+void Agent::start_attacking(shared_ptr<Agent> target) {
     throw Error(get_name() + ": Sorry, I can't attack!");
 }

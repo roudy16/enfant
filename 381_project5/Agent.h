@@ -18,13 +18,6 @@ class Structure;
 
 class Agent : public Sim_object {
 public:
-    // disallow copy/move construction or assignment and default ctor
-    Agent() = delete;
-    Agent(const Agent&) = delete;
-    Agent& operator= (const Agent&) = delete;
-    Agent(Agent&&) = delete;
-    Agent& operator= (Agent&&) = delete;
-
     virtual ~Agent() = 0;
 
     // return true if this agent is Alive or Disappearing
@@ -55,14 +48,21 @@ public:
     // The attacking Agent identifies itself with its this pointer.
     // A derived class can override this function.
     // The function lose_health is called to handle the effect of the attack.
-    virtual void take_hit(int attack_strength, std::shared_ptr<Agent> &attacker_ptr);
+    virtual void take_hit(int attack_strength, std::shared_ptr<Agent> attacker_ptr);
 
     /* Fat Interface for derived classes */
     // Throws exception that an Agent cannot work.
-    virtual void start_working(std::shared_ptr<Structure>&, std::shared_ptr<Structure>&);
+    virtual void start_working(std::shared_ptr<Structure>, std::shared_ptr<Structure>);
 
     // Throws exception that an Agent cannot attack.
-    virtual void start_attacking(std::shared_ptr<Agent>&);
+    virtual void start_attacking(std::shared_ptr<Agent>);
+
+    // disallow copy/move construction or assignment and default ctor
+    Agent() = delete;
+    Agent(const Agent&) = delete;
+    Agent& operator= (const Agent&) = delete;
+    Agent(Agent&&) = delete;
+    Agent& operator= (Agent&&) = delete;
 
 protected:
     Agent(const std::string& name_, Point location_);

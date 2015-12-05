@@ -62,7 +62,7 @@ public:
     // will throw Error("Structure not found!") if no structure of that name
     std::shared_ptr<Structure> get_structure_ptr(const std::string& name) const;
     // returns pointer to closest Structure to passed in object, empty pointer otherwise
-    std::shared_ptr<Structure> get_closest_structure_to_obj(std::shared_ptr<Sim_object>&);
+    std::shared_ptr<Structure> get_closest_structure_to_obj(std::shared_ptr<Sim_object>);
 
     // is there an agent with this name?
     bool is_agent_present(const std::string& name) const;
@@ -73,7 +73,7 @@ public:
     // will throw Error("Agent not found!") if no agent of that name
     std::shared_ptr<Agent> get_agent_ptr(const std::string& name) const;
     // returns pointer to closest Agent to passed in object, empty pointer otherwise
-    std::shared_ptr<Agent> get_closest_agent_to_obj(std::shared_ptr<Sim_object>&);
+    std::shared_ptr<Agent> get_closest_agent_to_obj(std::shared_ptr<Sim_object>);
 
     // tell all objects to describe themselves to the console
     void describe() const;
@@ -86,7 +86,7 @@ public:
     void attach(std::shared_ptr<View>);
     // Detach the View by discarding the supplied pointer from the container of Views
     // - no updates sent to it thereafter.
-    void detach(std::shared_ptr<View>&);
+    void detach(std::shared_ptr<View>);
     // notify the views about an object's location
     void notify_location(const std::string& name, const Point& location);
     // notify the views that an object is now gone

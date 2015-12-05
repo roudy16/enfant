@@ -10,36 +10,27 @@
 #include "Structure.h"
 #include <iostream>
 #include <exception>
+#include <stdexcept>
 #include <algorithm>
 #include <functional>
 #include <utility>
 #include <ctype.h>
 #include <cassert>
 
-using namespace std;
+using std::string;
+using std::cin; using std::cout; using std::endl;
+using std::shared_ptr; using std::weak_ptr; using std::static_pointer_cast; using std::make_shared;
+using std::exception; using std::runtime_error;
+using std::numeric_limits;
+using std::streamsize;
 using namespace std::placeholders;
 
-namespace {
-    // Data for creating a new Sim_object
-    struct New_obj_info {
-        string name;
-        string type;
-        Point start_pt;
-    };
-}
+// Forward declaration
+struct New_obj_info;
 
-// Read two doubles in from input then return Point created from those
-// throws Error if doubles cannot be read
+// Helpers
 static Point read_point();
-
-// Read and find Structure, throws Error if not found
-static shared_ptr<Structure> read_structure_from_input();
-
-// Read a new object name from input, throws Error if name is too short,
-// is not alphanumeric or another object already is using that name
-static void read_name(string& name);
-
-// Read data for creating new Sim_object from input
+static const string read_in_string();
 static void read_new_obj_info(New_obj_info& info);
 
 Controller::Controller()
@@ -76,6 +67,7 @@ static bool string_is_alnum(const string& str) {
     return iter == str.end();
 }
 
+// Initialize mapped containers that hold function pointers to user command logic
 void Controller::init_commands() {
     try {
         m_view_commands["default"] = &Controller::view_default_command;
@@ -97,8 +89,19 @@ void Controller::init_commands() {
         m_program_commands["train"] = &Controller::train_command;
     }
     catch (...) {
-        // TODO handle this
+        throw runtime_error("Error detected in Controller::init_commands");
     }
+}
+
+static const string read_in_string() {
+    string str;
+    cin >> str;
+
+    if (!cin.good()) {
+        throw runtime_error("Failed to read string from input");
+    }
+
+    return str;
 }
 
 static void discard_rest_of_line(std::istream& is) {
@@ -107,8 +110,7 @@ static void discard_rest_of_line(std::istream& is) {
 }
 
 Controller::Controller_agent_fp_t Controller::get_agent_command() {
-    string command;
-    cin >> command;
+    string command = read_in_string();
 
     // Try to find Agent command function
     Controller_agent_fp_t command_ptr = get_command_helper(m_agent_commands, command);
@@ -144,9 +146,8 @@ void Controller::run() {
     // main program loop, exited when user enters "quit" command
     while (true) {
         try {
-            string first_word;
             cout << "\nTime " << Model::get_instance()->get_time() << ": Enter command: ";
-            cin >> first_word;
+            string first_word = read_in_string();
 
             // Check if user wants to quit
             if (first_word == "quit") {
@@ -178,15 +179,11 @@ void Controller::run() {
         } // End try-block
         catch (exception& e) {
             cout << e.what() << endl;
-
-            // TODO Kieras said this is bad, see code review for P3
-            // If we've reached EOF allow program to exit normally
-            if (cin.eof()) break;
-
             discard_rest_of_line(cin);
         }
         catch (...) {
             cout << "Unknown exception caught!" << endl;
+            break;
         }
     } // End main program loop
 
@@ -236,8 +233,7 @@ void Controller::agent_move_command(shared_ptr<Agent> agent_ptr) {
 }
 
 static shared_ptr<Structure> read_structure_from_input() {
-    string structure_name;
-    cin >> structure_name;
+    string structure_name = read_in_string();
     return Model::get_instance()->get_structure_ptr(structure_name);
 }
 
@@ -255,8 +251,7 @@ void Controller::agent_work_command(shared_ptr<Agent> agent_ptr) {
 
 void Controller::agent_attack_command(shared_ptr<Agent> agent_ptr) {
     // read name for target to attack
-    string target_name;
-    cin >> target_name;
+    string target_name = read_in_string();
 
     // Find target Agent, throws Error if Agent not found
     shared_ptr<Agent> target_ptr = Model::get_instance()->get_agent_ptr(target_name);
@@ -275,16 +270,12 @@ void Controller::status_command() {
 }
 
 void Controller::open_command() {
-    string view_name;
-    cin >> view_name;
-    //TODO error handling
+    string view_name = read_in_string();
 
     shared_ptr<View> view_ptr = Model::get_instance()->find_view(view_name);
     if (view_ptr) {
         throw Error("View of that name already open!");
     }
-
-    // TODO create new view, dont forget map view weak_ptr
 
     if (view_name == "map") {
         shared_ptr<World_map> world_map_ptr = make_shared<World_map>("map");
@@ -322,6 +313,10 @@ void Controller::close_command() {
         throw Error("No view of that name is open!");
     }
 
+    if (view_name == "map") {
+        mp_map_view = weak_ptr<World_map>();
+    }
+
     Model::get_instance()->detach(view_ptr);
 }
 
@@ -333,20 +328,23 @@ void Controller::go_command() {
     Model::get_instance()->update();
 }
 
-static void read_name(string& name) {
-    cin >> name;
+// Data for creating a new Sim_object
+struct New_obj_info {
+    string name;
+    string type;
+    Point start_pt;
+};
+
+// Read data for creating new Sim_object from input
+static void read_new_obj_info(New_obj_info& info) {
+    info.name = read_in_string();
 
     // Check if input name is a valid object name
-    if (name.length() < 2 || !string_is_alnum(name) ||
-        Model::get_instance()->is_name_in_use(name))
+    if (info.name.length() < 2 || !string_is_alnum(info.name) ||
+        Model::get_instance()->is_name_in_use(info.name))
     {
         throw Error("Invalid name for new object!");
     }
-}
-
-static void read_new_obj_info(New_obj_info& info) {
-    // read in and validate name
-    read_name(info.name);
 
     // read in type of Structure to create, no validation yet
     cin >> info.type;

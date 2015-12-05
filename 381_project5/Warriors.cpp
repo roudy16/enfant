@@ -7,7 +7,9 @@
 #include <string>
 #include <cassert>
 
-using namespace std;
+using std::string;
+using std::cout; using std::endl;
+using std::shared_ptr; using std::weak_ptr; using std::static_pointer_cast; using std::make_shared;
 
 // Strength and range values for Soldier and Archer class
 constexpr int kSOLDIER_INITIAL_STRENGTH = 2;
@@ -19,17 +21,15 @@ constexpr double kARCHER_INITIAL_RANGE = 6.0;
 Infantry::Infantry(const string& name, Point location)
     : Agent(name, location), m_infantry_state(Infantry_state::NOT_ATTACKING)
 {
-#ifdef PRINT_CTORS_DTORS
-    cout << "Infantry " << get_name() << " constructed" << endl;
-#endif
 }
 
 void Infantry::stop_attacking() {
     m_infantry_state = Infantry_state::NOT_ATTACKING;
 }
 
+// Have Infantry set a new target and attack it!
 void Infantry::engage_new_target(shared_ptr<Agent> new_target) {
-    mp_target = static_cast<weak_ptr<Agent>>(new_target);
+    mp_target = weak_ptr<Agent>(new_target);
     cout << get_name() << ": I'm attacking!" << endl;
     m_infantry_state = Infantry_state::ATTACKING;
 }
@@ -64,7 +64,7 @@ void Infantry::stop() {
 // Make this Infantry start attacking the target Agent.
 // Throws an exception if the target is the same as this Agent,
 // is out of range, or is not alive.
-void Infantry::start_attacking(shared_ptr<Agent>& target_ptr) {
+void Infantry::start_attacking(shared_ptr<Agent> target_ptr) {
     assert(target_ptr);
 
     // Ensure infantry does not attack self
@@ -98,15 +98,9 @@ Infantry::Infantry_state Infantry::get_state() const {
 Soldier::Soldier(const string& name_, Point location_)
     : Infantry(name_, location_)
 {
-#ifdef PRINT_CTORS_DTORS
-    cout << "Soldier " << get_name() << " constructed" << endl;
-#endif
 }
 
 Soldier::~Soldier() {
-#ifdef PRINT_CTORS_DTORS
-    cout << "Soldier " << get_name() << " destructed" << endl;
-#endif
 }
 
 void Soldier::update() {
@@ -147,7 +141,7 @@ void Soldier::update() {
 }
 
 // Overrides Agent's take_hit to counterattack when attacked.
-void Soldier::take_hit(int attack_strength, shared_ptr<Agent>& attacker_ptr) {
+void Soldier::take_hit(int attack_strength, shared_ptr<Agent> attacker_ptr) {
     Agent::lose_health(attack_strength);
 
     // Attack the attacker if still alive and not already engaged
@@ -194,16 +188,17 @@ void Archer::update() {
             cout << get_name() << ": Target is now out of range" << endl;
             stop_attacking();
         }
+        else {
+            // target is in range, aim to maim!
+            cout << get_name() << ": Twang!" << endl;
+            shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
+            get_target().lock()->take_hit(kARCHER_INITIAL_STRENGTH, this_ptr);
 
-        // target is in range, aim to maim!
-        cout << get_name() << ": Clang!" << endl;
-        shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
-        get_target().lock()->take_hit(kARCHER_INITIAL_STRENGTH, this_ptr);
-
-        // If Archer killed the target, report it, stop attacking and forget target
-        if (get_target().expired()) {
-            cout << get_name() << ": I triumph!" << endl;
-            stop_attacking();
+            // If Archer killed the target, report it, stop attacking and forget target
+            if (get_target().expired()) {
+                cout << get_name() << ": I triumph!" << endl;
+                stop_attacking();
+            }
         }
     }
 
@@ -225,7 +220,7 @@ void Archer::update() {
     }
 }
 
-void Archer::take_hit(int attack_strength, shared_ptr<Agent>& attacker) {
+void Archer::take_hit(int attack_strength, shared_ptr<Agent> attacker) {
     lose_health(attack_strength);
 
     // Do nothing else if we died
@@ -240,7 +235,6 @@ void Archer::take_hit(int attack_strength, shared_ptr<Agent>& attacker) {
         return;
     }
 
-    // TODO don't really need Structure interface, could use Sim_object
     cout << get_name() << ": I'm going to run away to " << closest_structure->get_name() << endl;
     move_to(closest_structure->get_location());
 }

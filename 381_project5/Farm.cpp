@@ -6,7 +6,8 @@
 #include <iostream>
 #include <cmath>
 
-using namespace std;
+using std::string;
+using std::cout; using std::endl;
 
 constexpr double kFARM_INITIAL_FOOD_AMOUNT = 50.0;
 constexpr double kFARM_INITIAL_PRODUCTION_RATE = 2.0;
@@ -15,15 +16,10 @@ Farm::Farm(const string& name_, Point location_)
     : Structure(name_, location_), m_food_amount(kFARM_INITIAL_FOOD_AMOUNT),
     m_production_rate(kFARM_INITIAL_PRODUCTION_RATE)
 {
-#ifdef PRINT_CTORS_DTORS
-    cout << "Farm " << get_name() << " constructed" << endl;
-#endif
 }
 
-Farm::~Farm() {
-#ifdef PRINT_CTORS_DTORS
-    cout << "Farm " << get_name() << " destructed" << endl;
-#endif
+Farm::~Farm()
+{
 }
 
 // returns the specified amount, or the remaining amount, whichever is less,
@@ -39,9 +35,12 @@ double Farm::withdraw(double amount_to_get) {
     return return_amount;
 }
 
-double Farm::get_amount() const {
-    return m_food_amount;
+// ask model to notify views of current state
+void Farm::broadcast_current_state() const {
+    Structure::broadcast_current_state();
+    Model::get_instance()->notify_amount(get_name(), m_food_amount);
 }
+
 
 // update adds the production amount to the stored amount and tells Model to
 // notify Views

@@ -3,7 +3,9 @@
 #include <iostream>
 #include <iomanip>
 
-using namespace std;
+using std::string;
+using std::cout; using std::endl;
+using std::ios; using std::streamsize; using std::fixed; using std::setprecision;
 
 namespace {
     // Object to save and restore cout settings

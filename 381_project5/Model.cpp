@@ -7,22 +7,23 @@
 #include "Agent.h"
 #include "Utility.h"
 #include "View.h"
-#include <vector>
 #include <algorithm>
 #include <cassert>
 
-using namespace std;
+using std::string;
+using std::shared_ptr; using std::static_pointer_cast;
+using std::min_element;
 
 namespace {
     class Closest_to_obj {
     public:
-        Closest_to_obj(std::shared_ptr<Sim_object>& obj_ptr)
+        Closest_to_obj(shared_ptr<Sim_object> obj_ptr)
             : m_location(obj_ptr->get_location()), m_name(obj_ptr->get_name())
         {
         }
 
         template <typename T>
-        bool operator()(T& lhs, T& rhs) {
+        bool operator()(T& lhs, T& rhs) const {
             if (lhs.second->get_name() == m_name) {
                 return false;
             }
@@ -41,8 +42,8 @@ namespace {
         }
 
     private:
-        Point m_location;
-        std::string m_name;
+        const Point m_location;
+        const string m_name;
     };
 }
 
@@ -137,10 +138,10 @@ shared_ptr<Structure> Model::get_structure_ptr(const string& name) const {
     return iter->second;
 }
 
-shared_ptr<Structure> Model::get_closest_structure_to_obj(shared_ptr<Sim_object>& obj_ptr) {
+shared_ptr<Structure> Model::get_closest_structure_to_obj(shared_ptr<Sim_object> obj_ptr) {
     auto iter = min_element(m_structures.begin(), m_structures.end(), Closest_to_obj(obj_ptr));
 
-    if (iter->second->get_name() == obj_ptr->get_name()) {
+    if (iter == m_structures.end() || iter->second->get_name() == obj_ptr->get_name()) {
         return shared_ptr<Structure>();
     }
 
@@ -192,10 +193,10 @@ shared_ptr<Agent> Model::get_agent_ptr(const string& name) const {
     return iter->second;
 }
 
-shared_ptr<Agent> Model::get_closest_agent_to_obj(shared_ptr<Sim_object>& obj_ptr) {
+shared_ptr<Agent> Model::get_closest_agent_to_obj(shared_ptr<Sim_object> obj_ptr) {
     auto iter = min_element(m_agents.begin(), m_agents.end(), Closest_to_obj(obj_ptr));
 
-    if (iter->second->get_name() == obj_ptr->get_name()) {
+    if (iter == m_agents.end() || iter->second->get_name() == obj_ptr->get_name()) {
         return shared_ptr<Agent>();
     }
 
@@ -233,7 +234,7 @@ void Model::attach(shared_ptr<View> view_ptr) {
 
 // Detach the View by discarding the supplied pointer from the container of Views
 // - no updates sent to it thereafter.
-void Model::detach(shared_ptr<View>& view_ptr) {
+void Model::detach(shared_ptr<View> view_ptr) {
     auto iter = find(m_views.begin(), m_views.end(), view_ptr);
     assert(iter != m_views.end());
     m_views.erase(iter);
@@ -241,35 +242,35 @@ void Model::detach(shared_ptr<View>& view_ptr) {
 
 // notify the views about an object's location
 void Model::notify_location(const string& name, const Point& location) {
-    for (shared_ptr<View>& p : m_views) {
+    for (shared_ptr<View> p : m_views) {
         p->update_location(name, location);
     }
 }
 
 // notify the views that an object is now gone
 void Model::notify_gone(const string& name) {
-    for (shared_ptr<View>& p : m_views) {
+    for (shared_ptr<View> p : m_views) {
         p->update_remove(name);
     }
 }
 
 // notify the views of an objects's health
 void Model::notify_health(const string& name, double health) {
-    for (shared_ptr<View>& p : m_views) {
+    for (shared_ptr<View> p : m_views) {
         p->update_health(name, health);
     }
 }
 
 // notify the views of an object's food amount
 void Model::notify_amount(const string& name, double amount) {
-    for (shared_ptr<View>& p : m_views) {
+    for (shared_ptr<View> p : m_views) {
         p->update_amount(name, amount);
     }
 }
 
 // notify the views to draw their information
 void Model::notify_draw() {
-    for (shared_ptr<View>& p : m_views) {
+    for (shared_ptr<View> p : m_views) {
         p->draw();
     }
 }

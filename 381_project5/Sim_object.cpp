@@ -3,7 +3,7 @@
 #include <string>
 #include <iostream>
 
-using namespace std;
+using std::string;
 
 Sim_object::Sim_object(const string& name_) : m_name(name_)
 {

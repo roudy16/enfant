@@ -1,13 +1,13 @@
 #ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include "Views.h"
 #include <map>
 #include <string>
 #include <memory>
 
 class Agent;
 class View;
+class World_map;
 
 /* Controller
 This class is responsible for controlling the Model and View according to interactions
@@ -22,11 +22,6 @@ public:
     void run();
 
 private:
-    using Controller_fp_t = void(Controller::*)();
-    using Controller_agent_fp_t = void(Controller::*)(std::shared_ptr<Agent>);
-    using Command_map_t = std::map<std::string, Controller_fp_t>;
-    using Agent_command_map_t = std::map<std::string, Controller_agent_fp_t>;
-
     // View commands from spec
     void view_default_command();
     void view_size_command();
@@ -51,6 +46,11 @@ private:
     // helper to initialize command containers with string to 
     // function pointer mappings
     void init_commands();
+
+    using Controller_fp_t = void(Controller::*)();
+    using Controller_agent_fp_t = void(Controller::*)(std::shared_ptr<Agent>);
+    using Command_map_t = std::map<std::string, Controller_fp_t>;
+    using Agent_command_map_t = std::map<std::string, Controller_agent_fp_t>;
 
     // Returns function pointer to associated command if it exists, 
     // returns nullptr otherwise

@@ -5,20 +5,16 @@
 #include <string>
 #include <memory>
 
-using namespace std;
+using std::string;
+using std::cout; using std::endl;
 
 Structure::Structure(string name, Point location) 
     : Sim_object(name), m_location(location)
 {
-#ifdef PRINT_CTORS_DTORS
-    cout << "Structure " << get_name() << " constructed" << endl;
-#endif
 }
 
-Structure::~Structure() {
-#ifdef PRINT_CTORS_DTORS
-    cout << "Structure " << get_name() << " destructed" << endl;
-#endif
+Structure::~Structure()
+{
 }
 
 void Structure::update()
@@ -33,7 +29,6 @@ void Structure::describe() const {
 // ask model to notify views of current state
 void Structure::broadcast_current_state() const {
     Model::get_instance()->notify_location(get_name(), get_location());
-    Model::get_instance()->notify_amount(get_name(), get_amount());
 }
 
 double Structure::withdraw(double amount_to_get) {
@@ -42,8 +37,4 @@ double Structure::withdraw(double amount_to_get) {
 
 void Structure::deposit(double amount_to_give)
 {
-}
-
-double Structure::get_amount() const {
-    return 0.0;
 }

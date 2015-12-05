@@ -23,7 +23,7 @@ public:
     // Make this Infantry start attacking the target Agent.
     // Throws an exception if the target is the same as this Agent,
     // is out of range, or is not alive.
-    void start_attacking(std::shared_ptr<Agent>& target_ptr) override;
+    void start_attacking(std::shared_ptr<Agent> target_ptr) override;
 
 protected:
     enum class Infantry_state { NOT_ATTACKING, ATTACKING };
@@ -66,7 +66,7 @@ public:
     void update() override;
 
     // Overrides Agent's take_hit to counterattack when attacked.
-    void take_hit(int attack_strength, std::shared_ptr<Agent>& attacker_ptr) override;
+    void take_hit(int attack_strength, std::shared_ptr<Agent> attacker_ptr) override;
 
     // disallow copy/move construction or assignment and default ctor
     Soldier() = delete;
@@ -92,7 +92,7 @@ public:
     void update() override;
 
     // Overrides Agent's take_hit to counterattack when attacked.
-    void take_hit(int attack_strength, std::shared_ptr<Agent>& attacker_ptr) override;
+    void take_hit(int attack_strength, std::shared_ptr<Agent> attacker_ptr) override;
 
     // disallow copy/move construction or assignment and default ctor
     Archer() = delete;

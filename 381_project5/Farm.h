@@ -24,11 +24,12 @@ public:
     // output information about the current state
     void describe() const override;
 
+    // ask model to notify views of current state
+    void broadcast_current_state() const override;
+
     // returns the specified amount, or the remaining amount, whichever is less,
     // and deducts that amount from the amount on hand
     double withdraw(double amount_to_get) override;
-
-    double get_amount() const override;
 
     // disallow copy/move construction or assignment and default ctor
     Farm() = delete;

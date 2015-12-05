@@ -7,7 +7,8 @@
 #include <string>
 #include <memory>
 
-using namespace std;
+using std::string;
+using std::shared_ptr; using std::static_pointer_cast; using std::make_shared;
 
 shared_ptr<Agent> create_agent(const string& name, const string& type, Point location) {
     shared_ptr<Agent> new_agent_ptr;

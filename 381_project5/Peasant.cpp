@@ -4,9 +4,13 @@
 #include "Model.h"
 #include <string>
 #include <iostream>
+#include <memory>
 
-using namespace std;
+using std::string;
+using std::cout; using std::endl;
+using std::shared_ptr;
 
+// Initial values for Peasant variables
 constexpr double kPEASANT_INITIAL_AMOUNT = 0.0;
 constexpr double kPEASANT_MAX_AMOUNT = 35.0;
 
@@ -15,15 +19,10 @@ Peasant::Peasant(const string& name_, Point location_)
     m_destination(nullptr), m_amount(kPEASANT_INITIAL_AMOUNT),
     m_peasant_state(Peasant_State::NOT_WORKING)
 {
-#ifdef PRINT_CTORS_DTORS
-    cout << "Peasant " << get_name() << " constructed" << endl;
-#endif
 }
 
-Peasant::~Peasant() {
-#ifdef PRINT_CTORS_DTORS
-    cout << "Peasant " << get_name() << " destructed" << endl;
-#endif
+Peasant::~Peasant()
+{
 }
 
 bool Peasant::is_working() {
@@ -117,7 +116,7 @@ void Peasant::stop() {
 
 // starts the working process
 // Throws an exception if the source is the same as the destination.
-void Peasant::start_working(shared_ptr<Structure>& source_, shared_ptr<Structure>& destination_) {
+void Peasant::start_working(shared_ptr<Structure> source_, shared_ptr<Structure> destination_) {
     Agent::stop();
     forget_work();
 

@@ -39,8 +39,8 @@ public:
 
     // starts the working process
     // Throws an exception if the source is the same as the destination.
-    void start_working(std::shared_ptr<Structure>& source_, 
-                       std::shared_ptr<Structure>& destination_) override;
+    void start_working(std::shared_ptr<Structure> source_, 
+                       std::shared_ptr<Structure> destination_) override;
 
 private:
     enum class Peasant_State { NOT_WORKING, DEPOSITING, COLLECTING, INBOUND, OUTBOUND };

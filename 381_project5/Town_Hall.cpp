@@ -1,11 +1,14 @@
 #include "Town_Hall.h"
 #include "Geometry.h"
 #include "Utility.h"
+#include "Model.h"
 #include <string>
 #include <cmath>
 #include <iostream>
 
-using namespace std;
+using std::string;
+using std::cout; using std::endl;
+
 
 constexpr double kTOWNHALL_INITIAL_FOOD_AMOUNT = 0.0;
 constexpr double kTOWNHALL_INITIAL_TAX_RATE = 0.1;
@@ -16,20 +19,22 @@ Town_Hall::Town_Hall(const std::string& name_, Point location_)
     m_food_amount(kTOWNHALL_INITIAL_FOOD_AMOUNT),
     m_tax_rate(kTOWNHALL_INITIAL_TAX_RATE)
 {
-#ifdef PRINT_CTORS_DTORS
-    cout << "Town_Hall " << get_name() << " constructed" << endl;
-#endif
 }
 
-Town_Hall::~Town_Hall() {
-#ifdef PRINT_CTORS_DTORS
-    cout << "Town_Hall " << get_name() << " destructed" << endl;
-#endif
+Town_Hall::~Town_Hall()
+{
 }
 
 // deposit adds in the supplied amount
 void Town_Hall::deposit(double deposit_amount) {
     m_food_amount += deposit_amount;
+    Model::get_instance()->notify_amount(get_name(), m_food_amount);
+}
+
+// ask model to notify views of current state
+void Town_Hall::broadcast_current_state() const {
+    Structure::broadcast_current_state();
+    Model::get_instance()->notify_amount(get_name(), m_food_amount);
 }
 
 // Return whichever is less, the request or (the amount on hand - 10%) (a "tax"),
@@ -46,6 +51,8 @@ double Town_Hall::withdraw(double amount_to_obtain) {
 
     // Reduce amount on hand by amount to be returned
     m_food_amount -= return_amount ;
+    Model::get_instance()->notify_amount(get_name(), m_food_amount);
+
     return return_amount;
 }
 

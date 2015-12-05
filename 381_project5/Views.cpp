@@ -7,7 +7,10 @@
 #include <cmath>
 #include <cassert>
 
-using namespace std;
+using std::vector;
+using std::string;
+using std::cout; using std::endl;
+using std::setw;
 
 // default World_map settings
 constexpr double kDEFAULT_MAP_SCALE = 2.0;
@@ -27,27 +30,6 @@ constexpr int kDEFAULT_LOCALMAP_SIZE = 9;
 // Prints objects that are not visible on the grid, offgrid objects must be in
 // passed in container before function is called
 static void print_offgrid_helper(const vector<const string*>& offgrid_objects);
-
-namespace {
-    // Object to save and restore cout settings
-    // Settings saved when object is created then restored when object destroyed
-    class Cout_settings_saver {
-    public:
-        // Save settings
-        Cout_settings_saver() : m_form_flags(cout.flags()), m_old_precision(cout.precision())
-        {}
-
-        // Restore settings
-        ~Cout_settings_saver() {
-            cout.flags(m_form_flags);
-            cout.precision(m_old_precision);
-        }
-
-    private:
-        ios::fmtflags m_form_flags;
-        streamsize m_old_precision;
-    };
-}
 
 Map::Map(const string& name, const Point& origin)
     : View(name), m_origin(origin)

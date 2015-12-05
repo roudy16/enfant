@@ -13,9 +13,6 @@
     #endif
 #endif
 
-// TODO remove. Causes messages to be printed
-//#define PRINT_CTORS_DTORS
-
 /* Utility declarations, functions, and classes used by other modules */
 
 // a simple class for error exceptions that inherits from std::exception
@@ -28,5 +25,4 @@ public:
 private:
     const std::string msg;
 };
-
 #endif // UTILITY_H
