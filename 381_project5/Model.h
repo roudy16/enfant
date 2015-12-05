@@ -5,6 +5,7 @@
 #include <map>
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 // Forward declarations
 class Model;
@@ -110,6 +111,12 @@ private:
     ~Model();
     // Initialize the Model, not called in ctor to prevent recursive initialization
     void init();
+
+    // Helper template function for finding closest objects to another
+    // when used to search a map container of shared_ptrs to Sim_objects function will
+    // return a shared_ptr to the closest object to obj_ptr
+    template <typename C>
+    typename C::mapped_type get_closest_helper(C&, std::shared_ptr<Sim_object>);
 
     static Model* mp_instance; // pointer to single instance of Model
 

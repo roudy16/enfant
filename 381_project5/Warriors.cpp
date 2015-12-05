@@ -202,11 +202,15 @@ void Archer::update() {
         }
     }
 
+    // If the Archer is not attacking at this point it will try to find another Agent
+    // in range and attack it!
     if (get_state() == Infantry_state::NOT_ATTACKING) {
+        // Ask Model for closest other Agent to this Archer
         auto this_ptr = static_pointer_cast<Sim_object>(shared_from_this());
         auto closest_agent = Model::get_instance()->get_closest_agent_to_obj(this_ptr);
 
-        if (!closest_agent || closest_agent->get_name() == get_name()) {
+        // Ensure the Model gave us a valid Agent ptr
+        if (!closest_agent) {
             return;
         }
 

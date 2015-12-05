@@ -14,39 +14,6 @@ using std::string;
 using std::shared_ptr; using std::static_pointer_cast;
 using std::min_element;
 
-namespace {
-    class Closest_to_obj {
-    public:
-        Closest_to_obj(shared_ptr<Sim_object> obj_ptr)
-            : m_location(obj_ptr->get_location()), m_name(obj_ptr->get_name())
-        {
-        }
-
-        template <typename T>
-        bool operator()(T& lhs, T& rhs) const {
-            if (lhs.second->get_name() == m_name) {
-                return false;
-            }
-            if (rhs.second->get_name() == m_name) {
-                return true;
-            }
-
-            double dist_to_lhs = cartesian_distance(m_location, lhs.second->get_location());
-            double dist_to_rhs = cartesian_distance(m_location, rhs.second->get_location());
-
-            if (dist_to_lhs == dist_to_rhs) {
-                return lhs.second->get_name() < rhs.second->get_name();
-            }
-
-            return dist_to_lhs < dist_to_rhs;
-        }
-
-    private:
-        const Point m_location;
-        const string m_name;
-    };
-}
-
 // class used to deallocate Model
 class Model_destroyer {
 public:
@@ -138,14 +105,69 @@ shared_ptr<Structure> Model::get_structure_ptr(const string& name) const {
     return iter->second;
 }
 
-shared_ptr<Structure> Model::get_closest_structure_to_obj(shared_ptr<Sim_object> obj_ptr) {
-    auto iter = min_element(m_structures.begin(), m_structures.end(), Closest_to_obj(obj_ptr));
+// Comparator for finding closest object to another object. The Comparator is 
+// initialized with the unique name of an object that we want to find the closest 
+// other object to. When used to search a container of objects, object that evaluates
+// as least is the object that is closest to the object used to init. In the event
+// of a tie the object with the lesser lexicographical name is least
+class Closest_to_obj {
+public:
+    Closest_to_obj(shared_ptr<Sim_object> obj_ptr)
+        : m_location(obj_ptr->get_location()), m_name(obj_ptr->get_name())
+    {
+    }
 
-    if (iter == m_structures.end() || iter->second->get_name() == obj_ptr->get_name()) {
-        return shared_ptr<Structure>();
+    // Compare distances and names of objects
+    // Note: this template only works with std::map iterators that point
+    // to Sim_objects
+    template <typename T>
+    bool operator()(T& lhs, T& rhs) const {
+        // Check if either argument is the object used to init
+        // Object used to init always evaluates greater than any other
+        if (lhs.second->get_name() == m_name) {
+            return false;
+        }
+        if (rhs.second->get_name() == m_name) {
+            return true;
+        }
+
+        // get distances from args to init object
+        double dist_to_lhs = cartesian_distance(m_location, lhs.second->get_location());
+        double dist_to_rhs = cartesian_distance(m_location, rhs.second->get_location());
+
+        // resolves distance ties with name comparison
+        if (dist_to_lhs == dist_to_rhs) {
+            return lhs.second->get_name() < rhs.second->get_name();
+        }
+
+        // return true if lhs is closer than rhs
+        return dist_to_lhs < dist_to_rhs;
+    }
+
+private:
+    // name and location of object we want to find closest other to.
+    const Point m_location;
+    const string m_name;
+};
+
+// Helper template function for finding closest objects to another
+// when used to search a map container of shared_ptrs to Sim_objects function will
+// return a shared_ptr to the closest object to obj_ptr
+template <typename C>
+typename C::mapped_type Model::get_closest_helper(C& container, std::shared_ptr<Sim_object> obj_ptr) {
+    // Get and iterator to the closest object to obj_ptr
+    typename C::iterator iter = std::min_element(container.begin(), container.end(), Closest_to_obj(obj_ptr));
+
+    // Check if a valid min element was found, return empty ptr if none found
+    if (iter == container.end() || iter->second->get_name() == obj_ptr->get_name()) {
+        return typename C::mapped_type();
     }
 
     return iter->second;
+}
+
+shared_ptr<Structure> Model::get_closest_structure_to_obj(shared_ptr<Sim_object> obj_ptr) {
+    return get_closest_helper(m_structures, obj_ptr);
 }
 
 bool Model::is_agent_present(const string& name) const {
@@ -194,13 +216,7 @@ shared_ptr<Agent> Model::get_agent_ptr(const string& name) const {
 }
 
 shared_ptr<Agent> Model::get_closest_agent_to_obj(shared_ptr<Sim_object> obj_ptr) {
-    auto iter = min_element(m_agents.begin(), m_agents.end(), Closest_to_obj(obj_ptr));
-
-    if (iter == m_agents.end() || iter->second->get_name() == obj_ptr->get_name()) {
-        return shared_ptr<Agent>();
-    }
-
-    return iter->second;
+    return get_closest_helper(m_agents, obj_ptr);
 }
 
 // tell all objects to describe themselves to the console
