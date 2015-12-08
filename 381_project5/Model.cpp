@@ -43,11 +43,13 @@ Model::~Model() {
 }
 
 void Model::init() {
+    // Starting Structures
     add_structure(create_structure("Rivendale", "Farm", Point(10., 10.)));
     add_structure(create_structure("Sunnybrook", "Farm", Point(0., 30.)));
     add_structure(create_structure("Shire", "Town_Hall", Point(20., 20.)));
     add_structure(create_structure("Paduca", "Town_Hall", Point(30., 30.)));
 
+    // Starting Agents
     add_agent(create_agent("Pippin", "Peasant", Point(5., 10.)));
     add_agent(create_agent("Merry", "Peasant", Point(0., 25.)));
     add_agent(create_agent("Zug", "Soldier", Point(20., 30.)));
@@ -119,7 +121,7 @@ public:
 
     // Compare distances and names of objects
     // Note: this template only works with std::map iterators that point
-    // to Sim_objects
+    // to Sim_objects or objects derived some Sim_object
     template <typename T>
     bool operator()(T& lhs, T& rhs) const {
         // Check if either argument is the object used to init

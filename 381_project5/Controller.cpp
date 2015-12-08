@@ -358,7 +358,7 @@ static void read_new_obj_info(New_obj_info& info) {
     }
 
     // read in type of Structure to create, no validation yet
-    cin >> info.type;
+    read_in_string(info.type);
 
     // read in start point
     info.start_pt = read_point();
@@ -370,8 +370,8 @@ void Controller::build_command() {
 
     // create new Structure if information read in is valid
     shared_ptr<Structure> new_structure = create_structure(info.name,
-                                                info.type,
-                                                info.start_pt);
+                                                           info.type,
+                                                           info.start_pt);
 
     // Add new Structure to Model
     Model::get_instance()->add_structure(new_structure);

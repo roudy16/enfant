@@ -8,6 +8,18 @@ The following is a list of issues provided by the instructor:
 
 Malformed MVC  e.g. Model manages or draws views instead of Controller. 1 points
     - Archer calls on Model to find the nearest Agent/Structure to it, this wrong?
+      
+    - I added functionality to the Model related to game logic, should I 
+      instead give access to the Model's data? Or should I improve the
+      Observer pattern and broadcast only to listeners who care about certain
+      data updates?
+
+    - Controller reads string and creates a type of view on the 'open'
+      command, I suspect I should add a View factory method.
+
+    - Ah, I added a notify_draw() function to Model to get the views to draw. 
+      Only the Controller calls this function but I guess that messes up MVC. 
+      Should I give the Controller access to the Views container instead?
 
 Excess destructors declared, specified, or defined. 1 points
     - Structure has ctors and such deleted but this should not be necessary because
@@ -42,6 +54,9 @@ Defect in class structure for Warriors e.g. missing itermediate base class 1 poi
 
 Protected or unnecessary static member variables used 1 points
     - static variable used in get_type_string() within Infantry derived classes.
+
+    - The constexpr stuff could be applicable here as well, see comment
+      several lines up.
 
 
 std::string parameter not passed by const reference 1 points
