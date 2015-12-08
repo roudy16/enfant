@@ -100,9 +100,6 @@ Soldier::Soldier(const string& name_, Point location_)
 {
 }
 
-Soldier::~Soldier() {
-}
-
 void Soldier::update() {
     Agent::update();
 
@@ -163,10 +160,6 @@ const string& Soldier::get_type_string() const {
 
 Archer::Archer(const string& name_, Point location_)
     : Infantry(name_, location_)
-{
-}
-
-Archer::~Archer()
 {
 }
 

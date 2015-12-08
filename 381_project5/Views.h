@@ -67,7 +67,6 @@ private:
 class World_map : public Map {
 public:
     World_map(const std::string& name);
-    //virtual ~World_map();
 
     // any values are legal for the origin
     void set_origin(const Point& origin) override;
@@ -108,7 +107,6 @@ private:
 class Local_map : public Map {
 public:
     Local_map(const std::string& name);
-    //virtual ~Local_map();
 
     void update_location(const std::string& name, Point location) override;
 

@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <functional>
 #include <utility>
-#include <ctype.h>
 #include <cassert>
 
 using std::string;
@@ -30,7 +29,7 @@ struct New_obj_info;
 
 // Helpers
 static Point read_point();
-static const string read_in_string();
+static const string&& read_in_string();
 static void read_new_obj_info(New_obj_info& info);
 
 Controller::Controller()
@@ -93,7 +92,7 @@ void Controller::init_commands() {
     }
 }
 
-static const string read_in_string() {
+static const string&& read_in_string() {
     string str;
     cin >> str;
 
@@ -101,7 +100,7 @@ static const string read_in_string() {
         throw runtime_error("Failed to read string from input");
     }
 
-    return str;
+    return move(str);
 }
 
 static void discard_rest_of_line(std::istream& is) {

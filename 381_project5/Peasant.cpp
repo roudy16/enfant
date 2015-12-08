@@ -21,10 +21,6 @@ Peasant::Peasant(const string& name_, Point location_)
 {
 }
 
-Peasant::~Peasant()
-{
-}
-
 bool Peasant::is_working() {
     return m_peasant_state != Peasant_State::NOT_WORKING;
 }

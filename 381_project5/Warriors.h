@@ -55,8 +55,6 @@ class Soldier : public Infantry {
 public:
     explicit Soldier(const std::string& name_, Point location_);
 
-    ~Soldier() override;
-
     // update implements Soldier behavior
     void update() override;
 
@@ -80,8 +78,6 @@ private:
 class Archer : public Infantry {
 public:
     explicit Archer(const std::string& name_, Point location_);
-
-    ~Archer() override;
 
     // update implements Archer behavior
     void update() override;

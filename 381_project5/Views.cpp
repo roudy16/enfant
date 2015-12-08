@@ -174,10 +174,6 @@ World_map::World_map(const string& name)
 {
 }
 
-//World_map::~World_map()
-//{
-//}
-
 void World_map::do_draw_header() {
     // Print current Map settings
     cout << "Display size: " << m_size
@@ -240,10 +236,6 @@ Local_map::Local_map(const string& name)
     : Map(name, Point(kDEFAULT_MAP_ORIGINX, kDEFAULT_MAP_ORIGINY))
 {
 }
-
-//Local_map::~Local_map()
-//{
-//}
 
 void Local_map::do_draw_header() {
     cout << "Local view for: " << get_name() << endl;

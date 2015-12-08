@@ -20,8 +20,6 @@ class Peasant : public Agent {
 public:
     explicit Peasant(const std::string& name_, Point location_);
 
-    ~Peasant();
-
     // ask Model to broadcast our current state to all Views
     void broadcast_current_state() const override;
 
