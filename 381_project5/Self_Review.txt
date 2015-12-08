@@ -1,0 +1,58 @@
+# Possible Project 5 Problems
+
+Again I got a significant point reduction due to my issues on project 5. Here I
+am attempting to review my code and identify the issues in an effort to educate
+myself and in preparation to discuss the issues with the instructor or his minion.
+
+The following is a list of issues provided by the instructor:
+
+Malformed MVC  e.g. Model manages or draws views instead of Controller. 1 points
+    - Archer calls on Model to find the nearest Agent/Structure to it, this wrong?
+
+Excess destructors declared, specified, or defined. 1 points
+    - Structure has ctors and such deleted but this should not be necessary because
+      it is an abstract class. Same with View.
+    
+    - Empty virtual destructors in various classes not necessary. Find out why. I was
+      thinking that something had to be provided for virtual functions. Does compiler
+      automatically provide these as well? After some checking it seems definitions are
+      no provided for functions declared pure virtual. Hmmm, it seems that a definition
+      is needed in the base classes but if derived classes don't need to do anything new
+      then they do not need to define empty dtors.
+
+      
+Defect in class structure for Warriors e.g. missing itermediate base class 1 points
+    - Possibly having a hook for getting a string that is the name of the type. This
+      was used for printing messages from an Infantry class method that was the same
+      in the derived classes except for when the class name needed to be output.
+      
+    - Perhaps need a setter for the 'mp_target' member variable in Infantry class.
+    
+    - Use of constexpr for default values. This was used because it turns out to be
+      very handy for the domain of games. This allows for easy modification of such
+      values via other programs. One great use case for this is if a gameplay designer
+      determines the current values unbalance the gameplay the designer can change 
+      the values using a tool they have been provided that does not require programming
+      knowledge. The designer can then rebuild the game and test the tweaked gameplay.
+
+      
+Protected or unnecessary static member variables used 1 points
+    - static variable used in get_type_string() within Infantry derived classes.
+
+
+std::string parameter not passed by const reference 1 points
+    - read_in_string() messes this up. Should the string be be a static variable
+      that is passed out as a const reference? Should a string reference be passed
+      in to use as the string that stores the input data? The problem here was that
+      I didn't want to return a reference to a function local variable. Current fix
+      is passing in a string reference to use.
+
+    
+Improper use of C library or Cstyle header 1 points
+    - ctype.h unnecessary, why did I ever put it there in the first place? Don't recall.
+
+
+
+QUESTIONS:
+
+1. Does deleting base class copy and construction help pretect against slicing? Case in Agent.
