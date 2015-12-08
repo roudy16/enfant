@@ -6,11 +6,10 @@
 #include "Sim_object.h"
 
 /*
-Agents are a kind of Sim_object, and privately inherit from Moving_object.
+Agents are a kind of Sim_object, and have a Moving_object.
 Agents can be commanded to move to a destination. Agents have a health, which
 is decreased when they take a hit. If the Agent's health > 0, it is alive.
-If its heath <= 0, it starts dying, then on subsequent updates, 
-it becomes dead, and finally disappearing.
+If its heath <= 0, it dies and tells Model to remove it.
 */
 
 
@@ -18,6 +17,7 @@ class Structure;
 
 class Agent : public Sim_object {
 public:
+    // Make Agent an abstract class
     virtual ~Agent() = 0;
 
     // return true if this agent is Alive or Disappearing
@@ -58,6 +58,8 @@ public:
     virtual void start_attacking(std::shared_ptr<Agent>);
 
     // disallow copy/move construction or assignment and default ctor
+    // TODO necessary for abstract classes? Can they prevent slicing or is this 
+    // already accomplished just by having the class abstact?
     Agent() = delete;
     Agent(const Agent&) = delete;
     Agent& operator= (const Agent&) = delete;
@@ -72,7 +74,7 @@ protected:
     void lose_health(int attack_strength);
 
 private:
-    enum class Alive_State { ALIVE, DEAD};
+    enum class Alive_State { ALIVE, DEAD };
 
     Moving_object m_moving_obj;
     int m_health;

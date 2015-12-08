@@ -37,7 +37,8 @@ Defect in class structure for Warriors e.g. missing itermediate base class 1 poi
 
     - Forgot to document in header how Archer class behaves.
     
-    - Should the update method have a do_update() hook?
+    - Should the update method have a do_update() hook? I've since added this to force 
+      derived classes to do the Agent::update(), update() is made final in Infantry.
 
 Protected or unnecessary static member variables used 1 points
     - static variable used in get_type_string() within Infantry derived classes.

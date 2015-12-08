@@ -39,7 +39,8 @@ protected:
     // set new target and engage, outputs attacking message
     virtual void engage_new_target(std::shared_ptr<Agent> new_target);
 
-    // update hook that is executed after Agent class update
+    // update hook that is executed after Agent class update,
+    // does nothing unless overridden
     virtual void do_update();
 
     // Accessor hooks derived classes must provide
@@ -96,7 +97,7 @@ public:
     Archer& operator= (Archer&&) = delete;
 
 private:
-    // do update tasks for Soldier
+    // do update tasks for Archer
     void do_update() override;
     // returns Archer's attack range
     double get_range() const override;
