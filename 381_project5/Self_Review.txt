@@ -20,7 +20,7 @@ Excess destructors declared, specified, or defined. 1 points
       is needed in the base classes but if derived classes don't need to do anything new
       then they do not need to define empty dtors.
 
-      
+
 Defect in class structure for Warriors e.g. missing itermediate base class 1 points
     - Possibly having a hook for getting a string that is the name of the type. This
       was used for printing messages from an Infantry class method that was the same
@@ -35,7 +35,10 @@ Defect in class structure for Warriors e.g. missing itermediate base class 1 poi
       the values using a tool they have been provided that does not require programming
       knowledge. The designer can then rebuild the game and test the tweaked gameplay.
 
-      
+    - Forgot to document in header how Archer class behaves.
+    
+    - Should the update method have a do_update() hook?
+
 Protected or unnecessary static member variables used 1 points
     - static variable used in get_type_string() within Infantry derived classes.
 
@@ -47,7 +50,7 @@ std::string parameter not passed by const reference 1 points
       I didn't want to return a reference to a function local variable. Current fix
       is passing in a string reference to use.
 
-    
+
 Improper use of C library or Cstyle header 1 points
     - ctype.h unnecessary, why did I ever put it there in the first place? Don't recall.
 

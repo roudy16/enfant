@@ -118,7 +118,7 @@ void Soldier::update() {
 
     // target is still alive
     // if target is out of range, report it, stop attacking and forget target
-    const double&& distance = cartesian_distance(get_location(), get_target().lock()->get_location());
+    const double distance = cartesian_distance(get_location(), get_target().lock()->get_location());
     if (distance > kSOLDIER_INITIAL_RANGE) {
         cout << get_name() << ": Target is now out of range" << endl;
         stop_attacking();
@@ -208,7 +208,7 @@ void Archer::update() {
         }
 
         // get distance to target
-        double dist_to_agent = cartesian_distance(get_location(), closest_agent->get_location());
+        const double dist_to_agent = cartesian_distance(get_location(), closest_agent->get_location());
 
         // do nothing if target is out of range
         if (dist_to_agent > get_range()) {

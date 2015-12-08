@@ -26,7 +26,7 @@ protected:
     using Offgrid_objs_t = std::vector<const std::string*>;
 
     struct Grid_info {
-        Grid_t m_grid;
+        Grid_t         m_grid;
         Offgrid_objs_t m_offgrid_objs;
     };
 
@@ -54,7 +54,7 @@ private:
 
     bool get_subscripts(int &ix, int &iy, Point location);
 
-    Point m_origin;
+    Point         m_origin;
     Map_objects_t m_grid_objects;
 };
 
@@ -96,7 +96,7 @@ private:
     int get_size() const override;
 
     double m_scale;
-    int m_size;
+    int    m_size;
 };
 
 /*
