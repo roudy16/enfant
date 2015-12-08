@@ -49,12 +49,6 @@ public:
     // returns the name of the View
     const std::string& get_name();
 
-    View() = delete;
-    View(const View&) = delete;
-    View& operator= (const View&) = delete;
-    View(View&&) = delete;
-    View& operator= (View&&) = delete;
-
 protected:
     // hooks called when 'draw' is called, to be defined in derived classes.
     // draw_header() does nothing in this base class

@@ -1,9 +1,9 @@
 #include "Structure.h"
 #include "Utility.h"
 #include "Model.h"
+#include "Geometry.h"
 #include <iostream>
 #include <string>
-#include <memory>
 
 using std::string;
 using std::cout; using std::endl;
