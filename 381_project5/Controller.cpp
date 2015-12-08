@@ -29,7 +29,7 @@ struct New_obj_info;
 
 // Helpers
 static Point read_point();
-static const string&& read_in_string();
+static void read_in_string(string& str);
 static void read_new_obj_info(New_obj_info& info);
 
 Controller::Controller()
@@ -92,15 +92,12 @@ void Controller::init_commands() {
     }
 }
 
-static const string&& read_in_string() {
-    string str;
+static void read_in_string(string& str) {
     cin >> str;
 
     if (!cin.good()) {
         throw runtime_error("Failed to read string from input");
     }
-
-    return move(str);
 }
 
 static void discard_rest_of_line(std::istream& is) {
@@ -109,7 +106,8 @@ static void discard_rest_of_line(std::istream& is) {
 }
 
 Controller::Controller_agent_fp_t Controller::get_agent_command() {
-    string command = read_in_string();
+    string command;
+    read_in_string(command);
 
     // Try to find Agent command function
     Controller_agent_fp_t command_ptr = get_command_helper(m_agent_commands, command);
@@ -146,7 +144,8 @@ void Controller::run() {
     while (true) {
         try {
             cout << "\nTime " << Model::get_instance()->get_time() << ": Enter command: ";
-            string first_word = read_in_string();
+            string first_word;
+            read_in_string(first_word);
 
             // Check if user wants to quit
             if (first_word == "quit") {
@@ -233,7 +232,8 @@ void Controller::agent_move_command(shared_ptr<Agent> agent_ptr) {
 }
 
 static shared_ptr<Structure> read_structure_from_input() {
-    string structure_name = read_in_string();
+    string structure_name;
+    read_in_string(structure_name);
     return Model::get_instance()->get_structure_ptr(structure_name);
 }
 
@@ -251,7 +251,8 @@ void Controller::agent_work_command(shared_ptr<Agent> agent_ptr) {
 
 void Controller::agent_attack_command(shared_ptr<Agent> agent_ptr) {
     // read name for target to attack
-    string target_name = read_in_string();
+    string target_name;
+    read_in_string(target_name);
 
     // Find target Agent, throws Error if Agent not found
     shared_ptr<Agent> target_ptr = Model::get_instance()->get_agent_ptr(target_name);
@@ -273,7 +274,8 @@ void Controller::status_command() {
 
 // Attempt to open and attach a new View to the Model
 void Controller::open_command() {
-    string view_name = read_in_string();
+    string view_name;
+    read_in_string(view_name);
 
     // Check if there is already a View of this name open
     shared_ptr<View> view_ptr = Model::get_instance()->find_view(view_name);
@@ -315,7 +317,8 @@ void Controller::open_command() {
 
 // Attempt to close and detach a View from Model
 void Controller::close_command() {
-    string view_name = read_in_string();
+    string view_name;
+    read_in_string(view_name);
 
     // Check if there is an open View that matches input name
     shared_ptr<View> view_ptr = Model::get_instance()->find_view(view_name);
@@ -345,7 +348,7 @@ struct New_obj_info {
 
 // Read data for creating new Sim_object from input
 static void read_new_obj_info(New_obj_info& info) {
-    info.name = read_in_string();
+    read_in_string(info.name);
 
     // Check if input name is a valid object name
     if (info.name.length() < 2 || !string_is_alnum(info.name) ||
