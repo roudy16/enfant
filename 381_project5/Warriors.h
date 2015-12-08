@@ -12,6 +12,10 @@ public:
     // output information about the current state
     void describe() const override;
 
+    // Does Agent class update as well as do_update hook that base classes
+    // can provide
+    void update() override final;
+
     // Overrides Agent's stop to print a message
     void stop() override;
 
@@ -35,6 +39,9 @@ protected:
     // set new target and engage, outputs attacking message
     virtual void engage_new_target(std::shared_ptr<Agent> new_target);
 
+    // update hook that is executed after Agent class update
+    virtual void do_update();
+
     // Accessor hooks derived classes must provide
     virtual const std::string& get_type_string() const = 0;
     virtual double get_range() const = 0;
@@ -55,9 +62,6 @@ class Soldier : public Infantry {
 public:
     explicit Soldier(const std::string& name_, Point location_);
 
-    // update implements Soldier behavior
-    void update() override;
-
     // Overrides Agent's take_hit to counterattack when attacked.
     void take_hit(int attack_strength, std::shared_ptr<Agent> attacker_ptr) override;
 
@@ -69,6 +73,8 @@ public:
     Soldier& operator= (Soldier&&) = delete;
 
 private:
+    // do update tasks for Soldier
+    void do_update() override;
     // returns Soldier's attack range
     double get_range() const override;
     // returns string "Soldier"
@@ -78,9 +84,6 @@ private:
 class Archer : public Infantry {
 public:
     explicit Archer(const std::string& name_, Point location_);
-
-    // update implements Archer behavior
-    void update() override;
 
     // Overrides Agent's take_hit to counterattack when attacked.
     void take_hit(int attack_strength, std::shared_ptr<Agent> attacker_ptr) override;
@@ -93,6 +96,8 @@ public:
     Archer& operator= (Archer&&) = delete;
 
 private:
+    // do update tasks for Soldier
+    void do_update() override;
     // returns Archer's attack range
     double get_range() const override;
     // return string "Archer"

@@ -56,6 +56,15 @@ void Infantry::describe() const {
     }
 }
 
+void Infantry::do_update() {
+    // do nothing by default
+}
+
+void Infantry::update() {
+    Agent::update();
+    do_update();
+}
+
 // Overrides Agent's stop to print a message
 void Infantry::stop() {
     cout << get_name() << ": Don't bother me" << endl;
@@ -100,9 +109,7 @@ Soldier::Soldier(const string& name_, Point location_)
 {
 }
 
-void Soldier::update() {
-    Agent::update();
-
+void Soldier::do_update() {
     // Do nothing else if Infantry is not alive or not attacking
     if (get_state() == Infantry_state::NOT_ATTACKING) {
         return;
@@ -163,9 +170,7 @@ Archer::Archer(const string& name_, Point location_)
 {
 }
 
-void Archer::update() {
-    Agent::update();
-
+void Archer::do_update() {
     // Do nothing else if Archer is not alive or not attacking
     if (get_state() == Infantry_state::ATTACKING) {
         // Archer is attacking
