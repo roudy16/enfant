@@ -56,7 +56,7 @@ Protected or unnecessary static member variables used 1 points
     - static variable used in get_type_string() within Infantry derived classes.
 
     - The constexpr stuff could be applicable here as well, see comment
-      several lines up.
+      several lines up, not too sure otherwise.
 
 
 std::string parameter not passed by const reference 1 points
