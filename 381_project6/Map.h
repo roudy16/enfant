@@ -38,6 +38,9 @@ protected:
     Grid_info generate_grid_info();
     // Prints the grid along with axis label info
     void print_grid_helper(const Grid_t &grid);
+    // Prints objects that are not visible on the grid, offgrid objects must be in
+    // passed in container before function is called
+    void print_offgrid_helper(const Offgrid_objs_t &objs);
 
     // returns reference to Map's origin Point
     const Point& get_origin() const;

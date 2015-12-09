@@ -2,6 +2,7 @@
 #define HEALTH_STATUS_H
 
 #include "Status.h"
+#include <string>
 
 /*
     TODO Class description
