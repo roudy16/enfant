@@ -8,7 +8,7 @@
 
 class Archer : public Infantry {
 public:
-    explicit Archer(const std::string& name_, Point location_);
+    explicit Archer(const std::string& name_, const Point& location_);
 
     // Overrides Agent's take_hit to counterattack when attacked.
     void take_hit(int attack_strength, std::shared_ptr<Agent> attacker_ptr) override;

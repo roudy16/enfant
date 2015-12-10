@@ -5,6 +5,9 @@
 #include <string>
 #include <memory>
 
+// Forward declaration
+struct Point;
+
 // Infantry is an abstract base class that represents the basic capabilities
 // of combatants. They can report about themselves and attack other Agents
 class Infantry : public Agent {
@@ -27,11 +30,15 @@ public:
 protected:
     enum class Infantry_state { NOT_ATTACKING, ATTACKING };
 
-    Infantry(const std::string& name_, Point location_, int start_health_);
+    Infantry(const std::string& name_, const Point& location_, int start_health_);
 
     // Accessors for derived classes to Infantry member variables
     const std::weak_ptr<Agent>& get_target();
     Infantry_state get_state() const;
+
+    // Returns true if target is within attack range, prints message and stops
+    // attacking otherwise.
+    bool target_in_range();
 
     // stop attacking and forget target
     virtual void stop_attacking();

@@ -1,6 +1,7 @@
 #include "Agent_factory.h"
 #include "Agent.h"
 #include "Archer.h"
+#include "Mage.h"
 #include "Soldier.h"
 #include "Peasant.h"
 #include "Geometry.h"
@@ -26,6 +27,7 @@ shared_ptr<Agent> create_agent(const string& name, const string& type, Point loc
     }
     else if (type == "Mage") {
         // TODO create the Mage bud
+        new_agent_ptr = static_pointer_cast<Agent>(make_shared<Mage>(name, location));
     }
     else {
         throw Error("Trying to create agent of unknown type!");

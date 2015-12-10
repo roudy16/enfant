@@ -11,11 +11,12 @@ using std::cout; using std::endl;
 using std::shared_ptr;
 
 // Initial values for Peasant variables
+constexpr int kPEASANT_INITIAL_HEALTH = 5;
 constexpr double kPEASANT_INITIAL_AMOUNT = 0.0;
 constexpr double kPEASANT_MAX_AMOUNT = 35.0;
 
 Peasant::Peasant(const string& name_, Point location_)
-    : Agent(name_, location_), m_source(nullptr),
+    : Agent(name_, location_, kPEASANT_INITIAL_HEALTH), m_source(nullptr),
     m_destination(nullptr), m_amount(kPEASANT_INITIAL_AMOUNT),
     m_peasant_state(Peasant_State::NOT_WORKING)
 {

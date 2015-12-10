@@ -1,6 +1,8 @@
 #include "Archer.h"
 #include "Structure.h"
 #include "Model.h"
+#include "Utility.h"
+#include "Geometry.h"
 #include <string>
 #include <iostream>
 
@@ -15,7 +17,7 @@ constexpr int kARCHER_INITIAL_STRENGTH = 2;
 constexpr double kARCHER_INITIAL_RANGE = 6.0;
 
 
-Archer::Archer(const string& name_, Point location_)
+Archer::Archer(const string& name_, const Point& location_)
     : Infantry(name_, location_, kARCHER_INITIAL_HEALTH)
 {
 }
@@ -28,14 +30,8 @@ void Archer::do_update() {
             cout << get_name() << ": Target is dead" << endl;
             stop_attacking();
         }
-        else if (cartesian_distance(get_location(), get_target().lock()->get_location())
-                 > kARCHER_INITIAL_RANGE)
+        else if (target_in_range())
         {
-            // if target is out of range, report it, stop attacking and forget target
-            cout << get_name() << ": Target is now out of range" << endl;
-            stop_attacking();
-        }
-        else {
             // target is in range, aim to maim!
             cout << get_name() << ": Twang!" << endl;
             shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());

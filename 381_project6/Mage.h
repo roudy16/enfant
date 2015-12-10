@@ -7,8 +7,8 @@
 #include <memory>
 
 class Mage : public Infantry {
-
-    explicit Mage(const std::string& name_, Point location_);
+public:
+    explicit Mage(const std::string& name_, const Point& location_);
 
     // TODO describe take hit behavior
     void take_hit(int attack_strength, std::shared_ptr<Agent> attacker_ptr) override;
@@ -16,7 +16,7 @@ class Mage : public Infantry {
     // disallow copy/move construction or assignment and default ctor
     Mage() = delete;
     Mage(const Mage&) = delete;
-    Mage& operator= (const Mage&)  = delete;
+    Mage& operator= (const Mage&) = delete;
     Mage(Mage&&) = delete;
     Mage& operator= (Mage&&) = delete;
 

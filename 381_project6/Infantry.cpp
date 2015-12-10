@@ -66,6 +66,22 @@ void Infantry::stop() {
     cout << get_name() << ": Don't bother me" << endl;
 }
 
+// Returns true if target is within attack range, prints message and stops
+// attacking otherwise.
+bool Infantry::target_in_range() {
+    assert(!mp_target.expired());
+    if (cartesian_distance(get_location(), mp_target.lock()->get_location())
+                           > get_range())
+    {
+        // if target is out of range, report it, stop attacking and forget target
+        cout << get_name() << ": Target is now out of range" << endl;
+        stop_attacking();
+        return false;
+    }
+
+    return true;
+}
+
 // Make this Infantry start attacking the target Agent.
 // Throws an exception if the target is the same as this Agent,
 // is out of range, or is not alive.

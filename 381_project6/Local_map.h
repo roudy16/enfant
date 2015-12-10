@@ -2,8 +2,10 @@
 #define LOCAL_MAP_H
 
 #include "Map.h"
-#include "Geometry.h"
 #include <string>
+
+// Forward declaration
+struct Point;
 
 /*
     A Local_map shows the immediate area around an object. As that focus object moves
@@ -14,7 +16,7 @@ class Local_map : public Map {
 public:
     Local_map(const std::string& name);
 
-    void update_location(const std::string& name, Point location) override;
+    void update_location(const std::string& name, const Point& location) override;
 
     Local_map() = delete;
     Local_map(const Local_map&) = delete;

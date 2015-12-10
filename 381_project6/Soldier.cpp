@@ -34,22 +34,18 @@ void Soldier::do_update() {
 
     // target is still alive
     // if target is out of range, report it, stop attacking and forget target
-    const double distance = cartesian_distance(get_location(), get_target().lock()->get_location());
-    if (distance > kSOLDIER_INITIAL_RANGE) {
-        cout << get_name() << ": Target is now out of range" << endl;
-        stop_attacking();
-        return;
-    }
+    // otherwise attack target
+    if (target_in_range()) {
+        // target is in range, aim to maim!
+        cout << get_name() << ": Clang!" << endl;
+        shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
+        get_target().lock()->take_hit(kSOLDIER_INITIAL_STRENGTH, this_ptr);
 
-    // target is in range, aim to maim!
-    cout << get_name() << ": Clang!" << endl;
-    shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
-    get_target().lock()->take_hit(kSOLDIER_INITIAL_STRENGTH, this_ptr);
-
-    // If Infantry killed the target, report it, stop attacking and forget target
-    if (get_target().expired()) {
-        cout << get_name() << ": I triumph!" << endl;
-        stop_attacking();
+        // If Infantry killed the target, report it, stop attacking and forget target
+        if (get_target().expired()) {
+            cout << get_name() << ": I triumph!" << endl;
+            stop_attacking();
+        }
     }
 }
 
