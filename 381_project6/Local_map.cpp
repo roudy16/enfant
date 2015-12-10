@@ -3,6 +3,9 @@
 #include <string>
 #include <iostream>
 
+// TODO 
+#include "Utility.h"
+
 using std::string;
 using std::cout; using std::endl;
 
@@ -28,7 +31,7 @@ void Local_map::do_draw_body() {
     print_grid_helper(grid_info.m_grid);
 }
 
-void Local_map::update_location(const string& name, Point location) {
+void Local_map::update_location(const string& name, const Point& location) {
     Map::update_location(name, location);
 
     // if the name of the updated object is the same as the focus of this

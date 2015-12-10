@@ -15,7 +15,7 @@ constexpr int kPEASANT_INITIAL_HEALTH = 5;
 constexpr double kPEASANT_INITIAL_AMOUNT = 0.0;
 constexpr double kPEASANT_MAX_AMOUNT = 35.0;
 
-Peasant::Peasant(const string& name_, Point location_)
+Peasant::Peasant(const string& name_, const Point& location_)
     : Agent(name_, location_, kPEASANT_INITIAL_HEALTH), m_source(nullptr),
     m_destination(nullptr), m_amount(kPEASANT_INITIAL_AMOUNT),
     m_peasant_state(Peasant_State::NOT_WORKING)
@@ -99,7 +99,7 @@ void Peasant::stop_working() {
     }
 }
 
-void Peasant::move_to(Point dest) {
+void Peasant::move_to(const Point& dest) {
     // Set Peasant to stop working
     stop_working();
     Agent::move_to(dest);

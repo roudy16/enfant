@@ -18,7 +18,7 @@ Map::Map(const string& name, const Point& origin)
 {
 }
 
-void Map::update_location(const string& name, Point location) {
+void Map::update_location(const string& name, const Point& location) {
     m_grid_objects[name] = location;
 }
 

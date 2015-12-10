@@ -14,7 +14,7 @@ constexpr double kFARM_INITIAL_FOOD_AMOUNT = 50.0;
 // Farm production rate
 constexpr double kFARM_PRODUCTION_RATE = 2.0;
 
-Farm::Farm(const string& name_, Point location_)
+Farm::Farm(const string& name_, const Point& location_)
     : Structure(name_, location_), m_food_amount(kFARM_INITIAL_FOOD_AMOUNT)
 {
 }

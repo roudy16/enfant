@@ -2,9 +2,11 @@
 #define MAGE_H
 
 #include "Infantry.h"
-#include "Geometry.h"
 #include <string>
 #include <memory>
+
+// Forward declaration
+struct Point;
 
 class Mage : public Infantry {
 public:

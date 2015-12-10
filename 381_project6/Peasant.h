@@ -18,7 +18,7 @@ class Structure;
 
 class Peasant : public Agent {
 public:
-    explicit Peasant(const std::string& name_, Point location_);
+    explicit Peasant(const std::string& name_, const Point& location_);
 
     // ask Model to broadcast our current state to all Views
     void broadcast_current_state() const override;
@@ -30,7 +30,7 @@ public:
     void describe() const override;
 
     // overridden to suspend working behavior
-    void move_to(Point dest) override;
+    void move_to(const Point& dest) override;
 
     // stop moving and working
     void stop() override;

@@ -37,7 +37,7 @@ View::~View()
 {
 }
 
-void View::update_location(const string& name, Point location)
+void View::update_location(const string& name, const Point& location)
 {
 }
 

@@ -10,7 +10,7 @@ using std::shared_ptr; using std::static_pointer_cast;
 
 const double kAGENT_INITIAL_SPEED = 5.0;
 
-Agent::Agent(const string& name_, Point location_, int start_health_)
+Agent::Agent(const string& name_, const Point& location_, int start_health_)
     : Sim_object(name_), m_moving_obj(location_, kAGENT_INITIAL_SPEED),
     m_health(start_health_), m_alive_state(Alive_State::ALIVE)
 {
@@ -28,7 +28,7 @@ bool Agent::is_moving() const {
     return m_moving_obj.is_currently_moving();
 }
 
-void Agent::move_to(Point destination_) {
+void Agent::move_to(const Point& destination_) {
     m_moving_obj.start_moving(destination_);
 
     if (m_moving_obj.is_currently_moving()) {
@@ -142,7 +142,7 @@ void Agent::start_attacking(shared_ptr<Agent> target) {
 }
 
 // Jump Agent to target location
-void Agent::jump_to_location(Point target) {
+void Agent::jump_to_location(const Point& target) {
     m_moving_obj.jump_to_location(target);
     Model::get_instance()->notify_location(get_name(), get_location());
 }

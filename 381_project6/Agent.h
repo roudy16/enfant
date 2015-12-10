@@ -39,7 +39,7 @@ public:
     void broadcast_current_state() const override;
 
     // tell this Agent to start moving to location destination_
-    virtual void move_to(Point destination_);
+    virtual void move_to(const Point& destination_);
 
     // tell this Agent to stop its activity
     virtual void stop();
@@ -67,14 +67,14 @@ public:
     Agent& operator= (Agent&&) = delete;
 
 protected:
-    Agent(const std::string& name_, Point location_, int start_health_);
+    Agent(const std::string& name_, const Point& location_, int start_health_);
 
     // calculate loss of health due to hit.
     // if health decreases to zero or negative, Agent dies.
     void lose_health(int attack_strength);
 
     // Jump Agent to target location
-    void jump_to_location(Point target);
+    void jump_to_location(const Point& target);
 
 private:
     enum class Alive_State { ALIVE, DEAD };

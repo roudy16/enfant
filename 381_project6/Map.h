@@ -13,7 +13,7 @@ class Map : public View {
 public:
     // Save the supplied name and location for future use in a draw() call
     // If the name is already present,the new location replaces the previous one.
-    void update_location(const std::string& name, Point location) override;
+    void update_location(const std::string& name, const Point& location) override;
 
     // Remove the name and its location; no error if the name is not present.
     void update_remove(const std::string& name) override;

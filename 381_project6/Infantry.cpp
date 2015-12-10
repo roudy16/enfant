@@ -10,7 +10,7 @@ using std::cout; using std::endl;
 using std::shared_ptr; using std::weak_ptr; using std::static_pointer_cast; using std::make_shared;
 
 
-Infantry::Infantry(const string& name, Point location, int start_health_)
+Infantry::Infantry(const string& name, const Point& location, int start_health_)
     : Agent(name, location, start_health_), m_infantry_state(Infantry_state::NOT_ATTACKING)
 {
 }
