@@ -66,15 +66,15 @@ void Mage::take_hit(int attack_strength, shared_ptr<Agent> attacker_ptr) {
     Cartesian_vector teleport_direction;
 
     // If attacker is at same location, teleport to nearest Structure if it exists.
-    // If no Structure exists then the Mage is just 
+    // If no Structure exists then the Mage will teleport in place
     Point attacker_loc = attacker_ptr->get_location();
     if (get_location() == attacker_loc) {
         shared_ptr<Sim_object> this_ptr = static_pointer_cast<Sim_object>(shared_from_this());
         shared_ptr<Structure> closest_structure = Model::get_instance()->get_closest_structure_to_obj(this_ptr);
 
-        // If no Structure was found, teleport in place, this results in no damage
-        // to the Mage but the Mage does not move
-        if (!closest_structure) {
+        // If no Structure was found or Structure is also at same location teleport 
+        // in place, this results in no damage to the Mage but the Mage does not move
+        if (!closest_structure || closest_structure->get_location() == get_location()) {
             teleport(teleport_direction);
             return;
         }
