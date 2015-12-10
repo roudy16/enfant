@@ -15,6 +15,11 @@
 
 /* Utility declarations, functions, and classes used by other modules */
 
+// Tolerance used when comparing Points
+constexpr double kPOINT_TOLERANCE = 1.0e-6;
+
+bool double_tolerance_compare_eq(const double lhs, const double rhs);
+
 // a simple class for error exceptions that inherits from std::exception
 class Error : public std::exception {
 public:

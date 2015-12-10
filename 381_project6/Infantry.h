@@ -27,7 +27,7 @@ public:
 protected:
     enum class Infantry_state { NOT_ATTACKING, ATTACKING };
 
-    Infantry(const std::string& name_, Point location_);
+    Infantry(const std::string& name_, Point location_, int start_health_);
 
     // Accessors for derived classes to Infantry member variables
     const std::weak_ptr<Agent>& get_target();

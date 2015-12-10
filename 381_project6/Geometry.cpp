@@ -4,6 +4,7 @@ See Geometry.h for comments
 */
 
 #include "Geometry.h"
+#include "Utility.h"
 
 #include <iostream>
 #include <cmath>
@@ -19,12 +20,12 @@ const double pi = 2. * atan2(1., 0.);
 // compare two positions
 bool Point::operator== (const Point& rhs) const
 {
-    return (x == rhs.x && y == rhs.y);
+    return double_tolerance_compare_eq(x, rhs.x) && double_tolerance_compare_eq(y, rhs.y);
 }
  
 bool Point::operator!= (const Point& rhs) const
 {
-    return (x != rhs.x || y != rhs.y);
+    return !(*this == rhs);
 }
 
 // return the distance between two Points

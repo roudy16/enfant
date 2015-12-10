@@ -55,6 +55,12 @@ bool Moving_object::update_location()
     return false;
 }
 
+// Jump to passed in target location then recompute the delta to destination
+void Moving_object::jump_to_location(Point target_) {
+    location = target_;
+    compute_delta();
+}
+
 // use the Geometry operators to compute the delta change in x and y per update
 void Moving_object::compute_delta()
 {

@@ -9,18 +9,18 @@ using std::cout; using std::endl;
 using std::shared_ptr; using std::static_pointer_cast;
 
 
-// Strength and range values for Archer class
-constexpr int kARCHER_INITIAL_STRENGTH = 1;
+// Initial attribute values for Archer class
+constexpr int kARCHER_INITIAL_HEALTH = 6;
+constexpr int kARCHER_INITIAL_STRENGTH = 2;
 constexpr double kARCHER_INITIAL_RANGE = 6.0;
 
 
 Archer::Archer(const string& name_, Point location_)
-    : Infantry(name_, location_)
+    : Infantry(name_, location_, kARCHER_INITIAL_HEALTH)
 {
 }
 
 void Archer::do_update() {
-    // Do nothing else if Archer is not alive or not attacking
     if (get_state() == Infantry_state::ATTACKING) {
         // Archer is attacking
         // if target is dead, report it, stop attacking and forget target

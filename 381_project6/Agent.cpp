@@ -9,11 +9,10 @@ using std::cout; using std::endl;
 using std::shared_ptr; using std::static_pointer_cast;
 
 const double kAGENT_INITIAL_SPEED = 5.0;
-const int kAGENT_INITIAL_HEALTH = 5;
 
-Agent::Agent(const string& name_, Point location_)
+Agent::Agent(const string& name_, Point location_, int start_health_)
     : Sim_object(name_), m_moving_obj(location_, kAGENT_INITIAL_SPEED),
-    m_health(kAGENT_INITIAL_HEALTH), m_alive_state(Alive_State::ALIVE)
+    m_health(start_health_), m_alive_state(Alive_State::ALIVE)
 {
 }
 
@@ -140,4 +139,10 @@ void Agent::start_working(shared_ptr<Structure> dst, shared_ptr<Structure> src) 
 // Throws exception that an Agent cannot attack.
 void Agent::start_attacking(shared_ptr<Agent> target) {
     throw Error(get_name() + ": Sorry, I can't attack!");
+}
+
+// Jump Agent to target location
+void Agent::jump_to_location(Point target) {
+    m_moving_obj.jump_to_location(target);
+    Model::get_instance()->notify_location(get_name(), get_location());
 }

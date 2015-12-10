@@ -1,0 +1,5 @@
+# Tracking updates made from Project 5 to Project 6
+
+- In Agent class, added ability to vary starting health
+- In Geometry, added tolerance to point comparison
+- In Moving_object, added ability to jump to location

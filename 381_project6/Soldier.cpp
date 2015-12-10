@@ -7,13 +7,14 @@ using std::string;
 using std::cout; using std::endl;
 using std::shared_ptr; using std::static_pointer_cast;
 
-// Strength and range values for Soldier class
-constexpr int kSOLDIER_INITIAL_STRENGTH = 2;
+// Initial attribute values for Soldier class
+constexpr int kSOLDIER_INITIAL_HEALTH = 10;
+constexpr int kSOLDIER_INITIAL_STRENGTH = 3;
 constexpr double kSOLDIER_INITIAL_RANGE = 2.0;
 
 
 Soldier::Soldier(const string& name_, Point location_)
-    : Infantry(name_, location_)
+    : Infantry(name_, location_, kSOLDIER_INITIAL_HEALTH)
 {
 }
 

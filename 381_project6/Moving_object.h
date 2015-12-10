@@ -36,6 +36,8 @@ public:
     // update this object's location using current location, speed, and destination
     // returns true if arrived at destination, false if not
     bool update_location();
+    // Allow object to be jump to a location
+    void jump_to_location(Point target_);
 
 private:
     bool moving;            // true if this object is moving

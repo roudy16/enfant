@@ -67,11 +67,14 @@ public:
     Agent& operator= (Agent&&) = delete;
 
 protected:
-    Agent(const std::string& name_, Point location_);
+    Agent(const std::string& name_, Point location_, int start_health_);
 
     // calculate loss of health due to hit.
-    // if health decreases to zero or negative, Agent state becomes Dying, and any movement is stopped.
+    // if health decreases to zero or negative, Agent dies.
     void lose_health(int attack_strength);
+
+    // Jump Agent to target location
+    void jump_to_location(Point target);
 
 private:
     enum class Alive_State { ALIVE, DEAD };
