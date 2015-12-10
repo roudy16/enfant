@@ -67,11 +67,10 @@ void Infantry::stop() {
 }
 
 // Returns true if target is within attack range, prints message and stops
-// attacking otherwise.
+// attacking otherwise. Requires mp_target points to valid target
 bool Infantry::target_in_range() {
     assert(!mp_target.expired());
-    if (cartesian_distance(get_location(), mp_target.lock()->get_location())
-                           > get_range())
+    if (cartesian_distance(get_location(), mp_target.lock()->get_location()) > get_range())
     {
         // if target is out of range, report it, stop attacking and forget target
         cout << get_name() << ": Target is now out of range" << endl;

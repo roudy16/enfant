@@ -15,6 +15,8 @@ public:
     // TODO describe take hit behavior
     void take_hit(int attack_strength, std::shared_ptr<Agent> attacker_ptr) override;
 
+    void describe() const override;
+
     // disallow copy/move construction or assignment and default ctor
     Mage() = delete;
     Mage(const Mage&) = delete;
@@ -31,7 +33,8 @@ private:
     const std::string& get_type_string() const override;
 
     // Mage teleports its range in the provided direction,
-    // passed in direction must be normalised
+    // passed in direction must be normalised or zero vector
+    // and Mage must have at least 1 charge
     void teleport(Cartesian_vector direction);
 
     int m_charges;
