@@ -6,6 +6,7 @@
 #include <memory>
 
 class Agent;
+class Group;
 class View;
 class World_map;
 
@@ -42,9 +43,9 @@ private:
     void go_command();
     void build_command();
     void train_command();
+    void create_group_command();
 
     // Group commands
-    void group_create_command(std::shared_ptr<Group>);
     void group_disband_command(std::shared_ptr<Group>);
     void group_add_command(std::shared_ptr<Group>);
     void group_remove_command(std::shared_ptr<Group>);
@@ -69,6 +70,10 @@ private:
     Controller_fp_t get_view_program_command(const std::string& command);
     // get_agent_command additionally reads in a string
     Controller_agent_fp_t get_agent_command();
+    // Returns function ptr to group command associated with next input string
+    Controller_group_fp_t get_group_command();
+    // processes group commands
+    void group_command_handler();
 
     // Returns shared_ptr to the map view if one exists, otherwise
     // throws an Error

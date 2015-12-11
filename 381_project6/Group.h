@@ -15,11 +15,13 @@ public:
     void add_agent(std::shared_ptr<Agent> agent);
     void remove_agent(std::shared_ptr<Agent> agent);
 
-    bool operator==(const std::string& rhs_name);
+    bool operator==(const std::string& rhs_name) const;
+
 private:
     enum class Formation { LINE, COLUMN, WEDGE };
 
-
     std::map<const std::string, std::shared_ptr<Agent>> m_agents;
     const std::string m_name;
+    Formation m_formation;
 };
+

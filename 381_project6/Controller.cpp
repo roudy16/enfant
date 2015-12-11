@@ -11,6 +11,7 @@
 #include "Agent_factory.h"
 #include "Agent.h"
 #include "Structure.h"
+#include "Group.h"
 #include <iostream>
 #include <exception>
 #include <stdexcept>
@@ -82,6 +83,16 @@ void Controller::init_commands() {
         m_agent_commands["attack"] = &Controller::agent_attack_command;
         m_agent_commands["stop"] = &Controller::agent_stop_command;
 
+        m_group_commands["disband"] = &Controller::group_disband_command;
+        m_group_commands["add"] = &Controller::group_add_command;
+        m_group_commands["remove"] = &Controller::group_remove_command;
+        m_group_commands["move"] = &Controller::group_move_command;
+        m_group_commands["stop"] = &Controller::group_stop_command;
+        m_group_commands["attack"] = &Controller::group_attack_command;
+
+        // TODO do this last, might be hardish
+        //m_group_commands["form"] = &Controller::group_form_command;
+
         m_program_commands["open"] = &Controller::open_command;
         m_program_commands["close"] = &Controller::close_command;
         m_program_commands["status"] = &Controller::status_command;
@@ -89,6 +100,7 @@ void Controller::init_commands() {
         m_program_commands["go"] = &Controller::go_command;
         m_program_commands["build"] = &Controller::build_command;
         m_program_commands["train"] = &Controller::train_command;
+        m_program_commands["form_group"] = &Controller::create_group_command;
     }
     catch (...) {
         throw runtime_error("Error detected in Controller::init_commands");
@@ -123,6 +135,21 @@ Controller::Controller_agent_fp_t Controller::get_agent_command() {
     return command_ptr;
 }
 
+Controller::Controller_group_fp_t Controller::get_group_command() {
+    string command;
+    read_in_string(command);
+
+    // Try to find Agent command function
+    Controller_group_fp_t command_ptr = get_command_helper(m_group_commands, command);
+
+    // if none found, throw error
+    if (!command_ptr) {
+        throw Error("Unrecognized command!");
+    }
+
+    return command_ptr;
+}
+
 Controller::Controller_fp_t Controller::get_view_program_command(const string& command) {
     // try to find program command
     Controller_fp_t command_ptr = get_command_helper(m_program_commands, command);
@@ -138,6 +165,29 @@ Controller::Controller_fp_t Controller::get_view_program_command(const string& c
     }
 
     return command_ptr;
+}
+
+void Controller::group_command_handler() {
+    // User already input 'group' indicating they are trying to make a Group
+    // command. Now we read in the next command string which should be a valid
+    // command for Groups.
+    string command;
+    read_in_string(command);
+
+    // Find functions associated with user input group command
+    Controller_group_fp_t command_ptr = get_command_helper(m_group_commands, command);
+
+    // If no associated command is found then throw and Error alerting the user
+    if (!command_ptr) {
+        throw Error("Unrecognized group command!");
+    }
+
+    // All group commands have a group name associated with them so that we can
+    // know which group the command should apply to.
+    string name;
+    read_in_string(name);
+
+
 }
 
 void Controller::run() {
@@ -159,14 +209,21 @@ void Controller::run() {
             // then execute an Agent command
             if (Model::get_instance()->is_agent_present(first_word)) {
                 shared_ptr<Agent> agent_ptr = Model::get_instance()->get_agent_ptr(first_word);
-                if (!agent_ptr->is_alive()) {
-                    throw Error("Agent is not alive!");
-                }
+                assert(agent_ptr->is_alive());
 
                 // Find Agent command, throws Error if none found
                 Controller_agent_fp_t agent_command_ptr = get_agent_command();
                 // Execute Agent command
                 (this->*(agent_command_ptr))(agent_ptr);
+            }
+            // Check if first word is name of an active Group, if it is then
+            // get the Group and execute the command
+            else if (Model::get_instance()->is_group_present(first_word)) {
+                shared_ptr<Group> group_ptr = Model::get_instance()->get_group_ptr(first_word);
+                
+                Controller_group_fp_t group_command_ptr = get_group_command();
+
+                (this->*(group_command_ptr))(group_ptr);
             }
             // Otherwise check if user input a different command and execute it
             else {
@@ -269,6 +326,37 @@ void Controller::agent_stop_command(shared_ptr<Agent> agent_ptr) {
     // Have Agent stop everything it is doing
     agent_ptr->stop();
 }
+
+// Group commands
+void Controller::group_disband_command(shared_ptr<Group> group_ptr) {
+
+}
+
+
+void Controller::group_add_command(shared_ptr<Group> group_ptr) {
+
+}
+
+void Controller::group_remove_command(shared_ptr<Group> group_ptr) {
+
+}
+
+void Controller::group_formation_command(shared_ptr<Group> group_ptr) {
+
+}
+
+void Controller::group_move_command(shared_ptr<Group> group_ptr) {
+
+}
+
+void Controller::group_stop_command(shared_ptr<Group> group_ptr) {
+
+}
+
+void Controller::group_attack_command(shared_ptr<Group> group_ptr) {
+
+}
+
 
 void Controller::status_command() {
     // tell all objects to describe themselves to the console
@@ -390,3 +478,23 @@ void Controller::train_command() {
     // Add new Structure to Model
     Model::get_instance()->add_agent(new_agent);
 }
+
+void Controller::create_group_command() {
+    string name;
+    read_in_string(name);
+
+    // Check if input name is a valid group name
+    // Must be at least 1 character in length, contain only alphanumeric 
+    // characters and not already be in use by another Agent, Structure
+    // or Group
+    if (name.length() < 1 || !string_is_alnum(name) ||
+        Model::get_instance()->is_name_in_use(name))
+    {
+        throw Error("Invalid name for new group!");
+    }
+
+    // Create new group and add have Model at it to its group container
+    shared_ptr<Group> new_group = make_shared<Group>(name);
+    Model::get_instance()->add_group(new_group);
+}
+

@@ -80,7 +80,9 @@ public:
     // is there a group with this name?
     bool is_group_present(const std::string& name) const;
     void add_group(std::shared_ptr<Group> group_ptr);
-    void remove_group(std::shared_ptr<Group> group_ptr);
+    void remove_group(const std::string& name);
+    // will throw Error("Group not found!") if no Group of that name
+    std::shared_ptr<Group> get_group_ptr(const std::string& name) const;
 
     // tell all objects to describe themselves to the console
     void describe() const;

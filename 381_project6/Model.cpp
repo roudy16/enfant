@@ -5,6 +5,7 @@
 #include "Sim_object.h"
 #include "Structure.h"
 #include "Agent.h"
+#include "Group.h"
 #include "Utility.h"
 #include "View.h"
 #include <algorithm>
@@ -58,10 +59,13 @@ void Model::init() {
     add_agent(create_agent("Randalf", "Mage", Point(15., 30.)));
 }
 
-// is name already in use for either agent or structure?
-// return true if the name matches the name of an existing agent or structure
+// is name already in use for another Agent, Structure, or Group?
+// return true if the name matches the name of an existing Agent, Structure
+// or Group
 bool Model::is_name_in_use(const string& name) const {
-    return is_structure_present(name) || is_agent_present(name);
+    return is_structure_present(name) ||
+           is_agent_present(name) ||
+           is_group_present(name);
 }
 
 shared_ptr<Sim_object> Model::get_obj_ptr(const string& name) const {
@@ -79,12 +83,7 @@ bool Model::is_structure_present(const string& name) const {
     auto iter = m_structures.find(name);
 
     // return false if structure with name not found, return true otherwise
-    if (iter == m_structures.end()) {
-        return false;
-    }
-    else {
-        return true;
-    }
+    return iter != m_structures.end();
 }
 
 // add a new structure; assumes none with the same name
@@ -177,12 +176,7 @@ bool Model::is_agent_present(const string& name) const {
     auto iter = m_agents.find(name);
 
     // return false if agent with name not found, return true otherwise
-    if (iter == m_agents.end()) {
-        return false;
-    }
-    else {
-        return true;
-    }
+    return iter != m_agents.end();
 }
 
 // add a new agent; assumes none with the same name
@@ -196,6 +190,8 @@ void Model::add_agent(shared_ptr<Agent> new_agent_ptr) {
 }
 
 // Remove Agent from Sim_objects container and Agents container
+// Agent should be present in both containers when remove_agent
+// is called
 void Model::remove_agent(shared_ptr<Agent> agent_ptr) {
     assert(agent_ptr); // assert obj_ptr not nullptr
 
@@ -209,9 +205,10 @@ void Model::remove_agent(shared_ptr<Agent> agent_ptr) {
 }
 
 shared_ptr<Agent> Model::get_agent_ptr(const string& name) const {
+    // TODO this is code copy I think
     auto iter = m_agents.find(name);
 
-    // throw Error if structure not found
+    // throw Error if Agent not found
     if (iter == m_agents.end()) {
         throw Error("Agent not found!");
     }
@@ -223,17 +220,47 @@ shared_ptr<Agent> Model::get_closest_agent_to_obj(shared_ptr<Sim_object> obj_ptr
     return get_closest_helper(m_agents, obj_ptr);
 }
 
+static bool operator==(shared_ptr<Group> ptr, const string& name) {
+    return *ptr == name;
+}
+
 // is there a group with this name?
 bool Model::is_group_present(const std::string& name) const {
-    auto iter = find(m_groups.begin(), m_groups.end(), )
+    auto iter = find(m_groups.begin(), m_groups.end(), name);
+
+    // if group is return true, return false otherwise
+    return iter != m_groups.end();
 }
 
+// Add new group, assumes none with same name already exists
 void Model::add_group(std::shared_ptr<Group> group_ptr) {
-
+    m_groups.push_back(group_ptr);
 }
 
-void Model::remove_group(std::shared_ptr<Group> group_ptr) {
+// Remove a Group with matching name, throws and Error if no Group with
+// that name exists
+void Model::remove_group(const string& name) {
+    // Try to locate the Group with name in container
+    auto iter = find(m_groups.begin(), m_groups.end(), name);
 
+    // If group not found throw and Error
+    if (iter == m_groups.end()) {
+        throw Error("Group not found!");
+    }
+
+    // Group was found, remove it from the container
+    m_groups.erase(iter);
+}
+
+shared_ptr<Group> Model::get_group_ptr(const string& name) const {
+    auto iter = find(m_groups.begin(), m_groups.end(), name);
+
+    // If group not found throw and Error
+    if (iter == m_groups.end()) {
+        throw Error("Group not found!");
+    }
+
+    return *iter;
 }
 
 // tell all objects to describe themselves to the console
