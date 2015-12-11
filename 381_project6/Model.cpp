@@ -12,7 +12,7 @@
 
 using std::string;
 using std::shared_ptr; using std::static_pointer_cast;
-using std::min_element;
+using std::min_element; using std::find;
 
 // class used to deallocate Model
 class Model_destroyer {
@@ -221,6 +221,19 @@ shared_ptr<Agent> Model::get_agent_ptr(const string& name) const {
 
 shared_ptr<Agent> Model::get_closest_agent_to_obj(shared_ptr<Sim_object> obj_ptr) {
     return get_closest_helper(m_agents, obj_ptr);
+}
+
+// is there a group with this name?
+bool Model::is_group_present(const std::string& name) const {
+    auto iter = find(m_groups.begin(), m_groups.end(), )
+}
+
+void Model::add_group(std::shared_ptr<Group> group_ptr) {
+
+}
+
+void Model::remove_group(std::shared_ptr<Group> group_ptr) {
+
 }
 
 // tell all objects to describe themselves to the console

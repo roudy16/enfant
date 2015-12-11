@@ -77,7 +77,8 @@ public:
     // returns pointer to closest Agent to passed in object, empty pointer otherwise
     std::shared_ptr<Agent> get_closest_agent_to_obj(std::shared_ptr<Sim_object>);
 
-
+    // is there a group with this name?
+    bool is_group_present(const std::string& name) const;
     void add_group(std::shared_ptr<Group> group_ptr);
     void remove_group(std::shared_ptr<Group> group_ptr);
 

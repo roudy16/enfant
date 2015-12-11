@@ -43,14 +43,26 @@ private:
     void build_command();
     void train_command();
 
+    // Group commands
+    void group_create_command(std::shared_ptr<Group>);
+    void group_disband_command(std::shared_ptr<Group>);
+    void group_add_command(std::shared_ptr<Group>);
+    void group_remove_command(std::shared_ptr<Group>);
+    void group_formation_command(std::shared_ptr<Group>);
+    void group_move_command(std::shared_ptr<Group>);
+    void group_stop_command(std::shared_ptr<Group>);
+    void group_attack_command(std::shared_ptr<Group>);
+
     // helper to initialize command containers with string to 
     // function pointer mappings
     void init_commands();
 
     using Controller_fp_t = void(Controller::*)();
     using Controller_agent_fp_t = void(Controller::*)(std::shared_ptr<Agent>);
+    using Controller_group_fp_t = void(Controller::*)(std::shared_ptr<Group>);
     using Command_map_t = std::map<std::string, Controller_fp_t>;
     using Agent_command_map_t = std::map<std::string, Controller_agent_fp_t>;
+    using Group_command_map_t = std::map<std::string, Controller_group_fp_t>;
 
     // Returns function pointer to associated command if it exists, 
     // returns nullptr otherwise
@@ -64,6 +76,7 @@ private:
 
     // Containers for user command function pointers
     Agent_command_map_t       m_agent_commands;
+    Group_command_map_t       m_group_commands;
     Command_map_t             m_view_commands;
     Command_map_t             m_program_commands;
     // member that holds ptr to World map view when it is open
