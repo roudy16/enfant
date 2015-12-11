@@ -13,6 +13,7 @@ class View;
 class Sim_object;
 class Structure;
 class Agent;
+class Group;
 struct Point;
 
 /*
@@ -76,6 +77,10 @@ public:
     // returns pointer to closest Agent to passed in object, empty pointer otherwise
     std::shared_ptr<Agent> get_closest_agent_to_obj(std::shared_ptr<Sim_object>);
 
+
+    void add_group(std::shared_ptr<Group> group_ptr);
+    void remove_group(std::shared_ptr<Group> group_ptr);
+
     // tell all objects to describe themselves to the console
     void describe() const;
     // increment the time, and tell all objects to update themselves
@@ -123,6 +128,7 @@ private:
     std::map<const std::string, std::shared_ptr<Sim_object>> m_sim_objs;
     std::map<const std::string, std::shared_ptr<Agent>>      m_agents;
     std::map<const std::string, std::shared_ptr<Structure>>  m_structures;
+    std::vector<std::shared_ptr<Group>>                      m_groups;
     std::vector<std::shared_ptr<View>>                       m_views;
 
     int m_time;

@@ -2,6 +2,7 @@
 #define AGENT_H
 
 #include <memory>
+#include <vector>
 #include "Moving_object.h"
 #include "Sim_object.h"
 
@@ -14,6 +15,7 @@ If its heath <= 0, it dies and tells Model to remove it.
 
 
 class Structure;
+class Death_observer;
 
 class Agent : public Sim_object {
 public:
@@ -57,6 +59,11 @@ public:
     // Throws exception that an Agent cannot attack.
     virtual void start_attacking(std::shared_ptr<Agent>);
 
+    // Interface for allowing observation of Agent death
+    void attach_death_observer(std::shared_ptr<Death_observer> observer);
+    void detach_death_observer(std::shared_ptr<Death_observer> observer);
+    void notify_death(const std::string& name);
+
     // disallow copy/move construction or assignment and default ctor
     // TODO necessary for abstract classes? Can they prevent slicing or is this 
     // already accomplished just by having the class abstact?
@@ -79,6 +86,7 @@ protected:
 private:
     enum class Alive_State { ALIVE, DEAD };
 
+    std::vector<std::shared_ptr<Death_observer>> m_death_observers;
     Moving_object m_moving_obj;
     int m_health;
     Alive_State m_alive_state;
