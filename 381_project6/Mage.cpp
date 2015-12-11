@@ -141,6 +141,7 @@ void Mage::do_update() {
         else {
             // target is in range, aim to maim!
             // Use of attack spell expends a charge.
+            --m_charges;
             cout << get_name() << ": FWOOoosh!" << endl;
             shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
             get_target().lock()->take_hit(kMAGE_INITIAL_STRENGTH, this_ptr);

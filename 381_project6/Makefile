@@ -71,10 +71,10 @@ Infantry.o: Infantry.cpp Infantry.h Agent.h Utility.h
 Soldier.o: Soldier.cpp Soldier.h Infantry.h Agent.h Utility.h
 	$(CC) $(CFLAGS) Soldier.cpp
 
-Archer.o: Archer.cpp Archer.h Infantry.h Agent.h Utility.h
+Archer.o: Archer.cpp Archer.h Infantry.h Agent.h Utility.h Model.h
 	$(CC) $(CFLAGS) Archer.cpp
 
-Mage.o: Mage.cpp Mage.h Infantry.h Agent.h Utility.h Geometry.h
+Mage.o: Mage.cpp Mage.h Infantry.h Agent.h Utility.h Geometry.h Model.h
 	$(CC) $(CFLAGS) Mage.cpp
 
 Moving_object.o: Moving_object.cpp Moving_object.h Geometry.h Utility.h

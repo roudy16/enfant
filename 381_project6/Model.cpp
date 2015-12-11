@@ -189,22 +189,23 @@ bool Model::is_agent_present(const string& name) const {
 void Model::add_agent(shared_ptr<Agent> new_agent_ptr) {
     // Add Agent to Sim_objects container as a shared_ptr<Sim_object>
     m_sim_objs[new_agent_ptr->get_name()] = static_pointer_cast<Sim_object>(new_agent_ptr);
-
-    // Add Agent to Structures container as an shared_ptr<Agent>
+    // Add Agent to Agents container as an shared_ptr<Agent>
     m_agents[new_agent_ptr->get_name()] = new_agent_ptr;
+
     new_agent_ptr->broadcast_current_state();
 }
 
+// Remove Agent from Sim_objects container and Agents container
 void Model::remove_agent(shared_ptr<Agent> agent_ptr) {
-    assert(agent_ptr); // assert agent_ptr not nullptr
+    assert(agent_ptr); // assert obj_ptr not nullptr
 
     auto agent_iter = m_agents.find(agent_ptr->get_name());
     assert(agent_iter != m_agents.end());
     m_agents.erase(agent_iter);
 
-    auto sim_obj_iter = m_sim_objs.find(agent_ptr->get_name());
-    assert(sim_obj_iter != m_sim_objs.end());
-    m_sim_objs.erase(sim_obj_iter);
+    auto obj_iter = m_sim_objs.find(agent_ptr->get_name());
+    assert(obj_iter != m_sim_objs.end());
+    m_sim_objs.erase(obj_iter);
 }
 
 shared_ptr<Agent> Model::get_agent_ptr(const string& name) const {
@@ -224,6 +225,7 @@ shared_ptr<Agent> Model::get_closest_agent_to_obj(shared_ptr<Sim_object> obj_ptr
 
 // tell all objects to describe themselves to the console
 void Model::describe() const {
+    // TODO use STL
     for (auto& pair : m_sim_objs) {
         pair.second->describe();
     }
