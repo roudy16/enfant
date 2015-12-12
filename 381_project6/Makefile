@@ -10,6 +10,7 @@ OBJS += Farm.o Town_Hall.o
 OBJS += Peasant.o Infantry.o Soldier.o Archer.o Mage.o
 OBJS += Agent_factory.o Structure_factory.o
 OBJS += Geometry.o Utility.o
+OBJS += Death_observer.o Group.o
 PROG = p6exe
 
 default: $(PROG)
@@ -20,11 +21,14 @@ $(PROG): $(OBJS)
 p6_main.o: p6_main.cpp Controller.h
 	$(CC) $(CFLAGS) p6_main.cpp
 
-Model.o: Model.cpp Model.h View.h Sim_object.h Structure.h Agent.h Agent_factory.h Structure_factory.h Geometry.h Utility.h
+Model.o: Model.cpp Model.h View.h Sim_object.h Structure.h Agent.h Agent_factory.h Structure_factory.h Geometry.h Utility.h Group.h
 	$(CC) $(CFLAGS) Model.cpp
 
 View.o: View.cpp View.h Geometry.h Utility.h
 	$(CC) $(CFLAGS) View.cpp
+
+Controller.o: Controller.cpp Controller.h Model.h View.h Sim_object.h Structure.h Agent.h Agent_factory.h Structure_factory.h Geometry.h Utility.h Group.h
+	$(CC) $(CFLAGS) Controller.cpp
 
 Map.o: Map.cpp Map.h Geometry.h View.h Utility.h
 	$(CC) $(CFLAGS) Map.cpp
@@ -43,9 +47,6 @@ Health_status.o: Health_status.cpp Health_status.h Geometry.h View.h Utility.h
 
 Amount_status.o: Amount_status.cpp Amount_status.h Geometry.h View.h Utility.h
 	$(CC) $(CFLAGS) Amount_status.cpp
-
-Controller.o: Controller.cpp Controller.h Model.h View.h Sim_object.h Structure.h Agent.h Agent_factory.h Structure_factory.h Geometry.h Utility.h
-	$(CC) $(CFLAGS) Controller.cpp
 
 Sim_object.o: Sim_object.cpp Sim_object.h Geometry.h
 	$(CC) $(CFLAGS) Sim_object.cpp
@@ -91,6 +92,12 @@ Geometry.o: Geometry.cpp Geometry.h Utility.h
 
 Utility.o: Utility.cpp Utility.h
 	$(CC) $(CFLAGS) Utility.cpp
+
+Death_observer.o: Death_observer.cpp Death_observer.h
+	$(CC) $(CFLAGS) Death_observer.cpp
+
+Group.o: Group.cpp Group.h Death_observer.h Agent.h Utility.h
+	$(CC) $(CFLAGS) Group.cpp
 
 clean:
 	rm -f *.o

@@ -62,7 +62,7 @@ public:
     // Interface for allowing observation of Agent death
     void attach_death_observer(std::shared_ptr<Death_observer> observer);
     void detach_death_observer(std::shared_ptr<Death_observer> observer);
-    void notify_death(const std::string& name);
+    void notify_death();
 
     // disallow copy/move construction or assignment and default ctor
     // TODO necessary for abstract classes? Can they prevent slicing or is this 

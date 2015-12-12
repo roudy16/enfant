@@ -329,16 +329,30 @@ void Controller::agent_stop_command(shared_ptr<Agent> agent_ptr) {
 
 // Group commands
 void Controller::group_disband_command(shared_ptr<Group> group_ptr) {
-
+    group_ptr->disband();
+    Model::get_instance()->remove_group(group_ptr->get_name());
 }
 
 
 void Controller::group_add_command(shared_ptr<Group> group_ptr) {
+    string agent_name;
+    read_in_string(agent_name);
 
+    // Find Agent named, throws Error if Agent not found
+    shared_ptr<Agent> agent_ptr = Model::get_instance()->get_agent_ptr(agent_name);
+
+    group_ptr->add_agent(agent_ptr);
+    agent_ptr->attach_death_observer(static_pointer_cast<Death_observer>(group_ptr));
 }
 
 void Controller::group_remove_command(shared_ptr<Group> group_ptr) {
+    string agent_name;
+    read_in_string(agent_name);
 
+    // Find Agent named, throws Error if Agent not found
+    shared_ptr<Agent> agent_ptr = Model::get_instance()->get_agent_ptr(agent_name);
+
+    group_ptr->remove_agent(agent_ptr);
 }
 
 void Controller::group_formation_command(shared_ptr<Group> group_ptr) {

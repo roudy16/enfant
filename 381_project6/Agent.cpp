@@ -1,12 +1,15 @@
 #include "Agent.h"
 #include "Model.h"
 #include "Utility.h"
+#include "Death_observer.h"
 #include <iostream>
+#include <algorithm>
 #include <cassert>
 
 using std::string;
 using std::cout; using std::endl;
 using std::shared_ptr; using std::static_pointer_cast;
+using std::for_each; using std::find;
 
 const double kAGENT_INITIAL_SPEED = 5.0;
 
@@ -65,6 +68,7 @@ void Agent::lose_health(int attack_strength) {
 
         // notify Model to remove Agent from simulation
         auto this_ptr = static_pointer_cast<Agent>(shared_from_this());
+        notify_death();
         Model::get_instance()->notify_gone(get_name());
         Model::get_instance()->remove_agent(this_ptr);
     }
@@ -146,3 +150,26 @@ void Agent::jump_to_location(const Point& target) {
     m_moving_obj.jump_to_location(target);
     Model::get_instance()->notify_location(get_name(), get_location());
 }
+
+void Agent::attach_death_observer(std::shared_ptr<Death_observer> observer) {
+    assert(find(m_death_observers.begin(), m_death_observers.end(), observer) == m_death_observers.end());
+
+    m_death_observers.push_back(observer);
+}
+
+void Agent::detach_death_observer(std::shared_ptr<Death_observer> observer) {
+    auto iter = find(m_death_observers.begin(), m_death_observers.end(), observer);
+
+    // function should not be called if observer is not in this Agents observer container
+    assert(iter != m_death_observers.end());
+
+    m_death_observers.erase(iter);
+}
+
+void Agent::notify_death() {
+    const string& name = get_name();
+    for_each(m_death_observers.begin(), m_death_observers.end(),
+        [&name](shared_ptr<Death_observer>& p){ p->update_on_death(name); });
+}
+
+

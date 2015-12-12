@@ -113,6 +113,8 @@ public:
     friend class Model_destroyer;
 
 private:
+    using Sim_objs_t = std::map < const std::string, std::shared_ptr<Sim_object> > ;
+
     // create the initial objects
     Model();
     // destroy all objects
@@ -128,7 +130,7 @@ private:
 
     static Model* mp_instance; // pointer to single instance of Model
 
-    std::map<const std::string, std::shared_ptr<Sim_object>> m_sim_objs;
+    Sim_objs_t                                               m_sim_objs;
     std::map<const std::string, std::shared_ptr<Agent>>      m_agents;
     std::map<const std::string, std::shared_ptr<Structure>>  m_structures;
     std::vector<std::shared_ptr<Group>>                      m_groups;

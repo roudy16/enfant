@@ -13,7 +13,7 @@
 
 using std::string;
 using std::shared_ptr; using std::static_pointer_cast;
-using std::min_element; using std::find;
+using std::min_element; using std::find; using std::for_each;
 
 // class used to deallocate Model
 class Model_destroyer {
@@ -265,20 +265,19 @@ shared_ptr<Group> Model::get_group_ptr(const string& name) const {
 
 // tell all objects to describe themselves to the console
 void Model::describe() const {
-    // TODO use STL
-    for (auto& pair : m_sim_objs) {
-        pair.second->describe();
-    }
+    for_each(m_sim_objs.begin(), m_sim_objs.end(),
+        [](const Sim_objs_t::value_type& p){ p.second->describe(); });
+
+    for_each(m_groups.begin(), m_groups.end(),
+        [](const shared_ptr<Group>& p){ p->describe(); });
 }
 
 // increment the time, and tell all objects to update themselves
 void Model::update() {
     m_time++;
 
-    // update all objects
-    for (auto& pair : m_sim_objs) {
-        pair.second->update();
-    }
+    for_each(m_sim_objs.begin(), m_sim_objs.end(),
+        [](Sim_objs_t::value_type& p){ p.second->update(); });
 }
 
 /* View services */
@@ -288,9 +287,8 @@ void Model::update() {
 void Model::attach(shared_ptr<View> view_ptr) {
     m_views.push_back(view_ptr);
 
-    for (auto& p : m_sim_objs) {
-        p.second->broadcast_current_state();
-    }
+    for_each(m_sim_objs.begin(), m_sim_objs.end(),
+        [](Sim_objs_t::value_type& p){ p.second->broadcast_current_state(); });
 }
 
 // Detach the View by discarding the supplied pointer from the container of Views
@@ -303,32 +301,29 @@ void Model::detach(shared_ptr<View> view_ptr) {
 
 // notify the views about an object's location
 void Model::notify_location(const string& name, const Point& location) {
-    for (shared_ptr<View> p : m_views) {
-        p->update_location(name, location);
-    }
+    for_each(m_views.begin(), m_views.end(),
+        [&name, &location](shared_ptr<View>& v){ v->update_location(name, location); });
 }
 
 // notify the views that an object is now gone
 void Model::notify_gone(const string& name) {
-    for (shared_ptr<View> p : m_views) {
-        p->update_remove(name);
-    }
+    for_each(m_views.begin(), m_views.end(),
+        [&name](shared_ptr<View>& v){ v->update_remove(name); });
 }
 
 // notify the views of an objects's health
 void Model::notify_health(const string& name, double health) {
-    for (shared_ptr<View> p : m_views) {
-        p->update_health(name, health);
-    }
+    for_each(m_views.begin(), m_views.end(),
+        [&name, health](shared_ptr<View>& v){ v->update_health(name, health); });
 }
 
 // notify the views of an object's food amount
 void Model::notify_amount(const string& name, double amount) {
-    for (shared_ptr<View> p : m_views) {
-        p->update_amount(name, amount);
-    }
+    for_each(m_views.begin(), m_views.end(),
+        [&name, amount](shared_ptr<View>& v){ v->update_amount(name, amount); });
 }
 
+// TODO remove this
 // notify the views to draw their information
 void Model::notify_draw() {
     for (shared_ptr<View> p : m_views) {
