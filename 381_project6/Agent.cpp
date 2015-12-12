@@ -167,9 +167,9 @@ void Agent::detach_death_observer(std::shared_ptr<Death_observer> observer) {
 }
 
 void Agent::notify_death() {
-    const string& name = get_name();
+    shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
     for_each(m_death_observers.begin(), m_death_observers.end(),
-        [&name](shared_ptr<Death_observer>& p){ p->update_on_death(name); });
+        [&this_ptr](shared_ptr<Death_observer>& p){ p->update_on_death(this_ptr); });
 }
 
 

@@ -335,11 +335,11 @@ void Controller::group_disband_command(shared_ptr<Group> group_ptr) {
 
 
 void Controller::group_add_command(shared_ptr<Group> group_ptr) {
-    string agent_name;
-    read_in_string(agent_name);
+    string member_name;
+    read_in_string(member_name);
 
     // Find Agent named, throws Error if Agent not found
-    shared_ptr<Agent> agent_ptr = Model::get_instance()->get_agent_ptr(agent_name);
+    shared_ptr<Agent> agent_ptr = Model::get_instance()->get_agent_ptr(member_name);
 
     group_ptr->add_agent(agent_ptr);
     agent_ptr->attach_death_observer(static_pointer_cast<Death_observer>(group_ptr));

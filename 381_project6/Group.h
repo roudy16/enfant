@@ -1,17 +1,17 @@
 #include "Death_observer.h"
+#include "Agent.h"
 #include <string>
-#include <map>
 #include <memory>
+#include <set>
 
 // Forward declaration
-class Agent;
 struct Point;
 
 class Group : public Death_observer, public std::enable_shared_from_this<Group> {
 public:
     explicit Group(const std::string& name);
 
-    void update_on_death(const std::string& name) override;
+    void update_on_death(std::shared_ptr<Agent>) override;
 
     void disband();
     void move(const Point& destination);
@@ -35,7 +35,14 @@ public:
     Group& operator= (Group&&) = delete;
 
 private:
-    using Group_members_t = std::map<const std::string, std::shared_ptr<Agent>>;
+    // Comparator used to order members by name
+    struct Members_comp {
+        bool operator()(std::shared_ptr<Agent> lhs, std::shared_ptr<Agent> rhs) {
+            return lhs->get_name() < rhs->get_name();
+        }
+    };
+
+    using Group_members_t = std::set<std::shared_ptr<Agent>, Members_comp>;
     enum class Formation { LINE, COLUMN, WEDGE };
 
     Group_members_t   m_members;
