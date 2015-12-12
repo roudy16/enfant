@@ -36,8 +36,8 @@ protected:
     Infantry(const std::string& name_, const Point& location_, int start_health_);
 
     // Accessors for derived classes to Infantry member variables
-    const std::weak_ptr<Agent>& get_target();
-    Infantry_state get_state() const;
+    const std::weak_ptr<Agent>& get_target() const noexcept;
+    Infantry_state get_state() const noexcept;
 
     // Returns true if target is within attack range, prints message and stops
     // attacking otherwise.

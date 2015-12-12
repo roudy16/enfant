@@ -81,6 +81,8 @@ public:
     std::shared_ptr<Agent> find_agent(const std::string& name) const;
     // returns pointer to closest Agent to passed in object, empty pointer otherwise
     std::shared_ptr<Agent> get_closest_agent_to_obj(std::shared_ptr<Sim_object>);
+    // returns pointer to closest Agent that does not share a Group with passed in agent
+    std::shared_ptr<Agent> get_closest_hostile_agent(std::shared_ptr<Agent>);
 
     // is there a group with this name?
     bool is_group_present(const std::string& name) const;
@@ -113,6 +115,7 @@ public:
     void notify_amount(const std::string& name, double amount);
     // notify the views to draw themselves
     void notify_draw();
+    // TODO remove this
     // Returns shared_ptr to View with name, returns empty ptr otherwise
     std::shared_ptr<View> find_view(const std::string& name);
 
@@ -134,6 +137,9 @@ private:
     // return a shared_ptr to the closest object to obj_ptr
     template <typename C>
     typename C::mapped_type get_closest_helper(C&, std::shared_ptr<Sim_object>);
+
+    // Returns true if both Agents are present in the same group
+    bool agents_share_group(std::shared_ptr<Agent> agent_a, std::shared_ptr<Agent> agent_b) const;
 
     static Model* mp_instance; // pointer to single instance of Model
 

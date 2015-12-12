@@ -19,9 +19,6 @@
 /* Utility declarations, functions, and classes used by other modules */
 /* ################################################################## */
 
-// Returns true if two doubles compare equal within an allowable tolerance.
-bool double_tolerance_compare_eq(const double lhs, const double rhs) noexcept;
-
 // a simple class for error exceptions that inherits from std::exception
 class Error : public std::exception {
 public:

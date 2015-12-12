@@ -386,7 +386,8 @@ void Controller::group_formation_command(shared_ptr<Group> group_ptr) {
 }
 
 void Controller::group_move_command(shared_ptr<Group> group_ptr) {
-
+    Point destination = read_point();
+    group_ptr->move(destination);
 }
 
 void Controller::group_stop_command(shared_ptr<Group> group_ptr) {

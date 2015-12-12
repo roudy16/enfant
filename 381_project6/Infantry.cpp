@@ -98,7 +98,7 @@ void Infantry::start_attacking(shared_ptr<Agent> target_ptr) {
     }
 
     // Check if target is in range, cannot attack out of range target
-    const double&& distance = cartesian_distance(get_location(), target_ptr->get_location());
+    const double distance = cartesian_distance(get_location(), target_ptr->get_location());
     if (distance > get_range()) {
         throw Error(get_name() + ": Target is out of range!");
     }
@@ -107,10 +107,10 @@ void Infantry::start_attacking(shared_ptr<Agent> target_ptr) {
     engage_new_target(target_ptr);
 }
 
-const weak_ptr<Agent>& Infantry::get_target() {
+const weak_ptr<Agent>& Infantry::get_target() const noexcept {
     return mp_target;
 }
 
-Infantry::Infantry_state Infantry::get_state() const {
+Infantry::Infantry_state Infantry::get_state() const noexcept {
     return m_infantry_state;
 }

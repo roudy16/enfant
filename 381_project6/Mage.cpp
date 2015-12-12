@@ -69,7 +69,7 @@ void Mage::take_hit(int attack_strength, shared_ptr<Agent> attacker_ptr) {
     // If no Structure exists then the Mage will teleport in place
     Point attacker_loc = attacker_ptr->get_location();
     if (get_location() == attacker_loc) {
-        shared_ptr<Sim_object>&& this_ptr = static_pointer_cast<Sim_object>(shared_from_this());
+        shared_ptr<Sim_object> this_ptr = static_pointer_cast<Sim_object>(shared_from_this());
         shared_ptr<Structure> closest_structure = Model::get_instance()->get_closest_structure_to_obj(this_ptr);
 
         // If no Structure was found or Structure is also at same location teleport 
@@ -90,11 +90,7 @@ void Mage::take_hit(int attack_strength, shared_ptr<Agent> attacker_ptr) {
 
     // At this point the teleport_direction is not the zero vector but it must be
     // normalised before we call Mage::teleport()
-    const double normalisation_factor = 1.0 / sqrt(teleport_direction.delta_x * teleport_direction.delta_x +
-                                                   teleport_direction.delta_y * teleport_direction.delta_y);
-
-    teleport_direction.delta_x *= normalisation_factor;
-    teleport_direction.delta_y *= normalisation_factor;
+    teleport_direction.normalise();
 
     teleport(teleport_direction);
 }
@@ -143,7 +139,7 @@ void Mage::do_update() {
             // Use of attack spell expends a charge.
             --m_charges;
             cout << get_name() << ": FWOOoosh!" << endl;
-            shared_ptr<Agent>&& this_ptr = static_pointer_cast<Agent>(shared_from_this());
+            shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
             get_target().lock()->take_hit(kMAGE_INITIAL_STRENGTH, this_ptr);
 
             // If Mage killed the target, report it, stop attacking and forget target

@@ -4,6 +4,8 @@ See Geometry.h for comments
 */
 
 #include "Geometry.h"
+
+//TODO remove
 #include "Utility.h"
 
 #include <iostream>
@@ -14,18 +16,19 @@ using namespace std;
 // calculate a value for pi
 const double pi = 2. * atan2(1., 0.);
 
+
 // *** Member function definitions ***
 
 // Point members
 // compare two positions
 bool Point::operator== (const Point& rhs) const
 {
-    return double_tolerance_compare_eq(x, rhs.x) && double_tolerance_compare_eq(y, rhs.y);
+    return point_tolerance_compare_eq(*this, rhs);
 }
  
 bool Point::operator!= (const Point& rhs) const
 {
-    return !(*this == rhs);
+    return !point_tolerance_compare_eq(*this, rhs);
 }
 
 // return the distance between two Points
@@ -35,6 +38,17 @@ double cartesian_distance (const Point& p1, const Point& p2)
     double yd = p2.y - p1.y;
     double d = sqrt(xd * xd + yd * yd);
     return d;
+}
+
+// Returns true if two doubles compare equal within an allowable tolerance.
+bool double_tolerance_compare_eq(const double lhs, const double rhs, const double tol) noexcept{
+    return lhs < rhs + tol && lhs > rhs - tol;
+}
+
+// Returns true if two Points compare equal within an allowable tolerance.
+bool point_tolerance_compare_eq(const Point& lhs, const Point& rhs) noexcept {
+    return double_tolerance_compare_eq(lhs.x, rhs.x) &&
+           double_tolerance_compare_eq(lhs.y, rhs.y);
 }
 
 // Cartesian_vector members
@@ -52,6 +66,23 @@ Cartesian_vector::Cartesian_vector(const Polar_vector& pv)
 {
     delta_x = pv.r * cos(pv.theta);
     delta_y = pv.r * sin(pv.theta);
+}
+
+void Cartesian_vector::normalise() noexcept {
+    // Do nothing if vector is zero vector
+    if (double_tolerance_compare_eq(delta_x, 0.0) &&
+        double_tolerance_compare_eq(delta_y, 0.0))
+    {
+        return;
+    }
+
+    // Compute normalisation factor then multiply both vector components 
+    // by this factor.
+    const double normalisation_factor = 1.0 / sqrt(delta_x * delta_x +
+                                                   delta_y * delta_y);
+
+    delta_x *= normalisation_factor;
+    delta_y *= normalisation_factor;
 }
 
 // Polar_vector members
@@ -187,6 +218,21 @@ ostream& operator<< (ostream& os, const Polar_vector& pv)
     return os;
 }
 
+// Perform 2D rotations
+Point operator* (const Rotation2D& rot, const Point& p) {
+    double new_px = rot.a0 * p.x + rot.a1 * p.y;
+    double new_py = rot.b0 * p.x + rot.b1 * p.y;
+
+    return Point(new_px, new_py);
+}
+
+Cartesian_vector operator* (const Rotation2D& rot, const Cartesian_vector& cv) {
+    double new_cvx = rot.a0 * cv.delta_x + rot.a1 * cv.delta_y;
+    double new_cvy = rot.b0 * cv.delta_x + rot.b1 * cv.delta_y;
+
+    return Cartesian_vector(new_cvx, new_cvy);
+}
+
 /***** Utility function definitions *****/
 // There are 2pi radians in 360 degrees
 double to_radians (double theta_d)
@@ -198,4 +244,8 @@ double to_degrees (double theta_r)
 {
     double temp = 360. * theta_r / (2. * pi);
     return temp;
+}
+
+double get_pi() {
+    return pi;
 }

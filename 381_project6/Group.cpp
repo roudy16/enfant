@@ -1,6 +1,7 @@
 #include "Group.h"
 #include "Agent.h"
 #include "Utility.h"
+#include "Geometry.h"
 #include <string>
 #include <iostream>
 #include <algorithm>
@@ -13,6 +14,11 @@ using std::cout; using std::endl;
 using std::for_each;
 using std::bind; using namespace std::placeholders;
 using std::shared_ptr; using std::static_pointer_cast;
+
+
+// How far away from the destination point each member should be when a move
+// command is given to a group with multiple members
+constexpr double kGROUP_MOVE_OFFSET_MAGNITUDE = 0.5;
 
 Group::Group(const string& name_) : m_name(name_)
 {
@@ -101,8 +107,87 @@ void Group::disband() {
     m_members.clear();
 }
 
-void Group::move(const Point& destination) {
+// Returns approximate location of the group as a whole
+Point Group::calculate_location() const {
+    // If group has no members then return a Point (0.0, 0.0)
+    if (m_members.empty()) {
+        return Point(0.0, 0.0);
+    }
 
+    // Accumlators for the new locations coordinates
+    double new_px = 0.0;
+    double new_py = 0.0;
+
+    // Accumulate the values of the locations of all members of the group
+    for (auto p : m_members) {
+        new_px += p->get_location().x;
+        new_py += p->get_location().y;
+    }
+
+    // Multiply accumulated values by weight to get average of all locations
+    const double weight = 1.0 / static_cast<double>(m_members.size());
+    new_px *= weight;
+    new_py *= weight;
+
+    // Return a Point that is the average of all the members' locations
+    return Point(new_px, new_py);
+}
+
+// TODO needed?
+// Returns normalised heading vector from group to target location
+Cartesian_vector Group::calculate_heading(const Point& target) const {
+    Point group_location = calculate_location();
+
+    Cartesian_vector heading(group_location, target);
+    heading.normalise();
+
+    return heading;
+}
+
+void Group::move(const Point& destination) {
+    // Throw Error if group has no members to move
+    if (m_members.empty()) {
+        throw Error("Group has no members to move!");
+    }
+
+    Point group_location = calculate_location();
+
+    // Don't command the group to move if it is already there
+    if (point_tolerance_compare_eq(group_location, destination)) {
+        cout << "Group " << m_name << " is already there!" << endl;
+        return;
+    }
+
+    // If Group only has one member then move that member to destination
+    if (m_members.size() == 1) {
+        m_members.begin()->get()->move_to(destination);
+        return;
+    }
+
+    /* The group has multiple members and will command them all to move. The 
+    locations each member is told to move will be offsets all equal distance 
+    from the passed in destination. The first position filled will be offset
+    from destination in the direction of the heading from the groups current
+    to the destination. The remaining positions will be assigned at even
+    intervals in a counter-clockwise circle around the destination */
+
+    // create a normalised offset heading from the group's current location
+    // to the destination.
+    Cartesian_vector offset_heading(group_location, destination);
+    offset_heading.normalise();
+
+    // Radians to rotate about destination per member
+    const double theta_per_member = (2.0 * get_pi()) / static_cast<double>(m_members.size());
+
+    // Rotation matrix for applying rotations
+    const Rotation2D rotation_mat(theta_per_member);
+
+    for (auto p : m_members) {
+        p->move_to(destination + kGROUP_MOVE_OFFSET_MAGNITUDE * offset_heading);
+
+        // Apply the per member rotation to the offset heading
+        offset_heading = rotation_mat * offset_heading;
+    }
 }
 
 void Group::stop() {
@@ -113,12 +198,19 @@ void Group::attack(std::shared_ptr<Agent> target) {
 
 }
 
+void Group::work(std::shared_ptr<Structure> source, std::shared_ptr<Structure> destination) {
+
+}
+
 void Group::describe() const {
-    cout << "Group " << m_name + ":\n";
+    cout << "Group " << m_name << " has " << m_members.size() << " members:\n";
     for_each(m_members.begin(), m_members.end(),
         [](const Group_members_t::value_type& p){ cout << p->get_name() << '\n'; });
-    cout << "Total members: " << m_members.size() << endl;
     // TODO add formation if I do that
+}
+
+bool Group::is_agent_member(std::shared_ptr<Agent> query) {
+    return m_members.find(query) != m_members.end();
 }
 
 const string& Group::get_name() const {

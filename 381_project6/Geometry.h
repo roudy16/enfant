@@ -2,6 +2,10 @@
 #define GEOMETRY_H
 
 #include <iosfwd>
+#include <cmath>
+
+// TODO
+#include "Utility.h"
 
 /*
 This set of simple classes is used to compute positions and directions in the plane, 
@@ -23,9 +27,15 @@ A Polar_vector is (r, theta) - a displacement in polar coordinates using radians
 Various overloaded operators support computations of positions and directions.
 */
 
+// Tolerance used when comparing Points
+constexpr double kLINEAR_TOLERANCE = 1.0e-6;
+
 // angle units conversion functions
 double to_radians(double theta_d);
 double to_degrees(double theta_r);
+
+// get value of pi
+double get_pi();
 
 
 // forward class declarations
@@ -49,8 +59,16 @@ struct Point
     bool operator!= (const Point& rhs) const;    
 };
 
+// Returns true if two doubles compare equal within an allowable tolerance.
+bool double_tolerance_compare_eq(const double lhs,
+                                 const double rhs,
+                                 const double tol = kLINEAR_TOLERANCE) noexcept;
+
 // return the distance between two Points
 double cartesian_distance (const Point& p1, const Point& p2);
+
+// Returns true if two Points compare equal within an allowable tolerance.
+bool point_tolerance_compare_eq(const Point& lhs, const Point& rhs) noexcept;
 
 /* Cartesian_vector */
 // A Cartesian_vector contains an x, y displacement
@@ -70,6 +88,8 @@ struct Cartesian_vector
 
     // construct a Cartesian_vector from a Polar_vector
     Cartesian_vector(const Polar_vector& pv);
+
+    void normalise() noexcept;
 };
 
 
@@ -93,6 +113,21 @@ struct Polar_vector
     // construct a Polar_vector from a Cartesian_vector
     Polar_vector(const Cartesian_vector& cv);
 
+};
+
+/* 
+    A rotation matrix used to perform rotations about the origin
+    | a0  a1 |
+    | b0  b1 |
+*/
+struct Rotation2D {
+    double a0, a1, b0, b1;
+
+    // construct a Rotation2D that will rotate theta_ radians CCW
+    // about the origin
+    Rotation2D(const double theta_) :
+        a0(cos(theta_)), a1(-sin(theta_)), b0(-a1), b1(a0) 
+    {}
 };
 
 // *** Overloaded Operators ***
@@ -133,5 +168,9 @@ Polar_vector operator* (double d, const Polar_vector& pv);
 std::ostream& operator<< (std::ostream& os, const Point& p);
 std::ostream& operator<< (std::ostream& os, const Cartesian_vector& cv);
 std::ostream& operator<< (std::ostream& os, const Polar_vector& pv);
+
+// Perform 2D rotations
+Point operator* (const Rotation2D& rot, const Point& p);
+Cartesian_vector operator* (const Rotation2D& rot, const Cartesian_vector& cv);
 
 #endif
