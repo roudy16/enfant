@@ -31,9 +31,9 @@ private:
     // do update tasks for Soldier
     void do_update() override;
     // returns Soldier's attack range
-    double get_range() const override;
+    double get_range() const noexcept override;
     // returns string "Soldier"
-    const std::string& get_type_string() const override;
+    const std::string& get_type_string() const noexcept override;
 };
 
 #endif // SOLDIER_H

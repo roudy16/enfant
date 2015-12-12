@@ -5,6 +5,9 @@
 #include <string>
 #include <memory>
 
+//TODO
+#include "Utility.h"
+
 // Forward declaration
 struct Point;
 
@@ -51,8 +54,8 @@ protected:
     virtual void do_update();
 
     // Accessor hooks derived classes must provide
-    virtual const std::string& get_type_string() const = 0;
-    virtual double get_range() const = 0;
+    virtual const std::string& get_type_string() const noexcept = 0;
+    virtual double get_range() const noexcept = 0;
 
 private:
     std::weak_ptr<Agent> mp_target;

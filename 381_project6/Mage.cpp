@@ -156,12 +156,12 @@ void Mage::do_update() {
 }
 
 // returns Mage's attack range
-double Mage::get_range() const {
+double Mage::get_range() const noexcept {
     return kMAGE_INITIAL_RANGE;
 }
 
 // return string "Mage"
-const string& Mage::get_type_string() const {
+const string& Mage::get_type_string() const noexcept {
     static const string my_type = "Mage";
     return my_type;
 }

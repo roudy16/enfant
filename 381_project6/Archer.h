@@ -24,9 +24,9 @@ private:
     // do update tasks for Archer
     void do_update() override;
     // returns Archer's attack range
-    double get_range() const override;
+    double get_range() const noexcept override;
     // return string "Archer"
-    const std::string& get_type_string() const override;
+    const std::string& get_type_string() const noexcept override;
 };
 
 #endif // ARCHER_H
