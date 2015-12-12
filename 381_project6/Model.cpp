@@ -204,16 +204,28 @@ void Model::remove_agent(shared_ptr<Agent> agent_ptr) {
     m_sim_objs.erase(obj_iter);
 }
 
-shared_ptr<Agent> Model::get_agent_ptr(const string& name) const {
-    // TODO this is code copy I think
+// returns pointer to Agent with name if it exists, empty pointer otherwise
+shared_ptr<Agent> Model::find_agent(const std::string& name) const {
     auto iter = m_agents.find(name);
 
     // throw Error if Agent not found
     if (iter == m_agents.end()) {
-        throw Error("Agent not found!");
+        return shared_ptr<Agent>();
     }
 
     return iter->second;
+}
+
+shared_ptr<Agent> Model::get_agent_ptr(const string& name) const {
+    // TODO this is code copy I think
+    shared_ptr<Agent> agent_ptr = find_agent(name);
+
+    // throw Error if Agent not found
+    if (!agent_ptr) {
+        throw Error("Agent not found!");
+    }
+
+    return agent_ptr;
 }
 
 shared_ptr<Agent> Model::get_closest_agent_to_obj(shared_ptr<Sim_object> obj_ptr) {
@@ -252,15 +264,27 @@ void Model::remove_group(const string& name) {
     m_groups.erase(iter);
 }
 
-shared_ptr<Group> Model::get_group_ptr(const string& name) const {
+// returns pointer to Group with name if it exists, empty pointer otherwise
+shared_ptr<Group> Model::find_group(const std::string& name) const {
     auto iter = find(m_groups.begin(), m_groups.end(), name);
 
     // If group not found throw and Error
     if (iter == m_groups.end()) {
-        throw Error("Group not found!");
+        return shared_ptr<Group>();
     }
 
     return *iter;
+}
+
+shared_ptr<Group> Model::get_group_ptr(const string& name) const {
+    shared_ptr<Group> group_ptr = find_group(name);
+
+    // If group not found throw and Error
+    if (!group_ptr) {
+        throw Error("Group not found!");
+    }
+
+    return group_ptr;
 }
 
 // tell all objects to describe themselves to the console

@@ -4,12 +4,14 @@
 #include <string>
 #include <iostream>
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <cassert>
 
 using std::string;
 using std::cout; using std::endl;
 using std::for_each;
+using std::bind; using namespace std::placeholders;
 using std::shared_ptr; using std::static_pointer_cast;
 
 Group::Group(const string& name_) : m_name(name_)
@@ -20,36 +22,75 @@ void Group::update_on_death(shared_ptr<Agent> agent_ptr) {
     auto iter = m_members.find(agent_ptr);
     assert(iter != m_members.end());
 
-    remove_agent(*iter);
+    m_members.erase(iter);
+}
+
+bool Group::add_agent_helper(std::shared_ptr<Agent> agent) {
+    // Attempt to insert agent
+    auto return_val = m_members.insert(agent);
+
+    // If agent was inserted then add this Group as a Death_observer
+    if (return_val.second) {
+        agent->attach_death_observer(static_pointer_cast<Death_observer>(shared_from_this()));
+    }
+
+    // Returns true if agent was added, false if agent was already present
+    return return_val.second;
 }
 
 void Group::add_agent(std::shared_ptr<Agent> agent) {
-    auto iter = m_members.find(agent);
+    bool was_added = add_agent_helper(agent);
 
-    if (iter != m_members.end()) {
-        throw Error("Agent already a member of Group");
+    // If return val holds 'false' then agent was already present in Group
+    if (!was_added) {
+        throw Error("Agent already a member of that Group!");
     }
 
-    m_members.insert(agent);
-
-    cout << "Group " << m_name << ": agent " << agent->get_name() << " added" << endl;
+    cout << "Group " << m_name << ":  " << agent->get_name() << " added" << endl;
 }
 
-void Group::remove_agent(std::shared_ptr<Agent> agent) {
+bool Group::remove_agent_helper(std::shared_ptr<Agent> agent) {
     // Try to find the Agent in the Group
     auto iter = m_members.find(agent);
 
-    // Throw Error if Agent is not in this Group
+    // return false if agent is not a member of this Group
     if (iter == m_members.end()) {
+        return false;
+    }
+
+    // Remove Agent from Group
+    m_members.erase(iter);
+
+    // Indicate successful removal of agent from group
+    return true;
+}
+
+void Group::remove_agent(std::shared_ptr<Agent> agent) {
+    bool was_removed = remove_agent_helper(agent);
+
+    // Throw Error if Agent is not in this Group
+    if (!was_removed) {
         throw Error("Agent not a member of that group!");
     }
 
     // Remove this Group from agent's death observers
-    shared_ptr<Death_observer> this_ptr = static_pointer_cast<Death_observer>(shared_from_this());
-    agent->detach_death_observer(this_ptr);
+    agent->detach_death_observer(static_pointer_cast<Death_observer>(shared_from_this()));
 
-    // Remove Agent from Group
-    m_members.erase(iter);
+    cout << "Group " << m_name << ":  " << agent->get_name() << " removed" << endl;
+}
+
+void Group::add_group(Group& other_group) {
+    for_each(other_group.m_members.begin(), other_group.m_members.end(),
+        bind(&Group::add_agent_helper, this, _1));
+
+    cout << "Group " << m_name << ":  group " << other_group.m_name << " added" << endl;
+}
+
+void Group::remove_group(Group& other_group) {
+    for_each(other_group.m_members.begin(), other_group.m_members.end(),
+        bind(&Group::remove_agent_helper, this, _1));
+
+    cout << "Group " << m_name << ":  group " << other_group.m_name << " removed" << endl;
 }
 
 void Group::disband() {

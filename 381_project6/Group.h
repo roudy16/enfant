@@ -20,6 +20,8 @@ public:
 
     void add_agent(std::shared_ptr<Agent> agent);
     void remove_agent(std::shared_ptr<Agent> agent);
+    void add_group(Group& other_group);
+    void remove_group(Group& other_group);
 
     void describe() const;
 
@@ -35,6 +37,15 @@ public:
     Group& operator= (Group&&) = delete;
 
 private:
+    // Returns true if agent was added, false if agent was already present
+    // These two cases are the only possible outcomes
+    bool add_agent_helper(std::shared_ptr<Agent> agent);
+
+    // Returns true if agent was successfully removed from the Group, false if
+    // is not present in Group and thus cannot be removed
+    bool remove_agent_helper(std::shared_ptr<Agent> agent);
+
+
     // Comparator used to order members by name
     struct Members_comp {
         bool operator()(std::shared_ptr<Agent> lhs, std::shared_ptr<Agent> rhs) {

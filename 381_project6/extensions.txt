@@ -1,0 +1,9 @@
+## Some regarding the behavior of my extensions ##
+
+group add - will add current members of one group to another. Any member that are already
+    members of both groups will remain members of both groups. Groups always have unique
+    members.
+
+group remove - will remove all current members of one group from another. Any members that
+   are already not in the primary group will remain not members, using group remove just
+   ensures that the two groups share no members.

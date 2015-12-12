@@ -67,10 +67,9 @@ void Agent::lose_health(int attack_strength) {
         cout << get_name() << ": Arrggh!" << endl;
 
         // notify Model to remove Agent from simulation
-        auto this_ptr = static_pointer_cast<Agent>(shared_from_this());
         notify_death();
         Model::get_instance()->notify_gone(get_name());
-        Model::get_instance()->remove_agent(this_ptr);
+        Model::get_instance()->remove_agent(static_pointer_cast<Agent>(shared_from_this()));
     }
     else {
         // Acknowledge damage and notify of Model of updated health
@@ -170,6 +169,8 @@ void Agent::notify_death() {
     shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
     for_each(m_death_observers.begin(), m_death_observers.end(),
         [&this_ptr](shared_ptr<Death_observer>& p){ p->update_on_death(this_ptr); });
+
+    m_death_observers.clear();
 }
 
 

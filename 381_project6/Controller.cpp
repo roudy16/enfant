@@ -338,21 +338,47 @@ void Controller::group_add_command(shared_ptr<Group> group_ptr) {
     string member_name;
     read_in_string(member_name);
 
-    // Find Agent named, throws Error if Agent not found
-    shared_ptr<Agent> agent_ptr = Model::get_instance()->get_agent_ptr(member_name);
+    // Find Agent and add it to group
+    shared_ptr<Agent> agent_ptr = Model::get_instance()->find_agent(member_name);
+    if (agent_ptr) {
+        group_ptr->add_agent(agent_ptr);
+        return;
+    }
 
-    group_ptr->add_agent(agent_ptr);
-    agent_ptr->attach_death_observer(static_pointer_cast<Death_observer>(group_ptr));
+    // If no Agent with member name was found attempt to find a group with that name
+    shared_ptr<Group> other_group_ptr = Model::get_instance()->find_group(member_name);
+
+    // Throw Error if no Group was found with member name either
+    if (!other_group_ptr) {
+        throw Error("No Agent or Group found with that name!");
+    }
+
+    // Add the found group to the passed in group
+    group_ptr->add_group(*other_group_ptr);
 }
 
 void Controller::group_remove_command(shared_ptr<Group> group_ptr) {
-    string agent_name;
-    read_in_string(agent_name);
+    string member_name;
+    read_in_string(member_name);
 
     // Find Agent named, throws Error if Agent not found
-    shared_ptr<Agent> agent_ptr = Model::get_instance()->get_agent_ptr(agent_name);
+    shared_ptr<Agent> agent_ptr = Model::get_instance()->find_agent(member_name);
+    if (agent_ptr) {
+        group_ptr->remove_agent(agent_ptr);
+        return;
+    }
 
-    group_ptr->remove_agent(agent_ptr);
+    // If no Agent with member name was found attempt to find a group with that name
+    shared_ptr<Group> other_group_ptr = Model::get_instance()->find_group(member_name);
+
+    // Throw Error if no Group was found with member name either
+    if (!other_group_ptr) {
+        throw Error("No Agent or Group found with that name!");
+    }
+
+
+    // Remove the found group to the passed in group
+    group_ptr->remove_group(*other_group_ptr);
 }
 
 void Controller::group_formation_command(shared_ptr<Group> group_ptr) {

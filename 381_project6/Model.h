@@ -63,6 +63,9 @@ public:
     void add_structure(std::shared_ptr<Structure>);
     // will throw Error("Structure not found!") if no structure of that name
     std::shared_ptr<Structure> get_structure_ptr(const std::string& name) const;
+    // TODO needed?
+    // returns pointer to Structure with name if it exists, empty pointer otherwise
+    std::shared_ptr<Structure> find_structure(const std::string& name) const;
     // returns pointer to closest Structure to passed in object, empty pointer otherwise
     std::shared_ptr<Structure> get_closest_structure_to_obj(std::shared_ptr<Sim_object>);
 
@@ -74,6 +77,8 @@ public:
     void remove_agent(std::shared_ptr<Agent> agent_ptr);
     // will throw Error("Agent not found!") if no agent of that name
     std::shared_ptr<Agent> get_agent_ptr(const std::string& name) const;
+    // returns pointer to Agent with name if it exists, empty pointer otherwise
+    std::shared_ptr<Agent> find_agent(const std::string& name) const;
     // returns pointer to closest Agent to passed in object, empty pointer otherwise
     std::shared_ptr<Agent> get_closest_agent_to_obj(std::shared_ptr<Sim_object>);
 
@@ -83,6 +88,8 @@ public:
     void remove_group(const std::string& name);
     // will throw Error("Group not found!") if no Group of that name
     std::shared_ptr<Group> get_group_ptr(const std::string& name) const;
+    // returns pointer to Group with name if it exists, empty pointer otherwise
+    std::shared_ptr<Group> find_group(const std::string& name) const;
 
     // tell all objects to describe themselves to the console
     void describe() const;

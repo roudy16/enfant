@@ -41,7 +41,7 @@ void Soldier::do_update() {
     if (target_in_range()) {
         // target is in range, aim to maim!
         cout << get_name() << ": Clang!" << endl;
-        shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
+        shared_ptr<Agent>&& this_ptr = static_pointer_cast<Agent>(shared_from_this());
         get_target().lock()->take_hit(kSOLDIER_INITIAL_STRENGTH, this_ptr);
 
         // If Infantry killed the target, report it, stop attacking and forget target
