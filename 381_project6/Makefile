@@ -8,7 +8,7 @@ OBJS += Map.o Status.o World_map.o Local_map.o Health_status.o Amount_status.o
 OBJS += Sim_object.o Structure.o Moving_object.o Agent.o
 OBJS += Farm.o Town_Hall.o
 OBJS += Peasant.o Infantry.o Soldier.o Archer.o Mage.o
-OBJS += Agent_factory.o Structure_factory.o
+OBJS += Agent_factory.o Structure_factory.o View_factory.o
 OBJS += Geometry.o Utility.o
 OBJS += Group.o
 PROG = p6exe
@@ -95,6 +95,9 @@ Utility.o: Utility.cpp Utility.h
 
 Group.o: Group.cpp Group.h Agent.h Utility.h
 	$(CC) $(CFLAGS) Group.cpp
+
+View_factory.o: View_factory.cpp View.h Map.h Status.h Local_map.h World_map.h Health_status.h Amount_status.h Utility.h
+	$(CC) $(CFLAGS) View_factory.cpp
 
 clean:
 	rm -f *.o

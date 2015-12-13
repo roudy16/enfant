@@ -2,6 +2,7 @@
 #define CONTROLLER_H
 
 #include <map>
+#include <vector>
 #include <string>
 #include <memory>
 
@@ -52,6 +53,7 @@ private:
     void group_move_command(std::shared_ptr<Group>);
     void group_stop_command(std::shared_ptr<Group>);
     void group_attack_command(std::shared_ptr<Group>);
+    void group_work_command(std::shared_ptr<Group>);
 
     // helper to initialize command containers with string to 
     // function pointer mappings
@@ -81,8 +83,11 @@ private:
     Group_command_map_t       m_group_commands;
     Command_map_t             m_view_commands;
     Command_map_t             m_program_commands;
+
+    // Container to hold the Views 
     // member that holds ptr to World map view when it is open
-    std::weak_ptr<World_map>  mp_map_view;
+    std::vector<std::shared_ptr<View>> m_views;
+    std::weak_ptr<World_map>           mp_map_view;
 
     template<typename C>
     typename C::mapped_type get_command_helper(C& commands, const std::string& command);

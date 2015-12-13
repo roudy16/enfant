@@ -13,7 +13,7 @@ using std::string;
 using std::cout; using std::endl;
 using std::for_each;
 using std::bind; using namespace std::placeholders;
-using std::shared_ptr; using std::static_pointer_cast;
+using std::shared_ptr;
 
 
 // How far away from the destination point each member should be when a move
@@ -95,9 +95,13 @@ void Group::remove_group(shared_ptr<Group> other_group) {
 void Group::clean_up_dead_agents() {
     auto iter = m_members.begin();
 
+    // Remove each dead Agent from the members container
     while (iter != m_members.end()) {
+        // If Agent is dead, remove it
         if (!iter->get()->is_alive()) {
+            // Safely increment iterator
             iter = m_members.erase(iter);
+            continue;
         }
 
         iter++;
@@ -107,6 +111,7 @@ void Group::clean_up_dead_agents() {
 void Group::disband() {
     clean_up_dead_agents();
 
+    // Tell all members to remove this Group from their Groups containers
     shared_ptr<Group> this_ptr = shared_from_this();
     for_each(m_members.begin(), m_members.end(),
         [&this_ptr](const Group_members_t::value_type& p){ p->remove_from_my_groups(this_ptr); });
@@ -217,10 +222,10 @@ void Group::work(std::shared_ptr<Structure> source, std::shared_ptr<Structure> d
 void Group::describe() {
     clean_up_dead_agents();
 
+    // Print the number of members this Group has along with their names
     cout << "Group " << m_name << " has " << m_members.size() << " members:\n";
     for_each(m_members.begin(), m_members.end(),
         [](const Group_members_t::value_type& p){ cout << p->get_name() << '\n'; });
-    // TODO add formation if I do that
 }
 
 bool Group::is_agent_member(std::shared_ptr<Agent> query) {

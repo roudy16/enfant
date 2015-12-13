@@ -2,16 +2,15 @@
 #include "Model.h"
 #include "View.h"
 #include "World_map.h"
-#include "Local_map.h"
-#include "Health_status.h"
-#include "Amount_status.h"
 #include "Utility.h"
 #include "Geometry.h"
 #include "Structure_factory.h"
 #include "Agent_factory.h"
+#include "View_factory.h"
 #include "Agent.h"
 #include "Structure.h"
 #include "Group.h"
+#include <vector>
 #include <iostream>
 #include <exception>
 #include <stdexcept>
@@ -21,11 +20,13 @@
 #include <cassert>
 
 using std::string;
+using std::vector;
 using std::cin; using std::cout; using std::endl;
-using std::shared_ptr; using std::weak_ptr; using std::static_pointer_cast; using std::make_shared;
+using std::shared_ptr; using std::weak_ptr; using std::make_shared;
 using std::exception; using std::runtime_error;
 using std::numeric_limits;
 using std::streamsize;
+using std::for_each; using std::find_if;
 using namespace std::placeholders;
 
 // Forward declaration
@@ -89,6 +90,7 @@ void Controller::init_commands() {
         m_group_commands["move"] = &Controller::group_move_command;
         m_group_commands["stop"] = &Controller::group_stop_command;
         m_group_commands["attack"] = &Controller::group_attack_command;
+        m_group_commands["work"] = &Controller::group_work_command;
 
         m_program_commands["open"] = &Controller::open_command;
         m_program_commands["close"] = &Controller::close_command;
@@ -374,10 +376,27 @@ void Controller::group_attack_command(shared_ptr<Group> group_ptr) {
     group_ptr->attack(target_ptr);
 }
 
+void Controller::group_work_command(shared_ptr<Group> group_ptr) {
+    shared_ptr<Structure> source = read_structure_from_input();
+    shared_ptr<Structure> destination = read_structure_from_input();
+
+    group_ptr->work(source, destination);
+}
+
 void Controller::status_command() {
     // tell all objects to describe themselves to the console
     Model::get_instance()->describe();
 }
+
+class View_find_pred {
+public:
+    View_find_pred(const string& name) : m_name(name) {}
+
+    bool operator()(shared_ptr<View> v) const { return v->get_name() == m_name; }
+
+private:
+    string m_name;
+};
 
 // Attempt to open and attach a new View to the Model
 void Controller::open_command() {
@@ -385,41 +404,20 @@ void Controller::open_command() {
     read_in_string(view_name);
 
     // Check if there is already a View of this name open
-    shared_ptr<View> view_ptr = Model::get_instance()->find_view(view_name);
-    if (view_ptr) {
+    auto iter = find_if(m_views.begin(), m_views.end(), View_find_pred(view_name));
+    if (iter != m_views.end()) {
         throw Error("View of that name already open!");
     }
 
-    // Check what type of View user wants
-    if (view_name == "map") {
-        // create a World map that shows a large area of the world
-        shared_ptr<World_map> world_map_ptr = make_shared<World_map>("map");
-        Model::get_instance()->attach(static_pointer_cast<View>(world_map_ptr));
-        mp_map_view = weak_ptr<World_map>(world_map_ptr);
-    }
-    else if (view_name == "health") {
-        // create a health status view that shows the health of Agents
-        auto health_status_ptr = make_shared<Health_status>();
-        Model::get_instance()->attach(static_pointer_cast<View>(health_status_ptr));
-    }
-    else if (view_name == "amounts") {
-        // create an amount status view that shows the food amounts of Sim_objects
-        auto amounts_status_ptr = make_shared<Amount_status>();
-        Model::get_instance()->attach(static_pointer_cast<View>(amounts_status_ptr));
+    View_factory_return ret_val = create_view(view_name);
 
+    // If newly created map is the world map then remember this with weak_ptr
+    if (!ret_val.world_map_ptr.expired()) {
+        mp_map_view = ret_val.world_map_ptr;
     }
-    else {
-        // Create a local map view centered on a Sim_object that matches the input view_name,
-        // throw an Error if no such object exists
-        shared_ptr<Sim_object> obj_ptr = Model::get_instance()->get_obj_ptr(view_name);
 
-        if (!obj_ptr) {
-            throw Error("No object of that name!");
-        }
-
-        auto local_map_ptr = make_shared<Local_map>(obj_ptr->get_name());
-        Model::get_instance()->attach(static_pointer_cast<View>(local_map_ptr));
-    }
+    m_views.push_back(ret_val.view_ptr);
+    Model::get_instance()->attach(ret_val.view_ptr);
 }
 
 // Attempt to close and detach a View from Model
@@ -428,17 +426,19 @@ void Controller::close_command() {
     read_in_string(view_name);
 
     // Check if there is an open View that matches input name
-    shared_ptr<View> view_ptr = Model::get_instance()->find_view(view_name);
-    if (!view_ptr) {
+    auto iter = find_if(m_views.begin(), m_views.end(), View_find_pred(view_name));
+
+    if (iter == m_views.end()) {
         throw Error("No view of that name is open!");
     }
 
-    Model::get_instance()->detach(view_ptr);
+    m_views.erase(iter);
+    Model::get_instance()->detach(*iter);
 }
 
 // Draw all Views
 void Controller::show_command() {
-    Model::get_instance()->notify_draw();
+    for_each(m_views.begin(), m_views.end(), [](shared_ptr<View>& v){ v->draw(); });
 }
 
 // Update all Sim_objects

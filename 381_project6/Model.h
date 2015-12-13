@@ -109,11 +109,6 @@ public:
     void notify_health(const std::string& name, double health);
     // notify the views of a Structure's food amount
     void notify_amount(const std::string& name, double amount);
-    // notify the views to draw themselves
-    void notify_draw();
-    // TODO remove this
-    // Returns shared_ptr to View with name, returns empty ptr otherwise
-    std::shared_ptr<View> find_view(const std::string& name);
 
     // class used to deallocate Model
     friend class Model_destroyer;
@@ -128,6 +123,9 @@ private:
     // Initialize the Model, not called in ctor to prevent recursive initialization
     void init();
 
+    template <typename C, typename Comp>
+    typename C::mapped_type find_min_helper(C& container, Comp comp);
+
     static Model* mp_instance; // pointer to single instance of Model
 
     Sim_objs_t                                               m_sim_objs;
@@ -139,31 +137,30 @@ private:
     int m_time;
 };
 
+template <typename C, typename Comp>
+typename C::mapped_type Model::find_min_helper(C& container, Comp comp) {
+    auto iter = std::min_element(container.begin(), container.end(), comp);
 
-// returns pointer to Agent that evaluates least using passed in comparator
-// returns empty pointer if no such Agent found
-template <typename C>
-std::shared_ptr<Agent> Model::find_min_agent(C comp) {
-    auto iter = std::min_element(m_agents.begin(), m_agents.end(), comp);
-
-    if (iter == m_agents.end()) {
-        return std::shared_ptr<Agent>();
+    if (iter == container.end()) {
+        return typename C::mapped_type();
     }
 
     return iter->second;
 }
 
+
+// returns pointer to Agent that evaluates least using passed in comparator
+// returns empty pointer if no such Agent found
+template <typename Comp>
+std::shared_ptr<Agent> Model::find_min_agent(Comp comp) {
+    return find_min_helper(m_agents, comp);
+}
+
 // returns pointer to Structure that evaluates least using passed in comparator
 // returns empty pointer if no such Structure found
-template <typename C>
-std::shared_ptr<Structure> Model::find_min_structure(C comp) {
-    auto iter = std::min_element(m_structures.begin(), m_structures.end(), comp);
-
-    if (iter == m_structures.end()) {
-        return std::shared_ptr<Structure>();
-    }
-
-    return iter->second;
+template <typename Comp>
+std::shared_ptr<Structure> Model::find_min_structure(Comp comp) {
+    return find_min_helper(m_structures, comp);
 }
 
 

@@ -13,7 +13,7 @@
 #include <cassert>
 
 using std::string;
-using std::shared_ptr; using std::static_pointer_cast;
+using std::shared_ptr;
 using std::min_element; using std::find; using std::for_each;
 using std::map;
 
@@ -91,7 +91,7 @@ bool Model::is_structure_present(const string& name) const {
 // add a new structure; assumes none with the same name
 void Model::add_structure(shared_ptr<Structure> new_structure_ptr) {
     // Add Structure to Sim_objects container as a Sim_object*
-    m_sim_objs[new_structure_ptr->get_name()] = static_pointer_cast<Sim_object>(new_structure_ptr);
+    m_sim_objs[new_structure_ptr->get_name()] = new_structure_ptr;
 
     // Add Structure to Structures container as a shared_ptr<Structure>
     m_structures[new_structure_ptr->get_name()] = new_structure_ptr;
@@ -125,7 +125,7 @@ bool Model::is_agent_present(const string& name) const {
 // add a new agent; assumes none with the same name
 void Model::add_agent(shared_ptr<Agent> new_agent_ptr) {
     // Add Agent to Sim_objects container as a shared_ptr<Sim_object>
-    m_sim_objs[new_agent_ptr->get_name()] = static_pointer_cast<Sim_object>(new_agent_ptr);
+    m_sim_objs[new_agent_ptr->get_name()] = new_agent_ptr;
     // Add Agent to Agents container as an shared_ptr<Agent>
     m_agents[new_agent_ptr->get_name()] = new_agent_ptr;
 
@@ -254,29 +254,4 @@ void Model::notify_health(const string& name, double health) {
 void Model::notify_amount(const string& name, double amount) {
     for_each(m_views.begin(), m_views.end(),
         [&name, amount](shared_ptr<View>& v){ v->update_amount(name, amount); });
-}
-
-// TODO remove this
-// notify the views to draw their information
-void Model::notify_draw() {
-    for (shared_ptr<View> p : m_views) {
-        p->draw();
-    }
-}
-
-// Returns a pointer to the View that matches name, returns an empty
-// pointer otherwise
-shared_ptr<View> Model::find_view(const string& name) {
-    auto iter = m_views.begin();
-    for (; iter != m_views.end(); iter++) {
-        if ((*iter)->get_name() == name) {
-            break;
-        }
-    }
-
-    if (iter == m_views.end()) {
-        return shared_ptr<View>();
-    }
-
-    return *iter;
 }

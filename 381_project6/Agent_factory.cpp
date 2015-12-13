@@ -10,24 +10,24 @@
 #include <memory>
 
 using std::string;
-using std::shared_ptr; using std::static_pointer_cast; using std::make_shared;
+using std::shared_ptr; using std::make_shared;
 
 shared_ptr<Agent> create_agent(const string& name, const string& type, Point location) {
     shared_ptr<Agent> new_agent_ptr;
 
     // Determine what type of Agent to create, throw Error if no such type
     if (type == "Peasant") {
-        new_agent_ptr = static_pointer_cast<Agent>(make_shared<Peasant>(name, location));
+        new_agent_ptr = make_shared<Peasant>(name, location);
     }
     else if (type == "Soldier") {
-        new_agent_ptr = static_pointer_cast<Agent>(make_shared<Soldier>(name, location));
+        new_agent_ptr = make_shared<Soldier>(name, location);
     }
     else if (type == "Archer") {
-        new_agent_ptr = static_pointer_cast<Agent>(make_shared<Archer>(name, location));
+        new_agent_ptr = make_shared<Archer>(name, location);
     }
     else if (type == "Mage") {
         // TODO create the Mage bud
-        new_agent_ptr = static_pointer_cast<Agent>(make_shared<Mage>(name, location));
+        new_agent_ptr = make_shared<Mage>(name, location);
     }
     else {
         throw Error("Trying to create agent of unknown type!");

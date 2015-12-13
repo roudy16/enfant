@@ -1,4 +1,3 @@
-#include "Death_observer.h"
 #include "Agent.h"
 #include "Geometry.h"
 #include <string>
