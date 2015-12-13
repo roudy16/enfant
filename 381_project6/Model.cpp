@@ -98,85 +98,21 @@ void Model::add_structure(shared_ptr<Structure> new_structure_ptr) {
     new_structure_ptr->broadcast_current_state();
 }
 
-shared_ptr<Structure> Model::get_structure_ptr(const string& name) const {
-    auto iter = m_structures.find(name);
-
-    // throw Error if structure not found
-    if (iter == m_structures.end()) {
-        throw Error("Structure not found!");
-    }
-
-    return iter->second;
-}
-
-// Comparator for finding closest object to another object. The Comparator is 
-// initialized with the unique name of an object that we want to find the closest 
-// other object to. When used to search a container of objects, object that evaluates
-// as least is the object that is closest to the object used to init. In the event
-// of a tie the object with the lesser lexicographical name is least
-class Closest_to_obj {
-public:
-    Closest_to_obj(shared_ptr<Sim_object> obj_ptr)
-        : m_location(obj_ptr->get_location()), m_name(obj_ptr->get_name())
-    {
-    }
-
-    template <typename T>
-    bool operator()(T& lhs, T& rhs) const {
-        return closest_comp_helper(lhs.second, rhs.second);
-    }
-
-protected:
-    // Compare distances and names of objects
-    // Note: this template only works with std::map iterators that point
-    // to Sim_objects or objects derived some Sim_object
-    bool closest_comp_helper(shared_ptr<Sim_object> lhs, shared_ptr<Sim_object> rhs) const {
-        // Check if either argument is the object used to init
-        // Object used to init always evaluates greater than any other
-        if (lhs->get_name() == m_name) {
-            return false;
-        }
-        if (rhs->get_name() == m_name) {
-            return true;
-        }
-
-        // get distances from args to init object
-        double dist_to_lhs = cartesian_distance(m_location, lhs->get_location());
-        double dist_to_rhs = cartesian_distance(m_location, rhs->get_location());
-
-        // resolves distance ties with name comparison
-        if (dist_to_lhs == dist_to_rhs) {
-            return lhs->get_name() < rhs->get_name();
-        }
-
-        // return true if lhs is closer than rhs
-        return dist_to_lhs < dist_to_rhs;
-    }
-
-private:
-    // name and location of object we want to find closest other to.
-    const Point m_location;
-    const string m_name;
-};
-
-// Helper template function for finding closest objects to another
-// when used to search a map container of shared_ptrs to Sim_objects function will
-// return a shared_ptr to the closest object to obj_ptr
 template <typename C>
-typename C::mapped_type Model::get_closest_helper(C& container, std::shared_ptr<Sim_object> obj_ptr) {
-    // Get and iterator to the closest object to obj_ptr
-    typename C::iterator iter = std::min_element(container.begin(), container.end(), Closest_to_obj(obj_ptr));
+static typename C::mapped_type find_helper(C& container, const string& name) {
+    auto iter = container.find(name);
 
-    // Check if a valid min element was found, return empty ptr if none found
-    if (iter == container.end() || iter->second->get_name() == obj_ptr->get_name()) {
+    // return empty pointer if Structure not found
+    if (iter == container.end()) {
         return typename C::mapped_type();
     }
 
     return iter->second;
 }
 
-shared_ptr<Structure> Model::get_closest_structure_to_obj(shared_ptr<Sim_object> obj_ptr) {
-    return get_closest_helper(m_structures, obj_ptr);
+// returns pointer to Structure with name if it exists, empty pointer otherwise
+shared_ptr<Structure> Model::find_structure(const string& name) const {
+    return find_helper(m_structures, name);
 }
 
 bool Model::is_agent_present(const string& name) const {
@@ -213,69 +149,7 @@ void Model::remove_agent(shared_ptr<Agent> agent_ptr) {
 
 // returns pointer to Agent with name if it exists, empty pointer otherwise
 shared_ptr<Agent> Model::find_agent(const std::string& name) const {
-    auto iter = m_agents.find(name);
-
-    // throw Error if Agent not found
-    if (iter == m_agents.end()) {
-        return shared_ptr<Agent>();
-    }
-
-    return iter->second;
-}
-
-shared_ptr<Agent> Model::get_agent_ptr(const string& name) const {
-    // TODO this is code copy I think
-    shared_ptr<Agent> agent_ptr = find_agent(name);
-
-    // throw Error if Agent not found
-    if (!agent_ptr) {
-        throw Error("Agent not found!");
-    }
-
-    return agent_ptr;
-}
-
-shared_ptr<Agent> Model::get_closest_agent_to_obj(shared_ptr<Sim_object> obj_ptr) {
-    return get_closest_helper(m_agents, obj_ptr);
-}
-
-// Comparator used to find closest Agent that is not grouped with passed
-// in agent
-class Closest_hostile_to_agent : public Closest_to_obj {
-public:
-    using Agents_t = map<const string, shared_ptr<Agent>>::value_type;
-
-    Closest_hostile_to_agent(shared_ptr<Agent> agent) 
-        : Closest_to_obj(agent), m_agent(agent)
-    {
-    }
-
-    bool operator()(Agents_t& lhs, Agents_t& rhs) const {
-        if (m_agent->agents_share_group(lhs.second)) {
-            return false;
-        }
-
-        return closest_comp_helper(lhs.second, rhs.second);
-    }
-
-private:
-    shared_ptr<Agent> m_agent;
-};
-
-// returns pointer to closest Agent that does not share a Group with passed in agent
-shared_ptr<Agent> Model::get_closest_hostile_agent(shared_ptr<Agent> agent) {
-    // Get an iterator to the closest hostile agent
-    auto iter = std::min_element(m_agents.begin(), m_agents.end(), 
-        Closest_hostile_to_agent(agent));
-
-    // Check if a valid min element was found, return empty ptr if none found
-    if (iter == m_agents.end() || iter->second->agents_share_group(agent) ||
-        iter->second->get_name() == agent->get_name())
-    {
-        return shared_ptr<Agent>();
-    }
-
-    return iter->second;
+    return find_helper(m_agents, name);
 }
 
 static bool operator==(shared_ptr<Group> ptr, const string& name) {
@@ -314,23 +188,12 @@ void Model::remove_group(const string& name) {
 shared_ptr<Group> Model::find_group(const std::string& name) const {
     auto iter = find(m_groups.begin(), m_groups.end(), name);
 
-    // If group not found throw and Error
+    // If group not found return empty pointer
     if (iter == m_groups.end()) {
         return shared_ptr<Group>();
     }
 
     return *iter;
-}
-
-shared_ptr<Group> Model::get_group_ptr(const string& name) const {
-    shared_ptr<Group> group_ptr = find_group(name);
-
-    // If group not found throw and Error
-    if (!group_ptr) {
-        throw Error("Group not found!");
-    }
-
-    return group_ptr;
 }
 
 // tell all objects to describe themselves to the console

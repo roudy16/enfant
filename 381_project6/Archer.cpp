@@ -26,7 +26,7 @@ void Archer::do_update() {
     if (get_state() == Infantry_state::ATTACKING) {
         // Archer is attacking
         // if target is dead, report it, stop attacking and forget target
-        if (get_target().expired()) {
+        if (!is_target_alive()) {
             cout << get_name() << ": Target is dead" << endl;
             stop_attacking();
         }
@@ -38,7 +38,7 @@ void Archer::do_update() {
                                           static_pointer_cast<Agent>(shared_from_this()));
 
             // If Archer killed the target, report it, stop attacking and forget target
-            if (get_target().expired()) {
+            if (!is_target_alive()) {
                 cout << get_name() << ": I triumph!" << endl;
                 stop_attacking();
             }
@@ -50,7 +50,7 @@ void Archer::do_update() {
     if (get_state() == Infantry_state::NOT_ATTACKING) {
         // Ask Model for closest other Agent to this Archer
         shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
-        auto closest_agent = Model::get_instance()->get_closest_hostile_agent(this_ptr);
+        auto closest_agent = get_closest_hostile();
 
         // Ensure the Model gave us a valid Agent ptr
         if (!closest_agent) {
@@ -79,8 +79,7 @@ void Archer::take_hit(int attack_strength, shared_ptr<Agent> attacker) {
     }
 
     // Find nearest Structure to flee to if one exists
-    shared_ptr<Sim_object> this_ptr = static_pointer_cast<Sim_object>(shared_from_this());
-    auto closest_structure = Model::get_instance()->get_closest_structure_to_obj(this_ptr);
+    auto closest_structure = get_closest_structure();
 
     // Do nothing if no structures exist
     if (!closest_structure) {

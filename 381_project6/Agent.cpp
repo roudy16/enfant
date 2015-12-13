@@ -9,7 +9,7 @@
 using std::string;
 using std::cout; using std::endl;
 using std::shared_ptr; using std::static_pointer_cast;
-using std::for_each; using std::find;
+using std::for_each; using std::find; using std::any_of;
 
 const double kAGENT_INITIAL_SPEED = 5.0;
 
@@ -150,27 +150,29 @@ void Agent::jump_to_location(const Point& target) {
 }
 
 // returns true if this Agent shares a group with the other Agent
-bool Agent::agents_share_group(std::shared_ptr<Agent> other_agent) {
-    // Check all of both agents' groups to see if any are the same
-    for (auto lhs_group : m_groups) {
-        for (auto rhs_group : (*other_agent).m_groups) {
-            // if agents are both members of the same group return true
-            if (lhs_group == rhs_group) {
-                return true;
-            }
-        }
-    }
+bool Agent::agents_share_group(shared_ptr<Agent> other_agent) {
+    // Unary predicate returns true if passed in group contains agent
+    // used in construction.
+    struct Group_has_agent_pred {
+        Group_has_agent_pred(shared_ptr<Agent> agent) : mp_agent(agent)
+        {}
 
-    return false;
+        bool operator()(shared_ptr<Group> group) { return group->is_agent_member(mp_agent); }
+
+        shared_ptr<Agent> mp_agent;
+    };
+
+    // Check if any of this Agent's group also contain the other Agent
+    return any_of(m_groups.begin(), m_groups.end(), Group_has_agent_pred(other_agent));
 }
 
-void Agent::add_to_my_groups(std::shared_ptr<Group> group_ptr) {
+void Agent::add_to_my_groups(shared_ptr<Group> group_ptr) {
     assert(find(m_groups.begin(), m_groups.end(), group_ptr) == m_groups.end());
 
     m_groups.push_back(group_ptr);
 }
 
-void Agent::remove_from_my_groups(std::shared_ptr<Group> group_ptr) {
+void Agent::remove_from_my_groups(shared_ptr<Group> group_ptr) {
     auto iter = find(m_groups.begin(), m_groups.end(), group_ptr);
 
     // function should not be called if group_ptr is not in this Agents groups container

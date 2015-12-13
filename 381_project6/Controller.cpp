@@ -90,9 +90,6 @@ void Controller::init_commands() {
         m_group_commands["stop"] = &Controller::group_stop_command;
         m_group_commands["attack"] = &Controller::group_attack_command;
 
-        // TODO do this last, might be hardish
-        //m_group_commands["form"] = &Controller::group_form_command;
-
         m_program_commands["open"] = &Controller::open_command;
         m_program_commands["close"] = &Controller::close_command;
         m_program_commands["status"] = &Controller::status_command;
@@ -144,7 +141,7 @@ Controller::Controller_group_fp_t Controller::get_group_command() {
 
     // if none found, throw error
     if (!command_ptr) {
-        throw Error("Unrecognized command!");
+        throw Error("Unrecognized group command!");
     }
 
     return command_ptr;
@@ -167,29 +164,6 @@ Controller::Controller_fp_t Controller::get_view_program_command(const string& c
     return command_ptr;
 }
 
-void Controller::group_command_handler() {
-    // User already input 'group' indicating they are trying to make a Group
-    // command. Now we read in the next command string which should be a valid
-    // command for Groups.
-    string command;
-    read_in_string(command);
-
-    // Find functions associated with user input group command
-    Controller_group_fp_t command_ptr = get_command_helper(m_group_commands, command);
-
-    // If no associated command is found then throw and Error alerting the user
-    if (!command_ptr) {
-        throw Error("Unrecognized group command!");
-    }
-
-    // All group commands have a group name associated with them so that we can
-    // know which group the command should apply to.
-    string name;
-    read_in_string(name);
-
-
-}
-
 void Controller::run() {
     init_commands(); // Fill command containers
 
@@ -205,35 +179,37 @@ void Controller::run() {
                 break; // break out of main program loop
             }
 
+
             // Check if first word is name of an Agent and set the Agent ptr
             // then execute an Agent command
-            if (Model::get_instance()->is_agent_present(first_word)) {
-                shared_ptr<Agent> agent_ptr = Model::get_instance()->get_agent_ptr(first_word);
+            shared_ptr<Agent> agent_ptr = Model::get_instance()->find_agent(first_word);
+            if (agent_ptr) {
                 assert(agent_ptr->is_alive());
 
                 // Find Agent command, throws Error if none found
                 Controller_agent_fp_t agent_command_ptr = get_agent_command();
                 // Execute Agent command
-                (this->*(agent_command_ptr))(agent_ptr);
+                (this->*agent_command_ptr)(agent_ptr);
+                continue;
             }
+
             // Check if first word is name of an active Group, if it is then
             // get the Group and execute the command
-            else if (Model::get_instance()->is_group_present(first_word)) {
-                shared_ptr<Group> group_ptr = Model::get_instance()->get_group_ptr(first_word);
-                
+            shared_ptr<Group> group_ptr = Model::get_instance()->find_group(first_word);
+            if (group_ptr) {
+                // Get group command funciton pointer, throws Error if unrecognized command
                 Controller_group_fp_t group_command_ptr = get_group_command();
 
-                (this->*(group_command_ptr))(group_ptr);
-            }
-            // Otherwise check if user input a different command and execute it
-            else {
-                // Try to find a view or program-wide command, Error thrown
-                // if first_word is not a valid command
-                Controller_fp_t command_ptr = get_view_program_command(first_word);
-                // Execute command
-                (this->*(command_ptr))();
+                (this->*group_command_ptr)(group_ptr);
+                continue;
             }
 
+            // Otherwise check if user input a different command and execute it
+            // Try to find a view or program-wide command, Error thrown
+            // if first_word is not a valid command
+            Controller_fp_t command_ptr = get_view_program_command(first_word);
+            // Execute command
+            (this->*(command_ptr))();
         } // End try-block
         catch (exception& e) {
             cout << e.what() << endl;
@@ -294,7 +270,13 @@ void Controller::agent_move_command(shared_ptr<Agent> agent_ptr) {
 static shared_ptr<Structure> read_structure_from_input() {
     string structure_name;
     read_in_string(structure_name);
-    return Model::get_instance()->get_structure_ptr(structure_name);
+
+    shared_ptr<Structure> structure_ptr = Model::get_instance()->find_structure(structure_name);
+    if (!structure_ptr) {
+        throw Error("Structure not found!");
+    }
+
+    return structure_ptr;
 }
 
 void Controller::agent_work_command(shared_ptr<Agent> agent_ptr) {
@@ -309,15 +291,23 @@ void Controller::agent_work_command(shared_ptr<Agent> agent_ptr) {
     agent_ptr->start_working(source_ptr, destination_ptr);
 }
 
-void Controller::agent_attack_command(shared_ptr<Agent> agent_ptr) {
+static shared_ptr<Agent> read_in_attack_target() {
     // read name for target to attack
     string target_name;
     read_in_string(target_name);
 
     // Find target Agent, throws Error if Agent not found
-    shared_ptr<Agent> target_ptr = Model::get_instance()->get_agent_ptr(target_name);
-    assert(target_ptr);
+    shared_ptr<Agent> target_ptr = Model::get_instance()->find_agent(target_name);
 
+    if (!target_ptr) {
+        throw Error("Agent not found!");
+    }
+
+    return target_ptr;
+}
+
+void Controller::agent_attack_command(shared_ptr<Agent> agent_ptr) {
+    shared_ptr<Agent> target_ptr = read_in_attack_target();
     // Attack target if possible, throws Error if Agent cannot attack
     agent_ptr->start_attacking(target_ptr);
 }
@@ -333,15 +323,20 @@ void Controller::group_disband_command(shared_ptr<Group> group_ptr) {
     Model::get_instance()->remove_group(group_ptr->get_name());
 }
 
-
-void Controller::group_add_command(shared_ptr<Group> group_ptr) {
+// Provides basic framework for adding/removing to/from groups
+// Function pointers passed in should be either both Add functions or
+// both Remove functions for Group.
+static void group_add_remove_helper(shared_ptr<Group> group_ptr,
+                                    void(Group::*agent_fp)(shared_ptr<Agent>),
+                                    void(Group::*group_fp)(shared_ptr<Group>))
+{
     string member_name;
     read_in_string(member_name);
 
-    // Find Agent and add it to group
+    // Find Agent and add/remove it to/from group
     shared_ptr<Agent> agent_ptr = Model::get_instance()->find_agent(member_name);
     if (agent_ptr) {
-        group_ptr->add_agent(agent_ptr);
+        ((*group_ptr).*agent_fp)(agent_ptr);
         return;
     }
 
@@ -353,36 +348,16 @@ void Controller::group_add_command(shared_ptr<Group> group_ptr) {
         throw Error("No Agent or Group found with that name!");
     }
 
-    // Add the found group to the passed in group
-    group_ptr->add_group(*other_group_ptr);
+    // Add/Remove the found group to/from the passed in group
+    ((*group_ptr).*group_fp)(group_ptr);
+}
+
+void Controller::group_add_command(shared_ptr<Group> group_ptr) {
+    group_add_remove_helper(group_ptr, &Group::add_agent, &Group::add_group);
 }
 
 void Controller::group_remove_command(shared_ptr<Group> group_ptr) {
-    string member_name;
-    read_in_string(member_name);
-
-    // Find Agent named, throws Error if Agent not found
-    shared_ptr<Agent> agent_ptr = Model::get_instance()->find_agent(member_name);
-    if (agent_ptr) {
-        group_ptr->remove_agent(agent_ptr);
-        return;
-    }
-
-    // If no Agent with member name was found attempt to find a group with that name
-    shared_ptr<Group> other_group_ptr = Model::get_instance()->find_group(member_name);
-
-    // Throw Error if no Group was found with member name either
-    if (!other_group_ptr) {
-        throw Error("No Agent or Group found with that name!");
-    }
-
-
-    // Remove the found group to the passed in group
-    group_ptr->remove_group(*other_group_ptr);
-}
-
-void Controller::group_formation_command(shared_ptr<Group> group_ptr) {
-
+    group_add_remove_helper(group_ptr, &Group::remove_agent, &Group::remove_group);
 }
 
 void Controller::group_move_command(shared_ptr<Group> group_ptr) {
@@ -391,13 +366,13 @@ void Controller::group_move_command(shared_ptr<Group> group_ptr) {
 }
 
 void Controller::group_stop_command(shared_ptr<Group> group_ptr) {
-
+    group_ptr->stop();
 }
 
 void Controller::group_attack_command(shared_ptr<Group> group_ptr) {
-
+    shared_ptr<Agent> target_ptr = read_in_attack_target();
+    group_ptr->attack(target_ptr);
 }
-
 
 void Controller::status_command() {
     // tell all objects to describe themselves to the console

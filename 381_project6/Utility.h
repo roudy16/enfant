@@ -1,19 +1,22 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#include <string>
-#include <exception>
-#include <memory>
-#include <map>
-#include <cassert>
-
-// Hack for developing in Visual Studio versions that don't support all C++ features
 #ifdef _MSC_VER
   #if (_MSC_VER < 1900)
     #define noexcept throw()
     #define constexpr const
   #endif
 #endif
+
+#include <string>
+#include <exception>
+#include <memory>
+#include <map>
+#include <cassert>
+
+// Forward declarations
+class Agent;
+class Sim_object;
 
 /* ################################################################## */
 /* Utility declarations, functions, and classes used by other modules */

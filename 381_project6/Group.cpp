@@ -78,18 +78,18 @@ void Group::remove_agent(std::shared_ptr<Agent> agent) {
     cout << "Group " << m_name << ":  " << agent->get_name() << " removed" << endl;
 }
 
-void Group::add_group(Group& other_group) {
-    for_each(other_group.m_members.begin(), other_group.m_members.end(),
+void Group::add_group(shared_ptr<Group> other_group) {
+    for_each(other_group->m_members.begin(), other_group->m_members.end(),
         bind(&Group::add_agent_helper, this, _1));
 
-    cout << "Group " << m_name << ":  group " << other_group.m_name << " added" << endl;
+    cout << "Group " << m_name << ":  group " << other_group->m_name << " added" << endl;
 }
 
-void Group::remove_group(Group& other_group) {
-    for_each(other_group.m_members.begin(), other_group.m_members.end(),
+void Group::remove_group(shared_ptr<Group> other_group) {
+    for_each(other_group->m_members.begin(), other_group->m_members.end(),
         bind(&Group::remove_agent_helper, this, _1));
 
-    cout << "Group " << m_name << ":  group " << other_group.m_name << " removed" << endl;
+    cout << "Group " << m_name << ":  group " << other_group->m_name << " removed" << endl;
 }
 
 void Group::clean_up_dead_agents() {

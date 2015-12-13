@@ -10,6 +10,7 @@
 
 // Forward declaration
 struct Point;
+class Structure;
 
 // Infantry is an abstract base class that represents the basic capabilities
 // of combatants. They can report about themselves and attack other Agents
@@ -35,6 +36,14 @@ protected:
 
     Infantry(const std::string& name_, const Point& location_, int start_health_);
 
+    // Returns pointer to closest Structure to this Infantry if one exists,
+    // returns an empty pointer otherwise
+    std::shared_ptr<Structure> get_closest_structure();
+
+    // Returns pointer to closest non-grouped Agent to this Infantry if one exists,
+    // returns an empty pointer otherwise
+    std::shared_ptr<Agent> get_closest_hostile();
+
     // Accessors for derived classes to Infantry member variables
     const std::weak_ptr<Agent>& get_target() const noexcept;
     Infantry_state get_state() const noexcept;
@@ -42,6 +51,9 @@ protected:
     // Returns true if target is within attack range, prints message and stops
     // attacking otherwise.
     bool target_in_range();
+
+    // Returns true if the target is alive, false otherwise
+    bool is_target_alive() const;
 
     // stop attacking and forget target
     virtual void stop_attacking();

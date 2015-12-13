@@ -39,6 +39,8 @@ Implemented as a Singleton
 class Model {
 
 public:
+    using Agents_t = std::map<const std::string, std::shared_ptr<Agent>>;
+
     // disallow copy/move construction or assignment
     Model(const Model&) = delete;
     Model& operator= (const Model&) = delete;
@@ -61,13 +63,12 @@ public:
     bool is_structure_present(const std::string& name) const;
     // add a new structure; assumes none with the same name
     void add_structure(std::shared_ptr<Structure>);
-    // will throw Error("Structure not found!") if no structure of that name
-    std::shared_ptr<Structure> get_structure_ptr(const std::string& name) const;
-    // TODO needed?
     // returns pointer to Structure with name if it exists, empty pointer otherwise
     std::shared_ptr<Structure> find_structure(const std::string& name) const;
-    // returns pointer to closest Structure to passed in object, empty pointer otherwise
-    std::shared_ptr<Structure> get_closest_structure_to_obj(std::shared_ptr<Sim_object>);
+    // returns pointer to Structure that evaluates least using passed in comparator
+    // returns empty pointer if no such Structure found
+    template <typename C>
+    std::shared_ptr<Structure> find_min_structure(C comp);
 
     // is there an agent with this name?
     bool is_agent_present(const std::string& name) const;
@@ -75,22 +76,16 @@ public:
     void add_agent(std::shared_ptr<Agent> agent_ptr);
     // remove Agent from all containers, agent_ptr must not be nullptr
     void remove_agent(std::shared_ptr<Agent> agent_ptr);
-    // will throw Error("Agent not found!") if no agent of that name
-    std::shared_ptr<Agent> get_agent_ptr(const std::string& name) const;
     // returns pointer to Agent with name if it exists, empty pointer otherwise
     std::shared_ptr<Agent> find_agent(const std::string& name) const;
-    // returns pointer to closest Agent to passed in object, empty pointer otherwise
-    std::shared_ptr<Agent> get_closest_agent_to_obj(std::shared_ptr<Sim_object>);
-    // returns pointer to closest Agent that does not share a Group with passed in agent
-    // returns empty pointer if no such Agent exists
-    std::shared_ptr<Agent> get_closest_hostile_agent(std::shared_ptr<Agent>);
+    // returns pointer to Agent that evaluates least using passed in comparator
+    template <typename C>
+    std::shared_ptr<Agent> find_min_agent(C comp);
 
     // is there a group with this name?
     bool is_group_present(const std::string& name) const;
     void add_group(std::shared_ptr<Group> group_ptr);
     void remove_group(const std::string& name);
-    // will throw Error("Group not found!") if no Group of that name
-    std::shared_ptr<Group> get_group_ptr(const std::string& name) const;
     // returns pointer to Group with name if it exists, empty pointer otherwise
     std::shared_ptr<Group> find_group(const std::string& name) const;
 
@@ -133,21 +128,43 @@ private:
     // Initialize the Model, not called in ctor to prevent recursive initialization
     void init();
 
-    // Helper template function for finding closest objects to another
-    // when used to search a map container of shared_ptrs to Sim_objects function will
-    // return a shared_ptr to the closest object to obj_ptr
-    template <typename C>
-    typename C::mapped_type get_closest_helper(C&, std::shared_ptr<Sim_object>);
-
     static Model* mp_instance; // pointer to single instance of Model
 
     Sim_objs_t                                               m_sim_objs;
-    std::map<const std::string, std::shared_ptr<Agent>>      m_agents;
+    Agents_t                                                 m_agents;
     std::map<const std::string, std::shared_ptr<Structure>>  m_structures;
     std::vector<std::shared_ptr<Group>>                      m_groups;
     std::vector<std::shared_ptr<View>>                       m_views;
 
     int m_time;
 };
+
+
+// returns pointer to Agent that evaluates least using passed in comparator
+// returns empty pointer if no such Agent found
+template <typename C>
+std::shared_ptr<Agent> Model::find_min_agent(C comp) {
+    auto iter = std::min_element(m_agents.begin(), m_agents.end(), comp);
+
+    if (iter == m_agents.end()) {
+        return std::shared_ptr<Agent>();
+    }
+
+    return iter->second;
+}
+
+// returns pointer to Structure that evaluates least using passed in comparator
+// returns empty pointer if no such Structure found
+template <typename C>
+std::shared_ptr<Structure> Model::find_min_structure(C comp) {
+    auto iter = std::min_element(m_structures.begin(), m_structures.end(), comp);
+
+    if (iter == m_structures.end()) {
+        return std::shared_ptr<Structure>();
+    }
+
+    return iter->second;
+}
+
 
 #endif // MODEL_H

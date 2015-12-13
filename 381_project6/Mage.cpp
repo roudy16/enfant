@@ -55,6 +55,9 @@ void Mage::teleport(Cartesian_vector dir) {
 // The Mage will stop moving and stop attacking
 void Mage::stop() {
     Agent::stop();
+    if (get_state() == Infantry_state::ATTACKING) {
+        cout << get_name() << ": Stopping my attack" << endl;
+    }
     stop_attacking();
 }
 
@@ -76,8 +79,7 @@ void Mage::take_hit(int attack_strength, shared_ptr<Agent> attacker_ptr) {
     // If no Structure exists then the Mage will teleport in place
     Point attacker_loc = attacker_ptr->get_location();
     if (get_location() == attacker_loc) {
-        shared_ptr<Sim_object> this_ptr = static_pointer_cast<Sim_object>(shared_from_this());
-        shared_ptr<Structure> closest_structure = Model::get_instance()->get_closest_structure_to_obj(this_ptr);
+        shared_ptr<Structure> closest_structure = get_closest_structure();
 
         // If no Structure was found or Structure is also at same location teleport 
         // in place, this results in no damage to the Mage but the Mage does not move
@@ -131,7 +133,7 @@ void Mage::do_update() {
 
     // Mage is attacking
     // if target is dead, report it, stop attacking and forget target
-    if (get_target().expired()) {
+    if (!is_target_alive()) {
         cout << get_name() << ": Target is dead" << endl;
         stop_attacking();
     }
@@ -150,7 +152,7 @@ void Mage::do_update() {
             get_target().lock()->take_hit(kMAGE_INITIAL_STRENGTH, this_ptr);
 
             // If Mage killed the target, report it, stop attacking and forget target
-            if (get_target().expired()) {
+            if (!is_target_alive()) {
                 cout << get_name() << ": Play with fire, you get burned!" << endl;
                 stop_attacking();
             }

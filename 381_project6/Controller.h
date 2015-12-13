@@ -49,7 +49,6 @@ private:
     void group_disband_command(std::shared_ptr<Group>);
     void group_add_command(std::shared_ptr<Group>);
     void group_remove_command(std::shared_ptr<Group>);
-    void group_formation_command(std::shared_ptr<Group>);
     void group_move_command(std::shared_ptr<Group>);
     void group_stop_command(std::shared_ptr<Group>);
     void group_attack_command(std::shared_ptr<Group>);
@@ -72,8 +71,6 @@ private:
     Controller_agent_fp_t get_agent_command();
     // Returns function ptr to group command associated with next input string
     Controller_group_fp_t get_group_command();
-    // processes group commands
-    void group_command_handler();
 
     // Returns shared_ptr to the map view if one exists, otherwise
     // throws an Error

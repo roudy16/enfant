@@ -1,10 +1,12 @@
 #ifndef VIEW_H
 #define VIEW_H
 
-#include "Geometry.h"
 #include <vector>
 #include <string>
 #include <map>
+
+// Forward declaration
+struct Point;
 
 /* *** View class ***
 The View class encapsulates the data and functions needed to generate the map

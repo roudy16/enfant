@@ -1,5 +1,31 @@
 # Tracking updates made from Project 5 to Project 6
 
-- In Agent class, added ability to vary starting health
-- In Geometry, added tolerance to point comparison
-- In Moving_object, added ability to jump to location
+- In Moving_object:
+    added ability to jump to location
+
+- In Agent class:
+    added ability to vary starting health
+    added container of pointers to Groups the Agent is a member of
+    added public interface functions to add/remove Group pointers
+    added public interface function to ask if two Agents share a Group
+    added protected interface function to jump Agent to any location (think teleport)
+
+- Changed default values of concrete Agents attributes
+
+- In Geometry module:
+    added function to allow get value of pi
+    added function to do comparison of Points with tolerance
+    added function to do comparison of doubles with tolerance
+    added member function to normalise Cartesian_vectors
+    added struct Rotation2D to represent rotation matrices
+    added operator* overload to perform rotations on Points and
+      Cartesian_vectors using matrix multiplication
+
+- In Model module:
+    Model no longer throws Errors if searches for Agents or 
+      Structure are not found. Instead the Model will return empty pointers
+      and it is the callers responsibility to check the returned pointers.
+
+- In Controller module:
+    Controller now throws Errors for missing Agents, Structure, or Groups the
+      user may be attempting to command.

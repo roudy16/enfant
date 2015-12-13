@@ -29,7 +29,7 @@ void Soldier::do_update() {
 
     // Infantry is attacking
     // if target is dead, report it, stop attacking and forget target
-    if (get_target().expired()) {
+    if (!is_target_alive()) {
         cout << get_name() << ": Target is dead" << endl;
         stop_attacking();
         return;
@@ -45,7 +45,7 @@ void Soldier::do_update() {
         get_target().lock()->take_hit(kSOLDIER_INITIAL_STRENGTH, this_ptr);
 
         // If Infantry killed the target, report it, stop attacking and forget target
-        if (get_target().expired()) {
+        if (!is_target_alive()) {
             cout << get_name() << ": I triumph!" << endl;
             stop_attacking();
         }

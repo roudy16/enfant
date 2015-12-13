@@ -19,8 +19,8 @@ public:
 
     void add_agent(std::shared_ptr<Agent> agent);
     void remove_agent(std::shared_ptr<Agent> agent);
-    void add_group(Group& other_group);
-    void remove_group(Group& other_group);
+    void add_group(std::shared_ptr<Group> other_group);
+    void remove_group(std::shared_ptr<Group> other_group);
 
     void describe();
     bool is_agent_member(std::shared_ptr<Agent> query);
