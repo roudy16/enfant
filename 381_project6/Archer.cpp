@@ -49,8 +49,8 @@ void Archer::do_update() {
     // in range and attack it!
     if (get_state() == Infantry_state::NOT_ATTACKING) {
         // Ask Model for closest other Agent to this Archer
-        shared_ptr<Sim_object> this_ptr = static_pointer_cast<Sim_object>(shared_from_this());
-        auto closest_agent = Model::get_instance()->get_closest_agent_to_obj(this_ptr);
+        shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
+        auto closest_agent = Model::get_instance()->get_closest_hostile_agent(this_ptr);
 
         // Ensure the Model gave us a valid Agent ptr
         if (!closest_agent) {

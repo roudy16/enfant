@@ -82,6 +82,7 @@ public:
     // returns pointer to closest Agent to passed in object, empty pointer otherwise
     std::shared_ptr<Agent> get_closest_agent_to_obj(std::shared_ptr<Sim_object>);
     // returns pointer to closest Agent that does not share a Group with passed in agent
+    // returns empty pointer if no such Agent exists
     std::shared_ptr<Agent> get_closest_hostile_agent(std::shared_ptr<Agent>);
 
     // is there a group with this name?
@@ -137,9 +138,6 @@ private:
     // return a shared_ptr to the closest object to obj_ptr
     template <typename C>
     typename C::mapped_type get_closest_helper(C&, std::shared_ptr<Sim_object>);
-
-    // Returns true if both Agents are present in the same group
-    bool agents_share_group(std::shared_ptr<Agent> agent_a, std::shared_ptr<Agent> agent_b) const;
 
     static Model* mp_instance; // pointer to single instance of Model
 

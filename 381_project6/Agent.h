@@ -15,7 +15,7 @@ If its heath <= 0, it dies and tells Model to remove it.
 
 
 class Structure;
-class Death_observer;
+class Group;
 
 class Agent : public Sim_object {
 public:
@@ -59,9 +59,12 @@ public:
     // Throws exception that an Agent cannot attack.
     virtual void start_attacking(std::shared_ptr<Agent>);
 
-    // Interface for allowing observation of Agent death
-    void attach_death_observer(std::shared_ptr<Death_observer> observer);
-    void detach_death_observer(std::shared_ptr<Death_observer> observer);
+    // returns true if this Agent shares a group with the other Agent
+    bool agents_share_group(std::shared_ptr<Agent> other_agent);
+
+    // Interface for Group/Agent communication
+    void attach_to_group(std::shared_ptr<Group> group_ptr);
+    void detach_from_group(std::shared_ptr<Group> group_ptr);
     void notify_death();
 
     // disallow copy/move construction or assignment and default ctor
@@ -86,7 +89,7 @@ protected:
 private:
     enum class Alive_State { ALIVE, DEAD };
 
-    std::vector<std::shared_ptr<Death_observer>> m_death_observers;
+    std::vector<std::shared_ptr<Group>> m_groups;
     Moving_object m_moving_obj;
     int m_health;
     Alive_State m_alive_state;

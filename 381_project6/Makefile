@@ -10,7 +10,7 @@ OBJS += Farm.o Town_Hall.o
 OBJS += Peasant.o Infantry.o Soldier.o Archer.o Mage.o
 OBJS += Agent_factory.o Structure_factory.o
 OBJS += Geometry.o Utility.o
-OBJS += Death_observer.o Group.o
+OBJS += Group.o
 PROG = p6exe
 
 default: $(PROG)
@@ -93,10 +93,7 @@ Geometry.o: Geometry.cpp Geometry.h Utility.h
 Utility.o: Utility.cpp Utility.h
 	$(CC) $(CFLAGS) Utility.cpp
 
-Death_observer.o: Death_observer.cpp Death_observer.h
-	$(CC) $(CFLAGS) Death_observer.cpp
-
-Group.o: Group.cpp Group.h Death_observer.h Agent.h Utility.h
+Group.o: Group.cpp Group.h Agent.h Utility.h
 	$(CC) $(CFLAGS) Group.cpp
 
 clean:

@@ -37,7 +37,7 @@ bool Group::add_agent_helper(std::shared_ptr<Agent> agent) {
 
     // If agent was inserted then add this Group as a Death_observer
     if (return_val.second) {
-        agent->attach_death_observer(static_pointer_cast<Death_observer>(shared_from_this()));
+        agent->attach_to_group(shared_from_this());
     }
 
     // Returns true if agent was added, false if agent was already present
@@ -80,7 +80,7 @@ void Group::remove_agent(std::shared_ptr<Agent> agent) {
     }
 
     // Remove this Group from agent's death observers
-    agent->detach_death_observer(static_pointer_cast<Death_observer>(shared_from_this()));
+    agent->detach_from_group(shared_from_this());
 
     cout << "Group " << m_name << ":  " << agent->get_name() << " removed" << endl;
 }
@@ -100,9 +100,9 @@ void Group::remove_group(Group& other_group) {
 }
 
 void Group::disband() {
-    shared_ptr<Death_observer> this_ptr = static_pointer_cast<Death_observer>(shared_from_this());
+    shared_ptr<Group> this_ptr = shared_from_this();
     for_each(m_members.begin(), m_members.end(),
-        [&this_ptr](const Group_members_t::value_type& p){ p->detach_death_observer(this_ptr); });
+        [&this_ptr](const Group_members_t::value_type& p){ p->detach_from_group(this_ptr); });
 
     m_members.clear();
 }

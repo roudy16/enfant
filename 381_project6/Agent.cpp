@@ -1,7 +1,7 @@
 #include "Agent.h"
 #include "Model.h"
 #include "Utility.h"
-#include "Death_observer.h"
+#include "Group.h"
 #include <iostream>
 #include <algorithm>
 #include <cassert>
@@ -150,27 +150,42 @@ void Agent::jump_to_location(const Point& target) {
     Model::get_instance()->notify_location(get_name(), get_location());
 }
 
-void Agent::attach_death_observer(std::shared_ptr<Death_observer> observer) {
-    assert(find(m_death_observers.begin(), m_death_observers.end(), observer) == m_death_observers.end());
+// returns true if this Agent shares a group with the other Agent
+bool Agent::agents_share_group(std::shared_ptr<Agent> other_agent) {
+    // Check all of both agents' groups to see if any are the same
+    for (auto lhs_group : m_groups) {
+        for (auto rhs_group : (*other_agent).m_groups) {
+            // if agents are both members of the same group return true
+            if (lhs_group == rhs_group) {
+                return true;
+            }
+        }
+    }
 
-    m_death_observers.push_back(observer);
+    return false;
 }
 
-void Agent::detach_death_observer(std::shared_ptr<Death_observer> observer) {
-    auto iter = find(m_death_observers.begin(), m_death_observers.end(), observer);
+void Agent::attach_to_group(std::shared_ptr<Group> group_ptr) {
+    assert(find(m_groups.begin(), m_groups.end(), group_ptr) == m_groups.end());
 
-    // function should not be called if observer is not in this Agents observer container
-    assert(iter != m_death_observers.end());
+    m_groups.push_back(group_ptr);
+}
 
-    m_death_observers.erase(iter);
+void Agent::detach_from_group(std::shared_ptr<Group> group_ptr) {
+    auto iter = find(m_groups.begin(), m_groups.end(), group_ptr);
+
+    // function should not be called if group_ptr is not in this Agents groups container
+    assert(iter != m_groups.end());
+
+    m_groups.erase(iter);
 }
 
 void Agent::notify_death() {
     shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
-    for_each(m_death_observers.begin(), m_death_observers.end(),
-        [&this_ptr](shared_ptr<Death_observer>& p){ p->update_on_death(this_ptr); });
+    for_each(m_groups.begin(), m_groups.end(),
+        [&this_ptr](shared_ptr<Group>& p){ p->update_on_death(this_ptr); });
 
-    m_death_observers.clear();
+    m_groups.clear();
 }
 
 

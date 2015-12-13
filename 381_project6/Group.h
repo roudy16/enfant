@@ -6,11 +6,11 @@
 #include <set>
 
 
-class Group : public Death_observer, public std::enable_shared_from_this<Group> {
+class Group : public std::enable_shared_from_this<Group> {
 public:
     explicit Group(const std::string& name);
 
-    void update_on_death(std::shared_ptr<Agent>) override;
+    void update_on_death(std::shared_ptr<Agent>);
 
     void disband();
 
