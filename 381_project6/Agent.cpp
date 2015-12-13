@@ -67,7 +67,6 @@ void Agent::lose_health(int attack_strength) {
         cout << get_name() << ": Arrggh!" << endl;
 
         // notify Model to remove Agent from simulation
-        notify_death();
         Model::get_instance()->notify_gone(get_name());
         Model::get_instance()->remove_agent(static_pointer_cast<Agent>(shared_from_this()));
     }
@@ -165,13 +164,13 @@ bool Agent::agents_share_group(std::shared_ptr<Agent> other_agent) {
     return false;
 }
 
-void Agent::attach_to_group(std::shared_ptr<Group> group_ptr) {
+void Agent::add_to_my_groups(std::shared_ptr<Group> group_ptr) {
     assert(find(m_groups.begin(), m_groups.end(), group_ptr) == m_groups.end());
 
     m_groups.push_back(group_ptr);
 }
 
-void Agent::detach_from_group(std::shared_ptr<Group> group_ptr) {
+void Agent::remove_from_my_groups(std::shared_ptr<Group> group_ptr) {
     auto iter = find(m_groups.begin(), m_groups.end(), group_ptr);
 
     // function should not be called if group_ptr is not in this Agents groups container
@@ -179,13 +178,3 @@ void Agent::detach_from_group(std::shared_ptr<Group> group_ptr) {
 
     m_groups.erase(iter);
 }
-
-void Agent::notify_death() {
-    shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
-    for_each(m_groups.begin(), m_groups.end(),
-        [&this_ptr](shared_ptr<Group>& p){ p->update_on_death(this_ptr); });
-
-    m_groups.clear();
-}
-
-

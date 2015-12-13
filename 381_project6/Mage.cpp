@@ -51,6 +51,13 @@ void Mage::teleport(Cartesian_vector dir) {
     cout << get_name() << ": Poof! I'm over here!" << endl;
 }
 
+// Mages aren't stupid, they will listen when told to stop
+// The Mage will stop moving and stop attacking
+void Mage::stop() {
+    Agent::stop();
+    stop_attacking();
+}
+
 // If the Mage has charges it will use them to teleport away from its attacker
 // before the hit can strike the Mage, otherwise the Mage takes damage flees
 // directly away from the attacker. If the attacker is at the same Point as the

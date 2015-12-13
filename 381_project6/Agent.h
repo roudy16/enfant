@@ -62,10 +62,9 @@ public:
     // returns true if this Agent shares a group with the other Agent
     bool agents_share_group(std::shared_ptr<Agent> other_agent);
 
-    // Interface for Group/Agent communication
-    void attach_to_group(std::shared_ptr<Group> group_ptr);
-    void detach_from_group(std::shared_ptr<Group> group_ptr);
-    void notify_death();
+    // Allow Agents to keep a reference to the groups they are members of.
+    void add_to_my_groups(std::shared_ptr<Group> group_ptr);
+    void remove_from_my_groups(std::shared_ptr<Group> group_ptr);
 
     // disallow copy/move construction or assignment and default ctor
     // TODO necessary for abstract classes? Can they prevent slicing or is this 

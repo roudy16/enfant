@@ -24,20 +24,13 @@ Group::Group(const string& name_) : m_name(name_)
 {
 }
 
-void Group::update_on_death(shared_ptr<Agent> agent_ptr) {
-    auto iter = m_members.find(agent_ptr);
-    assert(iter != m_members.end());
-
-    m_members.erase(iter);
-}
-
 bool Group::add_agent_helper(std::shared_ptr<Agent> agent) {
     // Attempt to insert agent
     auto return_val = m_members.insert(agent);
 
     // If agent was inserted then add this Group as a Death_observer
     if (return_val.second) {
-        agent->attach_to_group(shared_from_this());
+        agent->add_to_my_groups(shared_from_this());
     }
 
     // Returns true if agent was added, false if agent was already present
@@ -80,7 +73,7 @@ void Group::remove_agent(std::shared_ptr<Agent> agent) {
     }
 
     // Remove this Group from agent's death observers
-    agent->detach_from_group(shared_from_this());
+    agent->remove_from_my_groups(shared_from_this());
 
     cout << "Group " << m_name << ":  " << agent->get_name() << " removed" << endl;
 }
@@ -99,15 +92,30 @@ void Group::remove_group(Group& other_group) {
     cout << "Group " << m_name << ":  group " << other_group.m_name << " removed" << endl;
 }
 
+void Group::clean_up_dead_agents() {
+    auto iter = m_members.begin();
+
+    while (iter != m_members.end()) {
+        if (!iter->get()->is_alive()) {
+            iter = m_members.erase(iter);
+        }
+
+        iter++;
+    }
+}
+
 void Group::disband() {
+    clean_up_dead_agents();
+
     shared_ptr<Group> this_ptr = shared_from_this();
     for_each(m_members.begin(), m_members.end(),
-        [&this_ptr](const Group_members_t::value_type& p){ p->detach_from_group(this_ptr); });
+        [&this_ptr](const Group_members_t::value_type& p){ p->remove_from_my_groups(this_ptr); });
 
     m_members.clear();
 }
 
 // Returns approximate location of the group as a whole
+// Assumes group member list contains only living Agents
 Point Group::calculate_location() const {
     // If group has no members then return a Point (0.0, 0.0)
     if (m_members.empty()) {
@@ -120,8 +128,9 @@ Point Group::calculate_location() const {
 
     // Accumulate the values of the locations of all members of the group
     for (auto p : m_members) {
-        new_px += p->get_location().x;
-        new_py += p->get_location().y;
+        const Point p_loc = p->get_location();
+        new_px += p_loc.x;
+        new_py += p_loc.y;
     }
 
     // Multiply accumulated values by weight to get average of all locations
@@ -133,18 +142,9 @@ Point Group::calculate_location() const {
     return Point(new_px, new_py);
 }
 
-// TODO needed?
-// Returns normalised heading vector from group to target location
-Cartesian_vector Group::calculate_heading(const Point& target) const {
-    Point group_location = calculate_location();
-
-    Cartesian_vector heading(group_location, target);
-    heading.normalise();
-
-    return heading;
-}
-
 void Group::move(const Point& destination) {
+    clean_up_dead_agents();
+
     // Throw Error if group has no members to move
     if (m_members.empty()) {
         throw Error("Group has no members to move!");
@@ -167,7 +167,7 @@ void Group::move(const Point& destination) {
     /* The group has multiple members and will command them all to move. The 
     locations each member is told to move will be offsets all equal distance 
     from the passed in destination. The first position filled will be offset
-    from destination in the direction of the heading from the groups current
+    from destination in the direction of the heading from the groups current location
     to the destination. The remaining positions will be assigned at even
     intervals in a counter-clockwise circle around the destination */
 
@@ -191,18 +191,32 @@ void Group::move(const Point& destination) {
 }
 
 void Group::stop() {
+    clean_up_dead_agents();
 
+    for (auto p : m_members) {
+        p->stop();
+    }
 }
 
 void Group::attack(std::shared_ptr<Agent> target) {
+    clean_up_dead_agents();
 
+    for (auto p : m_members) {
+        p->start_attacking(target);
+    }
 }
 
 void Group::work(std::shared_ptr<Structure> source, std::shared_ptr<Structure> destination) {
+    clean_up_dead_agents();
 
+    for (auto p : m_members) {
+        p->start_working(source, destination);
+    }
 }
 
-void Group::describe() const {
+void Group::describe() {
+    clean_up_dead_agents();
+
     cout << "Group " << m_name << " has " << m_members.size() << " members:\n";
     for_each(m_members.begin(), m_members.end(),
         [](const Group_members_t::value_type& p){ cout << p->get_name() << '\n'; });
@@ -210,6 +224,7 @@ void Group::describe() const {
 }
 
 bool Group::is_agent_member(std::shared_ptr<Agent> query) {
+    clean_up_dead_agents();
     return m_members.find(query) != m_members.end();
 }
 

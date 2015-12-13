@@ -10,8 +10,6 @@ class Group : public std::enable_shared_from_this<Group> {
 public:
     explicit Group(const std::string& name);
 
-    void update_on_death(std::shared_ptr<Agent>);
-
     void disband();
 
     void move(const Point& destination);
@@ -24,7 +22,7 @@ public:
     void add_group(Group& other_group);
     void remove_group(Group& other_group);
 
-    void describe() const;
+    void describe();
     bool is_agent_member(std::shared_ptr<Agent> query);
 
     const std::string& get_name() const;
@@ -39,6 +37,8 @@ public:
     Group& operator= (Group&&) = delete;
 
 private:
+    enum class Formation { LINE, COLUMN, WEDGE };
+
     // Returns true if agent was added, false if agent was already present
     // These two cases are the only possible outcomes
     bool add_agent_helper(std::shared_ptr<Agent> agent);
@@ -46,10 +46,11 @@ private:
     // is not present in Group and thus cannot be removed
     bool remove_agent_helper(std::shared_ptr<Agent> agent);
 
+    // Removes dead Agents from the Group
+    void clean_up_dead_agents();
+
     // Returns approximate location of the group as a whole
     Point calculate_location() const;
-    // Returns normalised heading vector from group to target location
-    Cartesian_vector calculate_heading(const Point& target) const;
 
     // Comparator used to order members by name
     struct Members_comp {
@@ -59,7 +60,6 @@ private:
     };
 
     using Group_members_t = std::set<std::shared_ptr<Agent>, Members_comp>;
-    enum class Formation { LINE, COLUMN, WEDGE };
 
     Group_members_t   m_members;
     const std::string m_name;

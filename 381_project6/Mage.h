@@ -12,6 +12,7 @@ class Mage : public Infantry {
 public:
     explicit Mage(const std::string& name_, const Point& location_);
 
+    void stop() override;
     // TODO describe take hit behavior
     void take_hit(int attack_strength, std::shared_ptr<Agent> attacker_ptr) override;
 
