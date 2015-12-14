@@ -36,19 +36,22 @@ void Soldier::do_update() {
     }
 
     // target is still alive
-    // if target is out of range, report it, stop attacking and forget target
-    // otherwise attack target
-    if (target_in_range()) {
-        // target is in range, aim to maim!
-        cout << get_name() << ": Clang!" << endl;
-        shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
-        get_target().lock()->take_hit(kSOLDIER_INITIAL_STRENGTH, this_ptr);
+    // Check if target is in range, prints message and stops attacking
+    // if target is out of range.
+    bool in_range = target_range_handling();
+    if (!in_range) {
+        return;
+    }
 
-        // If Infantry killed the target, report it, stop attacking and forget target
-        if (!is_target_alive()) {
-            cout << get_name() << ": I triumph!" << endl;
-            stop_attacking();
-        }
+    // target is in range, aim to maim!
+    cout << get_name() << ": Clang!" << endl;
+    shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
+    get_target().lock()->take_hit(kSOLDIER_INITIAL_STRENGTH, this_ptr);
+
+    // If Infantry killed the target, report it, stop attacking and forget target
+    if (!is_target_alive()) {
+        cout << get_name() << ": I triumph!" << endl;
+        stop_attacking();
     }
 }
 

@@ -169,7 +169,14 @@ Controller::Controller_fp_t Controller::get_view_program_command(const string& c
 void Controller::run() {
     init_commands(); // Fill command containers
 
-    // main program loop, exited when user enters "quit" command
+    /* main program loop, exited when user enters "quit" command
+        1. Prompt user to input a command
+        2. Read user command input
+        3. Check if user input quit command
+        4. If user input an Agent name attempt to process an Agent command
+        5. Else if user input a Group name attempt to process a Group command
+        6. Else attempt to process a whole program command
+    */
     while (true) {
         try {
             cout << "\nTime " << Model::get_instance()->get_time() << ": Enter command: ";
@@ -387,52 +394,52 @@ void Controller::status_command() {
     Model::get_instance()->describe();
 }
 
-class View_find_pred {
-public:
-    View_find_pred(const string& name) : m_name(name) {}
-
-    bool operator()(shared_ptr<View> v) const { return v->get_name() == m_name; }
-
-private:
-    string m_name;
+struct Open_close_helper_ret {
+    string name;
+    vector<shared_ptr<View>>::const_iterator iter;
 };
+
+static Open_close_helper_ret open_close_helper(const vector<shared_ptr<View>>& views) {
+    Open_close_helper_ret ret_val;
+    read_in_string(ret_val.name);
+
+    // Check if there is already a View of this name open
+    const string& name = ret_val.name; // express that name unchanged in lambda
+    ret_val.iter = find_if(views.begin(), views.end(), 
+        [&name](shared_ptr<View> v){ return v->get_name() == name; });
+
+    return ret_val;
+}
 
 // Attempt to open and attach a new View to the Model
 void Controller::open_command() {
-    string view_name;
-    read_in_string(view_name);
+    auto helper_ret = open_close_helper(m_views);
 
-    // Check if there is already a View of this name open
-    auto iter = find_if(m_views.begin(), m_views.end(), View_find_pred(view_name));
-    if (iter != m_views.end()) {
+    if (helper_ret.iter != m_views.end()) {
         throw Error("View of that name already open!");
     }
 
-    View_factory_return ret_val = create_view(view_name);
+    auto create_ret = create_view(helper_ret.name);
 
     // If newly created map is the world map then remember this with weak_ptr
-    if (!ret_val.world_map_ptr.expired()) {
-        mp_map_view = ret_val.world_map_ptr;
+    if (!create_ret.world_map_ptr.expired()) {
+        mp_map_view = create_ret.world_map_ptr;
     }
 
-    m_views.push_back(ret_val.view_ptr);
-    Model::get_instance()->attach(ret_val.view_ptr);
+    m_views.push_back(create_ret.view_ptr);
+    Model::get_instance()->attach(create_ret.view_ptr);
 }
 
 // Attempt to close and detach a View from Model
 void Controller::close_command() {
-    string view_name;
-    read_in_string(view_name);
+    auto helper_ret = open_close_helper(m_views);
 
-    // Check if there is an open View that matches input name
-    auto iter = find_if(m_views.begin(), m_views.end(), View_find_pred(view_name));
-
-    if (iter == m_views.end()) {
+    if (helper_ret.iter == m_views.end()) {
         throw Error("No view of that name is open!");
     }
 
-    m_views.erase(iter);
-    Model::get_instance()->detach(*iter);
+    m_views.erase(helper_ret.iter);
+    Model::get_instance()->detach(*helper_ret.iter);
 }
 
 // Draw all Views

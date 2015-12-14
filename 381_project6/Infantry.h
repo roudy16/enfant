@@ -49,8 +49,8 @@ protected:
     Infantry_state get_state() const noexcept;
 
     // Returns true if target is within attack range, prints message and stops
-    // attacking otherwise.
-    bool target_in_range();
+    // attacking and returns false otherwise.
+    bool target_range_handling();
 
     // Returns true if the target is alive, false otherwise
     bool is_target_alive() const;

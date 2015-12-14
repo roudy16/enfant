@@ -57,8 +57,8 @@ void Mage::stop() {
     Agent::stop();
     if (get_state() == Infantry_state::ATTACKING) {
         cout << get_name() << ": Stopping my attack" << endl;
+        stop_attacking();
     }
-    stop_attacking();
 }
 
 // If the Mage has charges it will use them to teleport away from its attacker
@@ -136,26 +136,32 @@ void Mage::do_update() {
     if (!is_target_alive()) {
         cout << get_name() << ": Target is dead" << endl;
         stop_attacking();
+        return;
     }
-    else if (target_in_range())
-    {
-        // Check if Mage has charges to use for attack
-        if (m_charges == 0) {
-            cout << get_name() << ": Must recharge before I attack..." << endl;
-        }
-        else {
-            // target is in range, aim to maim!
-            // Use of attack spell expends a charge.
-            --m_charges;
-            cout << get_name() << ": FWOOoosh!" << endl;
-            shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
-            get_target().lock()->take_hit(kMAGE_INITIAL_STRENGTH, this_ptr);
 
-            // If Mage killed the target, report it, stop attacking and forget target
-            if (!is_target_alive()) {
-                cout << get_name() << ": Play with fire, you get burned!" << endl;
-                stop_attacking();
-            }
+    // Check if target is in range, prints message and stops attacking
+    // if target is out of range.
+    bool in_range = target_range_handling();
+    if (!in_range) {
+        return;
+    }
+
+    // Check if Mage has charges to use for attack
+    if (m_charges == 0) {
+        cout << get_name() << ": Must recharge before I attack..." << endl;
+    }
+    else {
+        // target is in range, aim to maim!
+        // Use of attack spell expends a charge.
+        --m_charges;
+        cout << get_name() << ": FWOOoosh!" << endl;
+        shared_ptr<Agent> this_ptr = static_pointer_cast<Agent>(shared_from_this());
+        get_target().lock()->take_hit(kMAGE_INITIAL_STRENGTH, this_ptr);
+
+        // If Mage killed the target, report it, stop attacking and forget target
+        if (!is_target_alive()) {
+            cout << get_name() << ": Play with fire, you get burned!" << endl;
+            stop_attacking();
         }
     }
 }

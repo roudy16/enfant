@@ -112,9 +112,9 @@ void Group::disband() {
     clean_up_dead_agents();
 
     // Tell all members to remove this Group from their Groups containers
-    shared_ptr<Group> this_ptr = shared_from_this();
+    const shared_ptr<Group>& this_ptr = shared_from_this();
     for_each(m_members.begin(), m_members.end(),
-        [&this_ptr](const Group_members_t::value_type& p){ p->remove_from_my_groups(this_ptr); });
+        [&this_ptr](Group_members_t::value_type p){ p->remove_from_my_groups(this_ptr); });
 
     m_members.clear();
 }
@@ -225,7 +225,7 @@ void Group::describe() {
     // Print the number of members this Group has along with their names
     cout << "Group " << m_name << " has " << m_members.size() << " members:\n";
     for_each(m_members.begin(), m_members.end(),
-        [](const Group_members_t::value_type& p){ cout << p->get_name() << '\n'; });
+        [](Group_members_t::value_type p){ cout << p->get_name() << endl; });
 }
 
 bool Group::is_agent_member(std::shared_ptr<Agent> query) {

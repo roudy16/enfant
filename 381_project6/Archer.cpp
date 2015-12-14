@@ -22,27 +22,38 @@ Archer::Archer(const string& name_, const Point& location_)
 {
 }
 
+void Archer::attack_helper() {
+    // Archer is attacking
+    // if target is dead, report it, stop attacking and forget target
+    if (!is_target_alive()) {
+        cout << get_name() << ": Target is dead" << endl;
+        stop_attacking();
+        return;
+    }
+
+    // target is still alive
+    // Check if target is in range, prints message and stops attacking
+    // if target is out of range.
+    bool in_range = target_range_handling();
+    if (!in_range) {
+        return;
+    }
+
+    // target is in range, aim to maim!
+    cout << get_name() << ": Twang!" << endl;
+    get_target().lock()->take_hit(kARCHER_INITIAL_STRENGTH,
+                                  static_pointer_cast<Agent>(shared_from_this()));
+
+    // If Archer killed the target, report it, stop attacking and forget target
+    if (!is_target_alive()) {
+        cout << get_name() << ": I triumph!" << endl;
+        stop_attacking();
+    }
+}
+
 void Archer::do_update() {
     if (get_state() == Infantry_state::ATTACKING) {
-        // Archer is attacking
-        // if target is dead, report it, stop attacking and forget target
-        if (!is_target_alive()) {
-            cout << get_name() << ": Target is dead" << endl;
-            stop_attacking();
-        }
-        else if (target_in_range())
-        {
-            // target is in range, aim to maim!
-            cout << get_name() << ": Twang!" << endl;
-            get_target().lock()->take_hit(kARCHER_INITIAL_STRENGTH,
-                                          static_pointer_cast<Agent>(shared_from_this()));
-
-            // If Archer killed the target, report it, stop attacking and forget target
-            if (!is_target_alive()) {
-                cout << get_name() << ": I triumph!" << endl;
-                stop_attacking();
-            }
-        }
+        attack_helper();
     }
 
     // If the Archer is not attacking at this point it will try to find another Agent

@@ -23,6 +23,8 @@ public:
 private:
     // do update tasks for Archer
     void do_update() override;
+    // performs Archer attack behavior
+    void attack_helper();
     // returns Archer's attack range
     double get_range() const noexcept override;
     // return string "Archer"
