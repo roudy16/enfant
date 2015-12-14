@@ -125,7 +125,6 @@ void Map::set_origin(const Point& origin) {
     m_origin = origin;
 }
 
-
 // Calculate the cell subscripts corresponding to the supplied location parameter, 
 // using the current size, scale, and origin of the display. 
 // This function assumes that origin is a  member variable of type Point, 
@@ -149,4 +148,3 @@ bool Map::get_subscripts(int &ix, int &iy, Point location)
         return true;
     }
 }
-

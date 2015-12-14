@@ -181,7 +181,6 @@ void Controller::run() {
                 break; // break out of main program loop
             }
 
-
             // Check if first word is name of an Agent and set the Agent ptr
             // then execute an Agent command
             shared_ptr<Agent> agent_ptr = Model::get_instance()->find_agent(first_word);

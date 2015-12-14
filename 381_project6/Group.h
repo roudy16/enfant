@@ -36,8 +36,6 @@ public:
     Group& operator= (Group&&) = delete;
 
 private:
-    enum class Formation { LINE, COLUMN, WEDGE };
-
     // Returns true if agent was added, false if agent was already present
     // These two cases are the only possible outcomes
     bool add_agent_helper(std::shared_ptr<Agent> agent);
@@ -53,7 +51,7 @@ private:
 
     // Comparator used to order members by name
     struct Members_comp {
-        bool operator()(std::shared_ptr<Agent> lhs, std::shared_ptr<Agent> rhs) {
+        bool operator()(std::shared_ptr<Agent> lhs, std::shared_ptr<Agent> rhs) const {
             return lhs->get_name() < rhs->get_name();
         }
     };
@@ -62,6 +60,5 @@ private:
 
     Group_members_t   m_members;
     const std::string m_name;
-    Formation         m_formation;
 };
 

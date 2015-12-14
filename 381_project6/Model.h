@@ -114,7 +114,7 @@ public:
     friend class Model_destroyer;
 
 private:
-    using Sim_objs_t = std::map < const std::string, std::shared_ptr<Sim_object> > ;
+    using Sim_objs_t = std::map<const std::string, std::shared_ptr<Sim_object>>;
 
     // create the initial objects
     Model();

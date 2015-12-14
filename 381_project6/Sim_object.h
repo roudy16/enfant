@@ -33,7 +33,7 @@ public:
     Sim_object& operator= (Sim_object&&) = delete;
 
 private:
-    std::string m_name;
+    const std::string m_name;
 };
 
 #endif // SIM_OBJECT_H

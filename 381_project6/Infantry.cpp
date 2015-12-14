@@ -129,9 +129,8 @@ Infantry::Infantry_state Infantry::get_state() const noexcept {
 // other object to. When used to search a container of objects, object that evaluates
 // as least is the object that is closest to the object used to init. In the event
 // of a tie the object with the lesser lexicographical name is least
-class Closest_to_obj {
-public:
-    Closest_to_obj(std::shared_ptr<Sim_object> obj_ptr)
+struct Closest_to_obj {
+    Closest_to_obj(shared_ptr<Sim_object> obj_ptr)
         : m_location(obj_ptr->get_location()), m_name(obj_ptr->get_name())
     {}
 
@@ -140,12 +139,11 @@ public:
         return closest_comp_helper(lhs.second, rhs.second);
     }
 
-protected:
     // Compare distances and names of objects
     // Note: this template only works with std::map iterators that point
     // to Sim_objects or objects derived some Sim_object
-    bool closest_comp_helper(std::shared_ptr<Sim_object> lhs,
-        std::shared_ptr<Sim_object> rhs) const
+    bool closest_comp_helper(shared_ptr<Sim_object> lhs,
+        shared_ptr<Sim_object> rhs) const
     {
         // Check if either argument is the object used to init
         // Object used to init always evaluates greater than any other
@@ -169,17 +167,15 @@ protected:
         return dist_to_lhs < dist_to_rhs;
     }
 
-private:
     // name and location of object we want to find closest other to.
     const Point m_location;
-    const std::string m_name;
+    const string m_name;
 };
 
 // Comparator used to find closest Agent that is not grouped with passed
 // in agent
-class Closest_hostile_to_agent : public Closest_to_obj {
-public:
-    Closest_hostile_to_agent(std::shared_ptr<Agent> agent)
+struct Closest_hostile_to_agent : public Closest_to_obj {
+    Closest_hostile_to_agent(shared_ptr<Agent> agent)
         : Closest_to_obj(agent), m_agent(agent)
     {}
 
@@ -193,8 +189,7 @@ public:
         return closest_comp_helper(lhs.second, rhs.second);
     }
 
-private:
-    std::shared_ptr<Agent> m_agent;
+    shared_ptr<Agent> m_agent;
 };
 
 // Returns pointer to closest Structure to this Infantry if one exists,
