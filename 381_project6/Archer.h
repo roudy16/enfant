@@ -26,9 +26,9 @@ private:
     // performs Archer attack behavior
     void attack_helper();
     // returns Archer's attack range
-    double get_range() const noexcept override;
+    double get_range() const override;
     // return string "Archer"
-    const std::string& get_type_string() const noexcept override;
+    const std::string& get_type_string() const override;
 };
 
 #endif // ARCHER_H

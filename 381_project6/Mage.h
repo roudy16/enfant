@@ -29,9 +29,9 @@ private:
     // do update tasks for Mage
     void do_update() override;
     // returns Mage's attack range
-    double get_range() const noexcept override;
+    double get_range() const override;
     // return string "Mage"
-    const std::string& get_type_string() const noexcept override;
+    const std::string& get_type_string() const override;
 
     // Mage teleports its range in the provided direction,
     // passed in direction must be normalised or zero vector

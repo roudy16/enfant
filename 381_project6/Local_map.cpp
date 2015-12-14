@@ -10,7 +10,6 @@ using std::string;
 using std::cout; using std::endl;
 
 
-
 // default Local_map settings
 constexpr double kDEFAULT_LOCALMAP_SCALE = 2.0;
 constexpr int kDEFAULT_LOCALMAP_SIZE = 9;

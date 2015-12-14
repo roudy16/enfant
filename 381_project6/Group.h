@@ -9,23 +9,32 @@ class Group : public std::enable_shared_from_this<Group> {
 public:
     explicit Group(const std::string& name);
 
+    // Alerts all members to remove this Group from their own Groups container
+    // then removes all members from Group
     void disband();
 
+    // Prints the Group's name, number of members, and lists the names of the members
+    void describe();
+
+    // Interface for commanding all Group members
     void move(const Point& destination);
     void stop();
     void attack(std::shared_ptr<Agent> target);
     void work(std::shared_ptr<Structure> source, std::shared_ptr<Structure> destination);
 
+    // Interface for add/removing Agents/Groups
     void add_agent(std::shared_ptr<Agent> agent);
     void remove_agent(std::shared_ptr<Agent> agent);
     void add_group(std::shared_ptr<Group> other_group);
     void remove_group(std::shared_ptr<Group> other_group);
 
-    void describe();
+    // Returns true is query Agent is a member of this Group
     bool is_agent_member(std::shared_ptr<Agent> query);
 
+    // Returns name of the Groupo
     const std::string& get_name() const;
 
+    // Groups compare equal to strings that match the Group's name
     bool operator==(const std::string& rhs_name) const;
 
     // disallow copy/move construction or assignment and default ctor

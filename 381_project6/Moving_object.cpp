@@ -57,6 +57,11 @@ bool Moving_object::update_location()
 
 // Jump to passed in target location then recompute the delta to destination
 void Moving_object::jump_to_location(Point target_) {
+    // Do nothing if already at target_
+    if (location == target_) {
+        return;
+    }
+
     location = target_;
     compute_delta();
 }

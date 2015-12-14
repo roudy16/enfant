@@ -118,7 +118,8 @@ void Peasant::start_working(shared_ptr<Structure> source_, shared_ptr<Structure>
     forget_work();
 
     if (source_ == destination_) {
-        throw Error(get_name() + ": I can't move food to and from the same place!");
+        cout << get_name() + ": I can't move food to and from the same place!" << endl;
+        return;
     }
 
     m_source = source_;

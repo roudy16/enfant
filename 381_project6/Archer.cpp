@@ -102,11 +102,11 @@ void Archer::take_hit(int attack_strength, shared_ptr<Agent> attacker) {
     move_to(closest_structure->get_location());
 }
 
-double Archer::get_range() const noexcept {
+double Archer::get_range() const {
     return kARCHER_INITIAL_RANGE;
 }
 
-const string& Archer::get_type_string() const noexcept {
+const string& Archer::get_type_string() const {
     static const string my_type = "Archer";
     return my_type;
 }

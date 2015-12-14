@@ -150,9 +150,9 @@ Point Group::calculate_location() const {
 void Group::move(const Point& destination) {
     clean_up_dead_agents();
 
-    // Throw Error if group has no members to move
+    // Do nothing if Group is empty
     if (m_members.empty()) {
-        throw Error("Group has no members to move!");
+        return;
     }
 
     Point group_location = calculate_location();

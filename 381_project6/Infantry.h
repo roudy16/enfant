@@ -27,7 +27,7 @@ public:
     void stop() override;
 
     // Make this Infantry start attacking the target Agent.
-    // Throws an exception if the target is the same as this Agent,
+    // Prints failure message if the target is the same as this Agent,
     // is out of range, or is not alive.
     void start_attacking(std::shared_ptr<Agent> target_ptr) override;
 
@@ -55,19 +55,19 @@ protected:
     // Returns true if the target is alive, false otherwise
     bool is_target_alive() const;
 
-    // stop attacking and forget target
-    virtual void stop_attacking();
-
     // set new target and engage, outputs attacking message
-    virtual void engage_new_target(std::shared_ptr<Agent> new_target);
+    void engage_new_target(std::shared_ptr<Agent> new_target);
+
+    // stop attacking and forget target
+    void stop_attacking();
 
     // update hook that is executed after Agent class update,
     // does nothing unless overridden
     virtual void do_update();
 
     // Accessor hooks derived classes must provide
-    virtual const std::string& get_type_string() const noexcept = 0;
-    virtual double get_range() const noexcept = 0;
+    virtual const std::string& get_type_string() const = 0;
+    virtual double get_range() const = 0;
 
 private:
     std::weak_ptr<Agent> mp_target;

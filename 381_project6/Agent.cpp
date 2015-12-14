@@ -133,14 +133,14 @@ void Agent::broadcast_current_state() const {
 }
 
 /* Fat Interface for derived classes */
-// Throws exception that an Agent cannot work.
+// Prints message that Agent cant work
 void Agent::start_working(shared_ptr<Structure> dst, shared_ptr<Structure> src) {
-    throw Error(get_name() + ": Sorry, I can't work!");
+    cout << get_name() + ": Sorry, I can't work!" << endl;
 }
 
-// Throws exception that an Agent cannot attack.
+// Prints message that an Agent cannot attack.
 void Agent::start_attacking(shared_ptr<Agent> target) {
-    throw Error(get_name() + ": Sorry, I can't attack!");
+    cout << get_name() + ": Sorry, I can't attack!" << endl;
 }
 
 // Jump Agent to target location

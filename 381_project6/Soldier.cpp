@@ -67,11 +67,11 @@ void Soldier::take_hit(int attack_strength, shared_ptr<Agent> attacker_ptr) {
     }
 }
 
-double Soldier::get_range() const noexcept {
+double Soldier::get_range() const {
     return kSOLDIER_INITIAL_RANGE;
 }
 
-const string& Soldier::get_type_string() const noexcept {
+const string& Soldier::get_type_string() const {
     static const string my_type = "Soldier";
     return my_type;
 }

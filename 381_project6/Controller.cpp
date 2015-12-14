@@ -72,7 +72,8 @@ static bool string_is_alnum(const string& str) {
 }
 
 // Initialize mapped containers that hold function pointers to user command logic
-void Controller::init_commands() {
+bool Controller::init_commands() {
+    bool success = true;
     try {
         m_view_commands["default"] = &Controller::view_default_command;
         m_view_commands["size"] = &Controller::view_size_command;
@@ -102,8 +103,11 @@ void Controller::init_commands() {
         m_program_commands["form_group"] = &Controller::create_group_command;
     }
     catch (...) {
-        throw runtime_error("Error detected in Controller::init_commands");
+        cout << "Error detected in Controller::init_commands" << endl;
+        success = false;
     }
+
+    return success;
 }
 
 static void read_in_string(string& str) {
@@ -167,7 +171,10 @@ Controller::Controller_fp_t Controller::get_view_program_command(const string& c
 }
 
 void Controller::run() {
-    init_commands(); // Fill command containers
+    bool init_commands_success = init_commands(); // Fill command containers
+    if (!init_commands_success) {
+        return;
+    }
 
     /* main program loop, exited when user enters "quit" command
         1. Prompt user to input a command
@@ -357,7 +364,7 @@ static void group_add_remove_helper(shared_ptr<Group> group_ptr,
     }
 
     // Add/Remove the found group to/from the passed in group
-    ((*group_ptr).*group_fp)(group_ptr);
+    ((*group_ptr).*group_fp)(other_group_ptr);
 }
 
 void Controller::group_add_command(shared_ptr<Group> group_ptr) {

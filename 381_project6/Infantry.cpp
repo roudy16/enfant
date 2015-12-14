@@ -91,25 +91,28 @@ bool Infantry::is_target_alive() const {
 }
 
 // Make this Infantry start attacking the target Agent.
-// Throws an exception if the target is the same as this Agent,
+// Prints failure message if the target is the same as this Agent,
 // is out of range, or is not alive.
 void Infantry::start_attacking(shared_ptr<Agent> target_ptr) {
     assert(target_ptr);
 
     // Ensure infantry does not attack self
     if (target_ptr == shared_from_this()) {
-        throw Error(get_name() + ": I cannot attack myself!");
+        cout << get_name() + ": I cannot attack myself!" << endl;
+        return;
     }
 
     // Check target is Alive, cannot attack target if not Alive
     if (!target_ptr->is_alive()) {
-        throw Error(get_name() + ": Target is not alive!");
+        cout << get_name() + ": Target is not alive!" << endl;
+        return;
     }
 
     // Check if target is in range, cannot attack out of range target
     const double distance = cartesian_distance(get_location(), target_ptr->get_location());
     if (distance > get_range()) {
-        throw Error(get_name() + ": Target is out of range!");
+        cout << get_name() + ": Target is out of range!" << endl;
+        return;
     }
 
     // At this point it is okay to attack the target

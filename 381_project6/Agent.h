@@ -53,29 +53,21 @@ public:
     virtual void take_hit(int attack_strength, std::shared_ptr<Agent> attacker_ptr);
 
     /* Fat Interface for derived classes */
-    // Throws exception that an Agent cannot work.
+    // Prints message that an Agent cannot work.
     virtual void start_working(std::shared_ptr<Structure>, std::shared_ptr<Structure>);
 
-    // Throws exception that an Agent cannot attack.
+    // Prints message that an Agent cannot attack.
     virtual void start_attacking(std::shared_ptr<Agent>);
 
     // returns true if this Agent shares a group with the other Agent
     bool agents_share_group(std::shared_ptr<Agent> other_agent);
 
-    // Allow Agents to keep a reference to the groups they are members of.
+    // Allow Agents to keep pointers to the groups they are members of.
     void add_to_my_groups(std::shared_ptr<Group> group_ptr);
     void remove_from_my_groups(std::shared_ptr<Group> group_ptr);
 
-    // disallow copy/move construction or assignment and default ctor
-    // TODO necessary for abstract classes? Can they prevent slicing or is this 
-    // already accomplished just by having the class abstact?
-    Agent() = delete;
-    Agent(const Agent&) = delete;
-    Agent& operator= (const Agent&) = delete;
-    Agent(Agent&&) = delete;
-    Agent& operator= (Agent&&) = delete;
-
 protected:
+    // Constructs an Agent with name_ at location_ with start_health_ health
     Agent(const std::string& name_, const Point& location_, int start_health_);
 
     // calculate loss of health due to hit.

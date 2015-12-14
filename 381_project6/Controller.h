@@ -56,8 +56,8 @@ private:
     void group_work_command(std::shared_ptr<Group>);
 
     // helper to initialize command containers with string to 
-    // function pointer mappings
-    void init_commands();
+    // function pointer mappings, returns true on success
+    bool init_commands();
 
     using Controller_fp_t = void(Controller::*)();
     using Controller_agent_fp_t = void(Controller::*)(std::shared_ptr<Agent>);
